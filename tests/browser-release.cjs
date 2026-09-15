@@ -1,0 +1,32 @@
+const {chromium}=require(process.env.WHO_PLAYWRIGHT_MODULE||'playwright');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const base=process.env.CODELINGO_URL||'http://127.0.0.1:43127',dir=process.env.CODELINGO_BROWSER_REPORT||path.join(__dirname,'../.browser-artifacts/release');fs.mkdirSync(dir,{recursive:true});
+(async()=>{const browser=await chromium.launch({channel:'msedge',headless:true}),report={checks:[],errors:[]};
+try{const p=await browser.newPage({viewport:{width:1440,height:1000}});p.on('pageerror',e=>report.errors.push(e.message));await p.goto(base);
+ report.version=await(await p.request.get(base+'/health')).json();
+ async function load(file,name=path.basename(file)){
+  if(!await p.locator('#source').isVisible()&&await p.locator('#mapSource').isVisible())await p.locator('#mapSource').click();
+  await p.locator('#fileInput').setInputFiles({name,mimeType:'text/plain',buffer:fs.readFileSync(path.join(__dirname,file))});
+  const response=p.waitForResponse(r=>r.url().endsWith('/api/analyze'));await p.locator('#analyzeBtn').click();const r=await response;assert.equal(r.status(),200);const data=await r.json();await p.waitForFunction(()=>!document.querySelector('#analyzeBtn').disabled);
+  assert.ok(await p.locator('.module-node').count(),file);assert.ok(await p.locator('#documentGuide').innerText());assert.equal(await p.locator('.support-overview').count(),1);
+  report.checks.push({file,language:data.language,status:data.status,summary:await p.locator('#structureSummary').innerText()});return data;
+ }
+ await load('fixtures/user-agent.py','pasted-text.txt');await p.locator('.module-node[data-function="run"]').click();
+ assert.match(await p.locator('#functionOverview').innerText(),/便签/);assert.equal(await p.locator('.flow-unknown').count(),0);
+ const normal=p.locator('.flow-await').filter({hasText:'保存为 result'});assert.equal(await normal.count(),1);assert.ok(await normal.isVisible());await normal.click();
+ assert.match(await p.locator('#nodeStudy').innerText(),/self._chat/);assert.ok(await p.locator('#nodeStudy mark.source-focus').count());
+ await p.waitForFunction(()=>document.getElementById('toast').hidden);await p.locator('.flow-workspace').screenshot({path:path.join(dir,'agent-run.png')});
+ for(const summary of await p.locator('.exception-path>summary').all())await summary.click();
+ assert.ok(await p.locator('.exception-path[open]').count()>=2);assert.match(await p.locator('#flowCanvas').innerText(),/CancelledError/);
+ await p.locator('.module-node[data-function="_estimate_tokens"]').click();
+ for(const more of await p.locator('#nodeStudy .knowledge-more>summary').all())if(await more.isVisible())await more.click();
+ const card=p.locator('#nodeStudy .knowledge-card').filter({has:p.locator('summary').filter({hasText:'选最大或最小'})});await card.locator('summary').click();await card.locator('.save-knowledge').click();
+ const stored=await p.evaluate(()=>localStorage.getItem('whoisjson.knowledge.v1'));assert.ok(stored&&stored.includes('py.extrema'));report.favorite=true;
+ for(const file of ['fixtures/translator.py','fixtures/chat-presentation.txt','fixtures/distance-learning.js','fixtures/user-credentials-copied.txt','fixtures/user-settings.json','fixtures/user-python.Dockerfile','corpus/java-Factorial.java','corpus/vue-general.ts','corpus/vue-ci.yml','corpus/mdn-index.html','corpus/github-markdown.css','corpus/chinook.sql','holdout/cpython-queues.py','holdout/cpython-contextlib.py'])await load(file);
+ await load('holdout/cpython-queues.py');assert.ok((await p.locator('.module-node').allInnerTexts()).some(t=>t.includes('PriorityQueue._put')));await p.locator('.module-node[data-function="put"]').click();assert.ok(await p.locator('.flow-exception').count());await p.waitForFunction(()=>document.getElementById('toast').hidden);await p.locator('.flow-workspace').screenshot({path:path.join(dir,'holdout-queue.png')});
+ await p.setViewportSize({width:390,height:844});await load('fixtures/user-agent.py');await p.locator('.module-node[data-function="_chat"]').click();await p.locator('.flow-await').first().click();
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'mobile page overflow');assert.ok(await p.locator('#nodeStudy').isVisible());report.mobile=true;
+ await p.waitForFunction(()=>document.getElementById('toast').hidden);await p.screenshot({path:path.join(dir,'mobile-study.png')});
+ assert.ok(await p.evaluate(()=>localStorage.getItem('whoisjson.knowledge.v1').includes('py.extrema')));assert.deepEqual(report.errors,[]);
+ report.pass=true;
+}catch(e){report.failure=e.message;throw e;}finally{fs.writeFileSync(path.join(dir,'browser-result.json'),JSON.stringify(report,null,2));await browser.close();console.log(JSON.stringify({checks:report.checks.length,errors:report.errors,failure:report.failure,pass:report.pass}));}})().catch(e=>{console.error(e.message);process.exitCode=1});

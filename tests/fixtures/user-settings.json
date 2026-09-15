@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python --version)",
+      "Bash(node --version)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "printf \"lesson complete\\n\"",
+            "timeout": 180,
+            "statusMessage": "Lesson example"
+          }
+        ]
+      }
+    ]
+  }
+}

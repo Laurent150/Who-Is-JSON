@@ -1,0 +1,16 @@
+.venv/
+_pycache_/
+*.pyc
+lesson/settings.toml
+.cache/
+*.tmp
+
+# 自编忽略规则：保留目录中的标记文件
+lesson/items/*
+!lesson/items/.keep
+*.bak
+build/
+reports/
+*.log
+
+.env.lesson

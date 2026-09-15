@@ -1,0 +1,24 @@
+.runtime/
+node_modules/
+*.log
+.env
+
+.pnpm-store/
+__pycache__/
+.browser-artifacts/
+tests/release-result.json
+# Default repository check reports (may contain local diagnostics)
+/repository-audit.json
+/repository-reading.json
+*.pyc
+.env.*
+
+# Local credentials, generated output and editor state
+.gh/
+.github-cli/
+*.pem
+*.key
+*.p12
+*.pfx
+.DS_Store
+Thumbs.db

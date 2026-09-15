@@ -1,0 +1,14 @@
+# These files are verification inputs. Preserve the exact committed bytes,
+# including intentional line endings, on every contributor's machine.
+tests/corpus/** -text
+tests/holdout/** -text
+tests/fixtures/** -text
+
+*.png binary
+*.traineddata binary
+
+# Keep collaboration tooling consistent without renormalizing legacy sources.
+/.gitattributes text eol=lf
+/AGENTS.md text eol=lf
+/dev.ps1 text eol=lf
+/.github/workflows/*.yml text eol=lf

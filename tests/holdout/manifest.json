@@ -1,0 +1,52 @@
+[
+  {
+    "name": "cpython-queues.py",
+    "repo": "python/cpython",
+    "revision": "890778604a8cc99f18ce07737b198a8031c91f8d",
+    "file": "Lib/asyncio/queues.py",
+    "url": "https://raw.githubusercontent.com/python/cpython/890778604a8cc99f18ce07737b198a8031c91f8d/Lib/asyncio/queues.py",
+    "sha256": "b8f53efbc9fe57d4fb7df0bcc95f17c1eb63b1917f4fb7cd7906f382e3ed1ca3",
+    "licenseRetrieved": true,
+    "role": "unseen after initial implementation; not executed"
+  },
+  {
+    "name": "cpython-contextlib.py",
+    "repo": "python/cpython",
+    "revision": "890778604a8cc99f18ce07737b198a8031c91f8d",
+    "file": "Lib/contextlib.py",
+    "url": "https://raw.githubusercontent.com/python/cpython/890778604a8cc99f18ce07737b198a8031c91f8d/Lib/contextlib.py",
+    "sha256": "2e17d45cf3da698c9752c58a668c8a03d0ce2280fdffd6e352794a38a94d9f07",
+    "licenseRetrieved": true,
+    "role": "unseen after initial implementation; not executed"
+  },
+  {
+    "name": "cpython-mixins.py",
+    "repo": "python/cpython",
+    "revision": "890778604a8cc99f18ce07737b198a8031c91f8d",
+    "file": "Lib/asyncio/mixins.py",
+    "url": "https://raw.githubusercontent.com/python/cpython/890778604a8cc99f18ce07737b198a8031c91f8d/Lib/asyncio/mixins.py",
+    "sha256": "830ed2ee56d90258cb29d0042b321e8076f7fac34c66b5f265f93aceb7159d25",
+    "licenseRetrieved": true,
+    "role": "unseen after initial implementation; not executed"
+  },
+  {
+    "name": "flask-json-provider.py",
+    "repo": "pallets/flask",
+    "revision": "d73fa1cdcbd8b1465c151db8924ba58b1dd14e35",
+    "file": "src/flask/json/provider.py",
+    "url": "https://raw.githubusercontent.com/pallets/flask/d73fa1cdcbd8b1465c151db8924ba58b1dd14e35/src/flask/json/provider.py",
+    "sha256": "cefdd0dfdde6bb6f73e7b853aa789de432e2af52a8c920c1c2af17228235b72c",
+    "licenseRetrieved": true,
+    "role": "0.7.0 unseen holdout; not used to author rules"
+  },
+  {
+    "name": "node-jsonfile.js",
+    "repo": "jprichardson/node-jsonfile",
+    "revision": "0bb6b41beb950fa65b8e20a569e84e14acc136e6",
+    "file": "index.js",
+    "url": "https://raw.githubusercontent.com/jprichardson/node-jsonfile/0bb6b41beb950fa65b8e20a569e84e14acc136e6/index.js",
+    "sha256": "ec5a9f1f45014486f1df4a8c11a5b078671e9936c0651e035b67cb5e763954e8",
+    "licenseRetrieved": true,
+    "role": "0.7.0 unseen holdout; not used to author rules"
+  }
+]

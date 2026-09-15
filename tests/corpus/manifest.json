@@ -1,0 +1,142 @@
+[
+  {
+    "name": "binary-search.py",
+    "repo": "TheAlgorithms/Python",
+    "revision": "d5020134382bf0719974232595467bd3227243f8",
+    "file": "searches/binary_search.py",
+    "url": "https://raw.githubusercontent.com/TheAlgorithms/Python/d5020134382bf0719974232595467bd3227243f8/searches/binary_search.py",
+    "excerpt": "complete",
+    "sha256": "40edb392027b4b9431369cf105f4c610eb406e0792dc6ccffdabb7d5c7453f74",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "p-limit.js",
+    "repo": "sindresorhus/p-limit",
+    "revision": "783068bb9e967fd7bea8642e1bf5a3627fe38bdf",
+    "file": "index.js",
+    "url": "https://raw.githubusercontent.com/sindresorhus/p-limit/783068bb9e967fd7bea8642e1bf5a3627fe38bdf/index.js",
+    "excerpt": "complete",
+    "sha256": "63239cd9ae80b1433e05014fe6ec501475c6fa59fad06418cb5972dbc7cc14e2",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "mdn-index.html",
+    "repo": "mdn/beginner-html-site",
+    "revision": "gh-pages",
+    "file": "index.html",
+    "url": "https://raw.githubusercontent.com/mdn/beginner-html-site/gh-pages/index.html",
+    "excerpt": "complete",
+    "sha256": "e999a69cca46bf8991e9d3afd97b0eaf36377f71f8fdb286c50692cb140102fb",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "chinook.sql",
+    "repo": "lerocha/chinook-database",
+    "revision": "7f67772503d71ba90f19283c38e93923addb43fa",
+    "file": "ChinookDatabase/DataSources/Chinook_Sqlite.sql",
+    "url": "https://raw.githubusercontent.com/lerocha/chinook-database/7f67772503d71ba90f19283c38e93923addb43fa/ChinookDatabase/DataSources/Chinook_Sqlite.sql",
+    "excerpt": "CREATE TABLE section before INSERT INTO; original text preserved",
+    "sha256": "b89eb3e052e8b8b92a733f45db15e6b099077d32cc777c67f29bdebea29c4d22",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "is-number.js",
+    "repo": "jonschlinkert/is-number",
+    "revision": "98e8ff1da1a89f93d1397a24d7413ed15421c139",
+    "file": "index.js",
+    "url": "https://raw.githubusercontent.com/jonschlinkert/is-number/98e8ff1da1a89f93d1397a24d7413ed15421c139/index.js",
+    "excerpt": "complete",
+    "sha256": "04255e482e181687823a95b207802ddd32e746c65dce4c95a5176fc192735960",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "vue-general.ts",
+    "repo": "vuejs/core",
+    "revision": "54097087a0918b98f16c84599b1a6d654e952ca7",
+    "file": "packages/shared/src/general.ts",
+    "url": "https://raw.githubusercontent.com/vuejs/core/54097087a0918b98f16c84599b1a6d654e952ca7/packages/shared/src/general.ts",
+    "excerpt": "complete",
+    "sha256": "00f2ecb8608db0398c0fdeeb4ffcd120bf6f827769ec6f00f1d0b5baffcbf3bc",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "vue-ci.yml",
+    "repo": "vuejs/core",
+    "revision": "54097087a0918b98f16c84599b1a6d654e952ca7",
+    "file": ".github/workflows/ci.yml",
+    "url": "https://raw.githubusercontent.com/vuejs/core/54097087a0918b98f16c84599b1a6d654e952ca7/.github/workflows/ci.yml",
+    "excerpt": "complete",
+    "sha256": "d3afa4f3992e778911f27fca3de73b1c1da7f2cd09194d87e4f887cd63ac3c01",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "typescript-package.json",
+    "repo": "microsoft/TypeScript",
+    "revision": "879f9867ac455404e75759dd1739281cf6aa7f85",
+    "file": "package.json",
+    "url": "https://raw.githubusercontent.com/microsoft/TypeScript/879f9867ac455404e75759dd1739281cf6aa7f85/package.json",
+    "excerpt": "complete",
+    "sha256": "f2901f896a6fa3aff21c2b103a3037ac4dcef92c6be2be3bce8ed4132f52c53c",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "github-markdown.css",
+    "repo": "sindresorhus/github-markdown-css",
+    "revision": "e49401776c9d581ad42367fc4ea3d677d13e2e39",
+    "file": "github-markdown.css",
+    "url": "https://raw.githubusercontent.com/sindresorhus/github-markdown-css/e49401776c9d581ad42367fc4ea3d677d13e2e39/github-markdown.css",
+    "excerpt": "complete",
+    "sha256": "6112686f954db5d3806fb96116d2ab20ad3018469ab1015c587fd8efe7d25cf4",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "factorial.py",
+    "repo": "TheAlgorithms/Python",
+    "revision": "d5020134382bf0719974232595467bd3227243f8",
+    "file": "maths/factorial.py",
+    "url": "https://raw.githubusercontent.com/TheAlgorithms/Python/d5020134382bf0719974232595467bd3227243f8/maths/factorial.py",
+    "excerpt": "complete",
+    "sha256": "bfb8a6376ea4a157e96320c57670ac052c758e654f4448df2e980c4a53e62ac8",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "flask-helpers.py",
+    "repo": "pallets/flask",
+    "revision": "d73fa1cdcbd8b1465c151db8924ba58b1dd14e35",
+    "file": "src/flask/helpers.py",
+    "url": "https://raw.githubusercontent.com/pallets/flask/d73fa1cdcbd8b1465c151db8924ba58b1dd14e35/src/flask/helpers.py",
+    "excerpt": "complete",
+    "sha256": "7590b89bcae6c437b621a315854d8401bc38b5439ec95c9be7cc4c909f9e9221",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "java-BinarySearch.java",
+    "repo": "TheAlgorithms/Java",
+    "revision": "a097a286fc0c7b268ec9788996db5dfd8782ab45",
+    "file": "src/main/java/com/thealgorithms/searches/BinarySearch.java",
+    "url": "https://raw.githubusercontent.com/TheAlgorithms/Java/a097a286fc0c7b268ec9788996db5dfd8782ab45/src/main/java/com/thealgorithms/searches/BinarySearch.java",
+    "excerpt": "complete",
+    "sha256": "3ca1d1bcfce73c705ea51edec80f9bf142c74f8cf31efcbd332b863d2aa4c791",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "java-InsertionSort.java",
+    "repo": "TheAlgorithms/Java",
+    "revision": "a097a286fc0c7b268ec9788996db5dfd8782ab45",
+    "file": "src/main/java/com/thealgorithms/sorts/InsertionSort.java",
+    "url": "https://raw.githubusercontent.com/TheAlgorithms/Java/a097a286fc0c7b268ec9788996db5dfd8782ab45/src/main/java/com/thealgorithms/sorts/InsertionSort.java",
+    "excerpt": "complete",
+    "sha256": "af4a3e8e67d3a36484a1db4982ac9c7b627c7d665c496a76cbcb5a8182a0d57a",
+    "licenseRetrieved": true
+  },
+  {
+    "name": "java-Factorial.java",
+    "repo": "TheAlgorithms/Java",
+    "revision": "a097a286fc0c7b268ec9788996db5dfd8782ab45",
+    "file": "src/main/java/com/thealgorithms/maths/Factorial.java",
+    "url": "https://raw.githubusercontent.com/TheAlgorithms/Java/a097a286fc0c7b268ec9788996db5dfd8782ab45/src/main/java/com/thealgorithms/maths/Factorial.java",
+    "excerpt": "complete",
+    "sha256": "32046a58acd8bc0a1d4dd9a8f6210aa951644c62b19243887b92a8a21808cdb3",
+    "licenseRetrieved": true
+  }
+]

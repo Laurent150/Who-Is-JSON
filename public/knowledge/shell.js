@@ -1,0 +1,19 @@
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory;else root.WhoShellCards=factory;})(this,function(card){
+ const add=(id,title,plain,naming,example,result,pitfall)=>card('sh.'+id,'Shell',title,plain,naming,example,result,pitfall,'',null);
+ add('test','检查空值、非空值和文件','-z 检查文字长度为 0；-n 检查文字非空；-f 检查路径是否是普通文件。','[[、]]、-z、-n、-f 是 Bash 的固定写法；被检查的名字由作者起。','name=""\nif [[ -z "$name" ]]; then\n  echo "还没填写"\nfi','预期显示“还没填写”。','[[ ... ]] 不是 JavaScript 数组。这里的 -z 不是减法。');
+ add('if','根据检查结果选择路径','if 先检查，then 后放成立时的步骤；elif 继续检查其他条件；else 处理剩余情况；fi 结束整组判断。','if、then、elif、else、fi 是 Bash 关键字。','name="小林"\nif [[ -n "$name" ]]; then\n  echo "已有名字"\nelse\n  echo "请填写"\nfi','预期显示“已有名字”。','判断命令通常以退出状态 0 表示成立，与普通数字大小无关。');
+ add('for','依次尝试几个值','每一轮取一个值，交给变量，再执行 do 与 done 之间的步骤。','for、in、do、done 是固定写法，循环变量名由作者起。','for fruit in "苹果" "梨"; do\n  echo "$fruit"\ndone','预期依次显示苹果和梨。','break 可以提前停止循环，不代表整份脚本结束。');
+ add('assignment','给变量保存内容','把右边的结果保存在左边的名字下；没有内容时可保存空字符串。','变量名由作者或环境约定；= 是赋值写法，两边通常不能加空格。','message="你好"\necho "$message"','预期显示你好。','message = "你好" 会被当作命令，不能照其他语言的格式随意加空格。');
+ add('local','把名字留在函数内部','local 创建函数里的局部变量，减少与外层同名变量的互相影响。','local 是 Bash 内置命令；后面的变量名由作者起。','greet() {\n  local name="$1"\n  echo "你好，$name"\n}\ngreet "小林"','预期显示你好，小林。','local 通常只能在函数中使用；声明与命令替换合写还可能影响退出状态观察。');
+ add('function','先定义，再调用','函数把命令组织成可重复使用的一组步骤；定义时不执行函数体。','name() { ...; } 是定义写法，普通函数名由作者起；$1、$2 表示调用时的输入位置。','greet() {\n  echo "你好，$1"\n}\ngreet "小林"','预期只有调用 greet 时才显示你好，小林。','函数也可能修改外层变量；不要把定义函数误认为已经完成了读取。');
+ add('substitution','取得命令输出 · $(...)','先运行括号内的命令，再把它输出的文字放回当前位置；末尾的换行会被去掉。','$() 是 Bash 写法，括号中的命令必须存在。','message="$(printf "你好")"\necho "$message"','预期 message 保存你好。','捕获的是标准输出，不是函数的 return 值；软件展示这一点并不执行命令。');
+ add('redirect','决定输出去哪儿','> 改变标准输出去向；2> 改变错误输出去向；2>&1 让错误输出去当前标准输出的位置。','数字 1、2 是输出通道的约定；/dev/null 是丢弃内容的特殊设备。','printf "这行不会显示" >/dev/null\nprintf "这行会显示\\n"','预期只显示第二行。','重定向有顺序，>/dev/null 2>&1 与 2>&1 >/dev/null 不等价。隐藏错误不等于修好错误。');
+ add('fallback','前面失败也继续 · || true','前面的命令失败时才执行 true；true 给出成功退出状态。','|| 是命令条件连接写法，true 是成功返回的命令。','false || true\nprintf "%s\\n" "$?"','预期最后显示 0。','0 只说明整组命令最终成功；不能据此证明前面的查找成功或密码存在。');
+ add('expansion','取出变量或参数里的值','${name} 和 $name 取出变量内容；$1 表示第一个位置参数。','$ 和 ${...} 是固定写法，name 通常由作者或调用环境约定。','name="小林"\nprintf "%s\\n" "你好，${name}"','预期显示你好，小林。','变量常用双引号包住，避免空格拆分和通配符扩展。');
+ add('slice','按分隔模式切开文字','${v%%模式} 去掉匹配的最长后缀；${v#模式} 去掉匹配的最短前缀。','%%、# 是参数展开规则；不是取余或注释。','pair=$\'alice\\tblue\'\nleft="${pair%%$\'\\t\'*}"\nright="${pair#*$\'\\t\'}"','预期 left 是 alice，right 是 blue。','这里的 * 是模式通配符；数据中有多个制表符时，要确认期望取哪一段。');
+ add('command','确认工具是否可用','command -v 查看当前 Shell 能否找到指定命令，适合决定是否启用可选功能。','command 是 Shell 内置命令，-v 是它的选项；后面的工具名必须对应实际命令。','if command -v printf >/dev/null 2>&1; then\n  echo "可以输出文字"\nfi','常见 Bash 环境中预期显示可以输出文字。','工具存在不代表运行一定成功；权限、参数和外部服务仍可能失败。');
+ add('keychain','读取 macOS 钥匙串条目','security find-generic-password 查询普通密码条目；-s 按服务，-a 按账号，-w 请求密码文字。','security 是 macOS 工具，不是 Bash 语法；服务名和账号需要与保存时一致。','# 用占位名称展示用法；不会自动执行\nsecurity find-generic-password -s "示例服务" -a "示例账号" -w','如果对应条目存在且访问获准，命令会输出密码；本例没有运行。','这个工具在 Windows/Linux 上通常不存在；失败或空输出不一定代表没有配置。');
+ add('return','结束调用并给出状态','return 结束当前函数或被 source 的脚本；后面的数字是退出状态。','return 是 Bash 内置命令；0 通常表示成功，非 0 表示失败。','check() { return 1; }\ncheck\nprintf "%s\\n" "$?"','预期显示退出状态 1。','return 不返回文字。不写数字时通常沿用上一条命令的状态。');
+ add('break','停止当前循环','离开循环，继续执行循环后面的步骤。','break 是 Bash 内置命令，不是作者起的函数名。','for n in 1 2 3; do\n  echo "$n"\n  break\ndone','预期只显示 1。','break 不等于 return，也不等于终止整份脚本。');
+ add('embedded','一份脚本里嵌入另一种语言','Bash 可以把一段文字交给 node -e；文字内部按 JavaScript 解释，外层流程仍由 Bash 控制。','node 是运行工具，-e 表示把后面的参数当代码；const 等属于内部 JavaScript。','node -e \'const message = "你好"; process.stdout.write(message);\'','如果 Node 可用，预期输出你好。这里只做语法示例，没有执行。','双引号中的 $、反引号等会先被 Shell 处理；不能直接把任意 JavaScript 塞进双引号。');
+});
