@@ -1,0 +1,11 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const {analyze}=require('../analyzer'),{build}=require('../public/presentation');
+test('broken JS sibling is excluded while healthy functions remain explainable',()=>{
+ const code='function first(x) { return x + 1; }\nfunction broken() { return “bad”; }\nfunction last(y) { return y * 2; }';
+ const r=analyze(code,'demo.js');assert.equal(r.partialRecovery,true);assert.ok(r.unexplained.some(x=>x.start===2));
+ const p=build(r);assert.ok(p.sections.some(x=>x.title==='first'));assert.ok(p.sections.some(x=>x.title==='last'));assert.ok(!p.sections.some(x=>x.title==='broken'));assert.match(p.note,/部分可读/);
+});
+test('unclosed JS tail does not invalidate earlier complete function',()=>{const r=analyze('function good() { return 1; }\nfunction bad() {\n return 2;','x.js');assert.equal(r.partialRecovery,true);assert.deepEqual(r.blocks.filter(x=>x.reusable).map(x=>x.title),['good']);});
+test('explicit sequential line gutters are normalized without modifying raw evidence',()=>{const raw='10 | function first(x) {\n11 |   return x + 1;\n12 | }';const r=analyze(raw,'x.js');assert.equal(r.syntaxErrors,false);assert.match(r.normalizedCode,/^function first/);assert.equal(r.blocks[0].code,raw);assert.equal(r.blocks[0].start,1);assert.ok(r.formatChanges.length);assert.equal(analyze('const x = 10 | 2;','x.js').formatChanges,undefined);});
+test('Python complete sibling survives syntax damage without guessing indentation',()=>{const code='def good(x):\n    return x + 1\n\ndef broken(:\n    return 2\n';const r=analyze(code,'demo.py',process.env.CODELINGO_PYTHON||'python');assert.equal(r.partialRecovery,true);assert.ok(build(r).sections.some(x=>x.title==='good'));assert.ok(!r.blocks.some(x=>x.title==='broken'));});
+test('format normalization composes with partial recovery and preserves original rows',()=>{const r=analyze('```js\n1 | function good() { return 1; }\n2 | function bad() { return “x”; }\n3 | function another() { return 3; }\n```','');assert.equal(r.partialRecovery,true);assert.equal(r.blocks.find(x=>x.title==='good').start,2);assert.match(r.blocks.find(x=>x.title==='good').code,/^1 \|/);assert.ok(r.formatChanges.length>=2);});

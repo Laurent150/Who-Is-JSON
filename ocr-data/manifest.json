@@ -1,0 +1,27 @@
+{
+  "project": "naptha/tessdata",
+  "files": [
+    {
+      "file": "eng.traineddata",
+      "package": "@tesseract.js-data/eng",
+      "version": "1.0.0",
+      "url": "https://registry.npmjs.org/@tesseract.js-data/eng/-/eng-1.0.0.tgz",
+      "integrity": "sha512-mbTumm6KQPUHyzTPQaF3ObXYnx0SqqfV2nabqFVQBwD6Kl7PhGSLSzOlfFTWy0P3BjghaSKA2W9GB19Jk+ZcTg==",
+      "model": "4.0.0",
+      "bytes": 23466654,
+      "sha256": "daa0c97d651c19fba3b25e81317cd697e9908c8208090c94c3905381c23fc047"
+    },
+    {
+      "file": "chi_sim.traineddata",
+      "package": "@tesseract.js-data/chi_sim",
+      "version": "1.0.0",
+      "url": "https://registry.npmjs.org/@tesseract.js-data/chi_sim/-/chi_sim-1.0.0.tgz",
+      "integrity": "sha512-iuErURkPbECDUazgsLn/r3c+tU2y5o5S/w14d0A/YiagfsjYyZKgTo75RUpsGJ311qtu0dIX4hqnXAAjmqf2CA==",
+      "model": "4.0.0_best_int",
+      "bytes": 2471033,
+      "sha256": "9784f7c917c546424b690fcde708ce1f604a4393d08bb51ddab146d7d7c794e6"
+    }
+  ],
+  "license": "Apache-2.0",
+  "licenseSource": "https://github.com/naptha/tessdata/blob/gh-pages/LICENSE"
+}

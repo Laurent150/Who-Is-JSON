@@ -1,0 +1,6212 @@
+[
+  {
+    "name": "MathModelAgent",
+    "url": "https://github.com/jihe520/MathModelAgent.git",
+    "commit": "487f35085271f2f5bac5c0bad0b30c64b7b889f9",
+    "licenses": [
+      "docs/md/License.md"
+    ],
+    "files": [
+      {
+        "file": "backend/app/__init__.py",
+        "split": "development",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "defs": []
+      },
+      {
+        "file": "backend/app/config/setting.py",
+        "split": "holdout",
+        "sha256": "d1fdb0ea6b6e6443e418f02c12f908d42c6abe8c480dfe953d3c968277146aff",
+        "defs": [
+          {
+            "name": "ApiType",
+            "start": 11,
+            "end": 15,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "parse_cors",
+            "start": 18,
+            "end": 31,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "Settings",
+            "start": 34,
+            "end": 117,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "from_env",
+            "start": 109,
+            "end": 117,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/__init__.py",
+        "split": "development",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "defs": []
+      },
+      {
+        "file": "backend/app/core/agents/__init__.py",
+        "split": "development",
+        "sha256": "4e6d3800930de72961b4b504b8f1112f4018ba358805b7e45807a6b6c8cdeef1",
+        "defs": []
+      },
+      {
+        "file": "backend/app/core/agents/agent.py",
+        "split": "development",
+        "sha256": "f2aa7b4b431df72acbcde844a45e9c1b54fb721a947e0e12637ad7f8661f364d",
+        "defs": [
+          {
+            "name": "Agent",
+            "start": 16,
+            "end": 302,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 19,
+            "end": 33,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_estimate_tokens",
+            "start": 35,
+            "end": 37,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_estimate_message_tokens",
+            "start": 39,
+            "end": 43,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_chat",
+            "start": 45,
+            "end": 68,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "run",
+            "start": 70,
+            "end": 126,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "append_chat_history",
+            "start": 128,
+            "end": 139,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "compress_if_needed",
+            "start": 141,
+            "end": 216,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "_find_safe_preserve_point",
+            "start": 218,
+            "end": 233,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_is_safe_cut_point",
+            "start": 235,
+            "end": 265,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_get_safe_fallback_history",
+            "start": 267,
+            "end": 291,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_format_history_for_summary",
+            "start": 293,
+            "end": 302,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/agents/coder_agent.py",
+        "split": "development",
+        "sha256": "7cc81560b11f73e39db196b23f47cea018024e8ca742dd2c07cd803c689d0e52",
+        "defs": [
+          {
+            "name": "CoderAgent",
+            "start": 23,
+            "end": 220,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 25,
+            "end": 43,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run",
+            "start": 45,
+            "end": 220,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/agents/coordinator_agent.py",
+        "split": "development",
+        "sha256": "9db9628f61f87c4cf13f4df1d45512bc5bff9e6acb7e6e113bd9958e4c178b0a",
+        "defs": [
+          {
+            "name": "CoordinatorAgent",
+            "start": 15,
+            "end": 74,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 17,
+            "end": 25,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run",
+            "start": 27,
+            "end": 74,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/agents/modeler_agent.py",
+        "split": "development",
+        "sha256": "00a3073f9ba987887767019f08c3e3763912f6d65e731e63f323b78a3f9f83c9",
+        "defs": [
+          {
+            "name": "repair_json",
+            "start": 16,
+            "end": 54,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "ModelerAgent",
+            "start": 57,
+            "end": 119,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 59,
+            "end": 67,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run",
+            "start": 69,
+            "end": 119,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/agents/writer_agent.py",
+        "split": "holdout",
+        "sha256": "1b86c9916482ffc4b1a8b67455e1d822bccce0b7ace91d163eb307bb00bce52b",
+        "defs": [
+          {
+            "name": "WriterAgent",
+            "start": 23,
+            "end": 187,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 25,
+            "end": 41,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run",
+            "start": 43,
+            "end": 166,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "summarize",
+            "start": 168,
+            "end": 187,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/flows.py",
+        "split": "development",
+        "sha256": "28c5cb0b7fefe566ae4627a942933be5912bbb92fa070406fd9fde62355c20b7",
+        "defs": [
+          {
+            "name": "Flows",
+            "start": 8,
+            "end": 179,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 10,
+            "end": 12,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "set_flows",
+            "start": 14,
+            "end": 32,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_solution_flows",
+            "start": 34,
+            "end": 76,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_write_flows",
+            "start": 78,
+            "end": 100,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_writer_prompt",
+            "start": 102,
+            "end": 142,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_questions_quesx_keys",
+            "start": 144,
+            "end": 146,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_questions_quesx",
+            "start": 148,
+            "end": 156,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_seq",
+            "start": 158,
+            "end": 179,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/functions.py",
+        "split": "development",
+        "sha256": "70cb25e61626fcd94f117338548dbf3efa7490f23786531d7488f5dbb4ed8281",
+        "defs": []
+      },
+      {
+        "file": "backend/app/core/llm/__init__.py",
+        "split": "development",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "defs": []
+      },
+      {
+        "file": "backend/app/core/llm/llm.py",
+        "split": "holdout",
+        "sha256": "43f126585d57d15385ac32b4f17c2e229485133c359b8635358bf3dc5daf26f0",
+        "defs": [
+          {
+            "name": "LLMConfigError",
+            "start": 24,
+            "end": 25,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "LLM",
+            "start": 28,
+            "end": 194,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "simple_chat",
+            "start": 197,
+            "end": 205,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "__init__",
+            "start": 31,
+            "end": 47,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_create_provider",
+            "start": 49,
+            "end": 58,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_validate_config",
+            "start": 60,
+            "end": 65,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "chat",
+            "start": 67,
+            "end": 108,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "_validate_and_fix_tool_calls",
+            "start": 110,
+            "end": 163,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "send_message",
+            "start": 165,
+            "end": 194,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/llm/llm_factory.py",
+        "split": "development",
+        "sha256": "a3f2d0f4d33717a6c1c161963f5c9e512569fab0f3f51ce0ea175a3f724dcccb",
+        "defs": [
+          {
+            "name": "LLMFactory",
+            "start": 7,
+            "end": 57,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 12,
+            "end": 13,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_all_llms",
+            "start": 15,
+            "end": 57,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/llm/providers/__init__.py",
+        "split": "development",
+        "sha256": "a1599722e305f5aa33c449cb0f40cf0ec16494541a218cb6c894802463e35aec",
+        "defs": []
+      },
+      {
+        "file": "backend/app/core/llm/providers/anthropic.py",
+        "split": "development",
+        "sha256": "389ab9551484d6fc365be71b3b1356311072b3259e4b8e64009a3ff4dd8183af",
+        "defs": [
+          {
+            "name": "AnthropicProvider",
+            "start": 9,
+            "end": 127,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "call",
+            "start": 12,
+            "end": 63,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "_convert_messages",
+            "start": 65,
+            "end": 104,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_convert_tools",
+            "start": 106,
+            "end": 117,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_convert_tool_choice",
+            "start": 119,
+            "end": 127,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/llm/providers/base.py",
+        "split": "development",
+        "sha256": "7588ecf2769df014d1baf775c34b50f3d7df3a2e1b76b809c57ee4da09ed6cc8",
+        "defs": [
+          {
+            "name": "BaseProvider",
+            "start": 7,
+            "end": 37,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "call",
+            "start": 11,
+            "end": 37,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/llm/providers/openai_chat.py",
+        "split": "holdout",
+        "sha256": "11c6ca54330acb76746f84b646cb7aa2dacee29af621b744a07eca2847db0537",
+        "defs": [
+          {
+            "name": "OpenAIChatProvider",
+            "start": 8,
+            "end": 58,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "call",
+            "start": 11,
+            "end": 58,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/llm/providers/openai_responses.py",
+        "split": "development",
+        "sha256": "9a111a05a631476e536362874eb2cbb0bcfff341a7570127450233780e934a83",
+        "defs": [
+          {
+            "name": "OpenAIResponsesProvider",
+            "start": 8,
+            "end": 112,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "call",
+            "start": 11,
+            "end": 60,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "_messages_to_input",
+            "start": 62,
+            "end": 87,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_convert_tools",
+            "start": 89,
+            "end": 102,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_convert_tool_choice",
+            "start": 104,
+            "end": 112,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/llm/types.py",
+        "split": "holdout",
+        "sha256": "2db88a5ceb27af08855ae0b116fe0684690dad3650cb4a3a607a078949ded18e",
+        "defs": [
+          {
+            "name": "ToolCall",
+            "start": 7,
+            "end": 12,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "Usage",
+            "start": 16,
+            "end": 20,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "StandardResponse",
+            "start": 24,
+            "end": 33,
+            "kind": "ClassDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/prompts/__init__.py",
+        "split": "development",
+        "sha256": "f72de5ee9e5daa3ece0022e8ff71933badd5bdcd0ed83433c8b6f854cc0e0493",
+        "defs": []
+      },
+      {
+        "file": "backend/app/core/prompts/coder.py",
+        "split": "development",
+        "sha256": "48fad61b58994aaf38310ca6a06c65cc273b22a1b54a47f1cd5db97d2b951470",
+        "defs": []
+      },
+      {
+        "file": "backend/app/core/prompts/coordinator.py",
+        "split": "holdout",
+        "sha256": "756eb10438d29fc249f630d626f907785c32006c37e7b6008e5c021364521e4a",
+        "defs": []
+      },
+      {
+        "file": "backend/app/core/prompts/modeler.py",
+        "split": "holdout",
+        "sha256": "06427630d28b7684085563589e6f8d4f672b4a1827d4103e10252af7c7e16d9d",
+        "defs": []
+      },
+      {
+        "file": "backend/app/core/prompts/shared.py",
+        "split": "development",
+        "sha256": "ea7c703a88ad86319d778d6e7e7912098dbe55bf7a75186bc2cfe194c3d94afa",
+        "defs": [
+          {
+            "name": "get_reflection_prompt",
+            "start": 4,
+            "end": 31,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_completion_check_prompt",
+            "start": 34,
+            "end": 63,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/prompts/writer.py",
+        "split": "holdout",
+        "sha256": "450b013aaa465f1f5c03f451365ca58d21695a30fcc9c46a3407713f3e7e3577",
+        "defs": [
+          {
+            "name": "get_writer_prompt",
+            "start": 6,
+            "end": 220,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/core/workflow.py",
+        "split": "holdout",
+        "sha256": "004890d66eca7f1448e45f3a5115272c852fbea4539580fadcad3e4f1c362caa",
+        "defs": [
+          {
+            "name": "WorkFlow",
+            "start": 19,
+            "end": 29,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "MathModelWorkFlow",
+            "start": 32,
+            "end": 243,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 22,
+            "end": 23,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "execute",
+            "start": 25,
+            "end": 29,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_check_cancelled",
+            "start": 40,
+            "end": 47,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "execute",
+            "start": 49,
+            "end": 243,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/main.py",
+        "split": "development",
+        "sha256": "1e293d7f28b9d718ad8c8adda6ef5871c004c3305c56eb7b2bb87b342fcfcd38",
+        "defs": [
+          {
+            "name": "lifespan",
+            "start": 14,
+            "end": 23,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/models/__init__.py",
+        "split": "development",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "defs": []
+      },
+      {
+        "file": "backend/app/models/user_output.py",
+        "split": "development",
+        "sha256": "af951ed5bacdf8aeceb8953887fe30eeb604a8ec9e62cf3d30e53c09910ae035",
+        "defs": [
+          {
+            "name": "UserOutput",
+            "start": 11,
+            "end": 194,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 13,
+            "end": 32,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_init_seq",
+            "start": 34,
+            "end": 49,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "set_res",
+            "start": 51,
+            "end": 61,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_res",
+            "start": 63,
+            "end": 65,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_model_build_solve",
+            "start": 67,
+            "end": 75,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "replace_references_with_uuid",
+            "start": 77,
+            "end": 122,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "sort_text_with_footnotes",
+            "start": 124,
+            "end": 150,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "append_footnotes_to_text",
+            "start": 152,
+            "end": 166,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_result_to_save",
+            "start": 168,
+            "end": 185,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "save_result",
+            "start": 187,
+            "end": 194,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/routers/__init__.py",
+        "split": "development",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "defs": []
+      },
+      {
+        "file": "backend/app/routers/common_router.py",
+        "split": "development",
+        "sha256": "fb9981f9cf5ea5b63846e04d0b663565baf7a40172e834ce1b314afcbbd3fa04",
+        "defs": [
+          {
+            "name": "_require_safe_task_id",
+            "start": 17,
+            "end": 32,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_load_task_messages_from_file",
+            "start": 35,
+            "end": 56,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "root",
+            "start": 60,
+            "end": 61,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "config",
+            "start": 65,
+            "end": 73,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "get_writer_seque",
+            "start": 77,
+            "end": 80,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "get_task_messages",
+            "start": 84,
+            "end": 85,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "track",
+            "start": 89,
+            "end": 92,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "get_service_status",
+            "start": 96,
+            "end": 112,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/routers/files_router.py",
+        "split": "development",
+        "sha256": "777bbc0398ef709a5704fb09403ac0116aaef5bc42b4cfd0f7089f8884d34706",
+        "defs": [
+          {
+            "name": "get_download_url",
+            "start": 14,
+            "end": 15,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "get_download_all_url",
+            "start": 19,
+            "end": 20,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "get_files",
+            "start": 24,
+            "end": 33,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "open_folder",
+            "start": 37,
+            "end": 50,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/routers/modeling_router.py",
+        "split": "holdout",
+        "sha256": "fd95f98df2f7000a8748dfd5bb1b36427552b429cd40d041e2008553f9502a6f",
+        "defs": [
+          {
+            "name": "ValidateApiKeyRequest",
+            "start": 36,
+            "end": 40,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "ValidateOpenalexEmailRequest",
+            "start": 43,
+            "end": 44,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "ValidateOpenalexEmailResponse",
+            "start": 47,
+            "end": 49,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "ValidateApiKeyResponse",
+            "start": 52,
+            "end": 54,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "SaveApiConfigRequest",
+            "start": 57,
+            "end": 62,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "save_api_config",
+            "start": 66,
+            "end": 114,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "validate_api_key",
+            "start": 118,
+            "end": 164,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "validate_openalex_email",
+            "start": 168,
+            "end": 186,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "exampleModeling",
+            "start": 190,
+            "end": 219,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "modeling",
+            "start": 223,
+            "end": 272,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "run_modeling_task_async",
+            "start": 275,
+            "end": 346,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "CancelTaskResponse",
+            "start": 349,
+            "end": 351,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "cancel_task",
+            "start": 355,
+            "end": 370,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/routers/ws_router.py",
+        "split": "development",
+        "sha256": "37a0473796c909a794c77af87f205825e60caef46a5fc0ef1cfa314a97b5766a",
+        "defs": [
+          {
+            "name": "_is_websocket_closed",
+            "start": 18,
+            "end": 22,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_is_closed_send_error",
+            "start": 25,
+            "end": 30,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "websocket_endpoint",
+            "start": 34,
+            "end": 121,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/schemas/A2A.py",
+        "split": "development",
+        "sha256": "9406ce56e51548597482e5c40e33e7db370e3fe0efbf537edc86b155d064423a",
+        "defs": [
+          {
+            "name": "CoordinatorToModeler",
+            "start": 7,
+            "end": 10,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "ModelerToCoder",
+            "start": 13,
+            "end": 15,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "CoderToWriter",
+            "start": 18,
+            "end": 22,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "WriterResponse",
+            "start": 25,
+            "end": 28,
+            "kind": "ClassDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/schemas/__init__.py",
+        "split": "holdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "defs": []
+      },
+      {
+        "file": "backend/app/schemas/base.py",
+        "split": "holdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "defs": []
+      },
+      {
+        "file": "backend/app/schemas/enums.py",
+        "split": "holdout",
+        "sha256": "ef4e6380033ca5f02873d3244090fc6c01f1a331a7e0aa48035d9e97dc30fd11",
+        "defs": [
+          {
+            "name": "CompTemplate",
+            "start": 6,
+            "end": 9,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "FormatOutPut",
+            "start": 12,
+            "end": 15,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "AgentType",
+            "start": 18,
+            "end": 24,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "AgentStatus",
+            "start": 27,
+            "end": 33,
+            "kind": "ClassDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/schemas/request.py",
+        "split": "development",
+        "sha256": "7188939d12cf252caf90f8af1a680127fa1dea7de97a261b557412330e945d32",
+        "defs": [
+          {
+            "name": "ExampleRequest",
+            "start": 7,
+            "end": 10,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "Problem",
+            "start": 13,
+            "end": 24,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "model_dump",
+            "start": 20,
+            "end": 24,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/schemas/response.py",
+        "split": "development",
+        "sha256": "47c8536d9c03de78f89445eafe1ff5482b13b2f081922bed7cc3ad69affaa5de",
+        "defs": [
+          {
+            "name": "Message",
+            "start": 9,
+            "end": 13,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "ToolMessage",
+            "start": 16,
+            "end": 20,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "SystemMessage",
+            "start": 23,
+            "end": 25,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "UserMessage",
+            "start": 28,
+            "end": 29,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "AgentMessage",
+            "start": 32,
+            "end": 34,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "ModelerMessage",
+            "start": 37,
+            "end": 38,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "CoordinatorMessage",
+            "start": 41,
+            "end": 42,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "CodeExecution",
+            "start": 45,
+            "end": 48,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "StdOutModel",
+            "start": 51,
+            "end": 52,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "StdErrModel",
+            "start": 55,
+            "end": 56,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "ResultModel",
+            "start": 59,
+            "end": 72,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "ErrorModel",
+            "start": 75,
+            "end": 79,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "ScholarMessage",
+            "start": 86,
+            "end": 89,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "InterpreterMessage",
+            "start": 92,
+            "end": 95,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "CoderMessage",
+            "start": 100,
+            "end": 101,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "WriterMessage",
+            "start": 104,
+            "end": 106,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "ApprovalMessage",
+            "start": 109,
+            "end": 125,
+            "kind": "ClassDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/schemas/tool_result.py",
+        "split": "development",
+        "sha256": "c43ba2995a17373ad6df6db7f90732d19553f6a62629c1e4fcc2a04a75ff5d42",
+        "defs": [
+          {
+            "name": "ToolResult",
+            "start": 7,
+            "end": 11,
+            "kind": "ClassDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/services/redis_manager.py",
+        "split": "development",
+        "sha256": "ec52ed271cfd8d311bc403bfcfb5a6dba447e961eb35c8a5ec23bd9b3ed9bf81",
+        "defs": [
+          {
+            "name": "RedisManager",
+            "start": 12,
+            "end": 97,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 14,
+            "end": 19,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_client",
+            "start": 21,
+            "end": 34,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "set",
+            "start": 36,
+            "end": 40,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "_save_message_to_file",
+            "start": 42,
+            "end": 67,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "publish_message",
+            "start": 70,
+            "end": 84,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "subscribe_to_task",
+            "start": 86,
+            "end": 91,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "close",
+            "start": 93,
+            "end": 97,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/services/ws_manager.py",
+        "split": "development",
+        "sha256": "b01e2902578fcee3cf60865a5e00d93fd341eb221e612502bb98c6a5fa5d067d",
+        "defs": [
+          {
+            "name": "WebSocketManager",
+            "start": 6,
+            "end": 27,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 8,
+            "end": 9,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "connect",
+            "start": 11,
+            "end": 13,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "disconnect",
+            "start": 15,
+            "end": 17,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "send_personal_message",
+            "start": 19,
+            "end": 20,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "send_personal_message_json",
+            "start": 22,
+            "end": 23,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "broadcast",
+            "start": 25,
+            "end": 27,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tests/__init__.py",
+        "split": "development",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "defs": []
+      },
+      {
+        "file": "backend/app/tests/get_config_template.py",
+        "split": "development",
+        "sha256": "9315494d5b87c1286b24c61f4570fa78543bcc5aa2e809684056a46214f7a066",
+        "defs": [
+          {
+            "name": "test_get_config_template",
+            "start": 11,
+            "end": 17,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tests/test_common_utils.py",
+        "split": "development",
+        "sha256": "68ae6d5ac56bb09f4dbf1508edb5d9c55ce33c891dfffe4253d31de925ba011d",
+        "defs": [
+          {
+            "name": "TestCommonUtils",
+            "start": 8,
+            "end": 16,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "test_split_footnotes",
+            "start": 11,
+            "end": 16,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tests/test_e2b.py",
+        "split": "development",
+        "sha256": "8855c2d6c82cc19eca7c8baac87a59b812728387c259e395511d40678a80caa6",
+        "defs": [
+          {
+            "name": "TestE2BCodeInterpreter",
+            "start": 13,
+            "end": 59,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "setUp",
+            "start": 16,
+            "end": 27,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "test_execute_code",
+            "start": 29,
+            "end": 59,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tools/__init__.py",
+        "split": "development",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "defs": []
+      },
+      {
+        "file": "backend/app/tools/base.py",
+        "split": "development",
+        "sha256": "e2376d8df4343d70f88902c6b49126df7b7f27aeb58778385c03454ddec0292b",
+        "defs": [
+          {
+            "name": "tool",
+            "start": 8,
+            "end": 48,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "BaseTool",
+            "start": 51,
+            "end": 107,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "decorator",
+            "start": 26,
+            "end": 46,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "__init__",
+            "start": 56,
+            "end": 58,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_tools",
+            "start": 60,
+            "end": 72,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "has_function",
+            "start": 74,
+            "end": 87,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "invoke_function",
+            "start": 89,
+            "end": 107,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tools/base_interpreter.py",
+        "split": "development",
+        "sha256": "cafa88c9971eccdd57d3f4de39410d97f8a2518dfde32dd5c5f3d02818328ae8",
+        "defs": [
+          {
+            "name": "BaseCodeInterpreter",
+            "start": 14,
+            "end": 90,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 16,
+            "end": 26,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "initialize",
+            "start": 29,
+            "end": 31,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "_pre_execute_code",
+            "start": 34,
+            "end": 36,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "execute_code",
+            "start": 39,
+            "end": 41,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "cleanup",
+            "start": 44,
+            "end": 46,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "get_created_images",
+            "start": 49,
+            "end": 51,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "_push_to_websocket",
+            "start": 53,
+            "end": 63,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "add_section",
+            "start": 65,
+            "end": 69,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_content",
+            "start": 71,
+            "end": 74,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_code_output",
+            "start": 76,
+            "end": 78,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "delete_color_control_char",
+            "start": 80,
+            "end": 82,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_truncate_text",
+            "start": 84,
+            "end": 90,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tools/e2b_interpreter.py",
+        "split": "development",
+        "sha256": "f4807b163cef3acaa041a4f261c1a511a8b8ed074717d909d12ff1be3fd92e0d",
+        "defs": [
+          {
+            "name": "E2BCodeInterpreter",
+            "start": 21,
+            "end": 393,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 23,
+            "end": 30,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "create",
+            "start": 33,
+            "end": 41,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "initialize",
+            "start": 43,
+            "end": 54,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "_upload_all_files",
+            "start": 56,
+            "end": 84,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "_pre_execute_code",
+            "start": 86,
+            "end": 111,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "execute_code",
+            "start": 113,
+            "end": 303,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "get_created_images",
+            "start": 305,
+            "end": 325,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "cleanup",
+            "start": 327,
+            "end": 342,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "download_all_files_from_sandbox",
+            "start": 345,
+            "end": 393,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tools/interpreter_factory.py",
+        "split": "development",
+        "sha256": "55e9d0577e8ca81df1fd6d46791d8f07479edfb7b64a2133cd6b932befcb919b",
+        "defs": [
+          {
+            "name": "create_interpreter",
+            "start": 12,
+            "end": 60,
+            "kind": "AsyncFunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tools/local_interpreter.py",
+        "split": "development",
+        "sha256": "9fd87b95f03a34703e0ddeaa8d25d0e0cbf4d678442c4a1803f8b750d0ca5986",
+        "defs": [
+          {
+            "name": "LocalCodeInterpreter",
+            "start": 18,
+            "end": 254,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 20,
+            "end": 28,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "initialize",
+            "start": 30,
+            "end": 46,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "_pre_execute_code",
+            "start": 48,
+            "end": 66,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "execute_code",
+            "start": 68,
+            "end": 143,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "execute_code_",
+            "start": 145,
+            "end": 207,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_created_images",
+            "start": 209,
+            "end": 224,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "cleanup",
+            "start": 226,
+            "end": 232,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "send_interrupt_signal",
+            "start": 234,
+            "end": 235,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "restart_jupyter_kernel",
+            "start": 237,
+            "end": 250,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_create_work_dir",
+            "start": 252,
+            "end": 254,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tools/matplotlib_setup.py",
+        "split": "development",
+        "sha256": "8358df5398fc1fecb485f257ce6ae5535a0a97c460c69f86f4ee0bbf52aaab50",
+        "defs": [
+          {
+            "name": "build_matplotlib_init_code",
+            "start": 20,
+            "end": 108,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tools/notebook_serializer.py",
+        "split": "development",
+        "sha256": "b3c0da3d0c27107d17e47aa41f7737ef912715ea3e883b41fcc9d79787a224bc",
+        "defs": [
+          {
+            "name": "NotebookSerializer",
+            "start": 9,
+            "end": 116,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 11,
+            "end": 22,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "init_notebook",
+            "start": 24,
+            "end": 38,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "ansi_to_html",
+            "start": 45,
+            "end": 48,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "write_to_notebook",
+            "start": 50,
+            "end": 53,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_code_cell_to_notebook",
+            "start": 55,
+            "end": 58,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_code_cell_output_to_notebook",
+            "start": 60,
+            "end": 77,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_code_cell_error_to_notebook",
+            "start": 79,
+            "end": 87,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_image_to_notebook",
+            "start": 89,
+            "end": 94,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_markdown_to_notebook",
+            "start": 96,
+            "end": 101,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_markdown_segmentation_to_notebook",
+            "start": 103,
+            "end": 113,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_notebook_output_content",
+            "start": 115,
+            "end": 116,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/tools/openalex_scholar.py",
+        "split": "development",
+        "sha256": "47412bfc798f8f8be859b48063b39830a9954f54643bd992365bca9ae5a49a77",
+        "defs": [
+          {
+            "name": "OpenAlexScholar",
+            "start": 9,
+            "end": 222,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 12,
+            "end": 23,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_get_request_url",
+            "start": 25,
+            "end": 33,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_get_abstract_from_index",
+            "start": 35,
+            "end": 61,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "search_papers",
+            "start": 63,
+            "end": 175,
+            "kind": "AsyncFunctionDef"
+          },
+          {
+            "name": "papers_to_str",
+            "start": 177,
+            "end": 191,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_format_citation",
+            "start": 193,
+            "end": 222,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/utils/RichPrinter.py",
+        "split": "development",
+        "sha256": "d5dbfcb29c3dd41c36ed2997d52f1de41d221582ec37cbd8629eb948afdc73b5",
+        "defs": [
+          {
+            "name": "RichPrinter",
+            "start": 12,
+            "end": 158,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "_format_message",
+            "start": 27,
+            "end": 47,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "success",
+            "start": 50,
+            "end": 51,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "error",
+            "start": 54,
+            "end": 55,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "warning",
+            "start": 58,
+            "end": 59,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "print_agent_msg",
+            "start": 62,
+            "end": 75,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_print_panel",
+            "start": 78,
+            "end": 96,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "table",
+            "start": 99,
+            "end": 116,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "workflow_start",
+            "start": 119,
+            "end": 126,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "workflow_end",
+            "start": 129,
+            "end": 136,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "agent_start",
+            "start": 139,
+            "end": 147,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "agent_end",
+            "start": 150,
+            "end": 158,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/utils/__init__.py",
+        "split": "holdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "defs": []
+      },
+      {
+        "file": "backend/app/utils/cli.py",
+        "split": "holdout",
+        "sha256": "e88acb9f9f2733d818fd20afadedb28c1b5a3a061bf4e728df0bdb839c99b5d0",
+        "defs": [
+          {
+            "name": "center_cli_str",
+            "start": 6,
+            "end": 20,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_ascii_banner",
+            "start": 23,
+            "end": 49,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/utils/common_utils.py",
+        "split": "development",
+        "sha256": "7437403934970ea3788e0ceb2244fadb22e33c321d2c49cbcb6342b86233e7ea",
+        "defs": [
+          {
+            "name": "create_task_id",
+            "start": 17,
+            "end": 22,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "ensure_safe_task_id",
+            "start": 25,
+            "end": 40,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "create_work_dir",
+            "start": 43,
+            "end": 64,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_copy_fonts_to_work_dir",
+            "start": 71,
+            "end": 91,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_work_dir",
+            "start": 94,
+            "end": 111,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_config_template",
+            "start": 115,
+            "end": 126,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_toml",
+            "start": 129,
+            "end": 136,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_markdown",
+            "start": 139,
+            "end": 146,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_current_files",
+            "start": 149,
+            "end": 171,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "transform_link",
+            "start": 174,
+            "end": 186,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "md_2_docx",
+            "start": 189,
+            "end": 214,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "split_footnotes",
+            "start": 217,
+            "end": 233,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/utils/data_recorder.py",
+        "split": "development",
+        "sha256": "ac32f6f65f8600aa6d5a7e4bf093ae933d8042e3c88daaf7fb9ce7c7f8d06240",
+        "defs": [
+          {
+            "name": "DataRecorder",
+            "start": 10,
+            "end": 215,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 12,
+            "end": 25,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "print_summary",
+            "start": 27,
+            "end": 76,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "write_to_json",
+            "start": 78,
+            "end": 85,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "append_chat_history",
+            "start": 87,
+            "end": 92,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "chat_completion_to_dict",
+            "start": 94,
+            "end": 134,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "append_chat_completion",
+            "start": 136,
+            "end": 149,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "update_token_usage",
+            "start": 151,
+            "end": 184,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "calculate_cost",
+            "start": 186,
+            "end": 215,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/utils/log_util.py",
+        "split": "development",
+        "sha256": "b8416f5a8e5592f336ba8f185cd85bc2d8a354a7b8f686abaa345ba8d34fd05c",
+        "defs": [
+          {
+            "name": "LoggerInitializer",
+            "start": 9,
+            "end": 54,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "__init__",
+            "start": 11,
+            "end": 16,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "__ensure_log_directory_exists",
+            "start": 18,
+            "end": 23,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "__filter",
+            "start": 26,
+            "end": 28,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "init_log",
+            "start": 30,
+            "end": 54,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "backend/app/utils/track.py",
+        "split": "holdout",
+        "sha256": "c217bd02bed2d6ec013eb81d4de0d3238ce812e14fc03ee0cdb85d561afc1404",
+        "defs": [
+          {
+            "name": "log_agent_call",
+            "start": 6,
+            "end": 14,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/render_template.py",
+        "split": "development",
+        "sha256": "671281e7d0cb1e25fd96867c5d1323da4f8949a590f51dae2eacaa3bed81f970",
+        "defs": [
+          {
+            "name": "normalize",
+            "start": 66,
+            "end": 70,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "resolve_template",
+            "start": 73,
+            "end": 86,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "write_readme",
+            "start": 89,
+            "end": 114,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 117,
+            "end": 162,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_correlation_pairgrid.py",
+        "split": "holdout",
+        "sha256": "e923aef5946d94c7931710415b1381c593b2d0ea3e4088d19161bac843bdb767",
+        "defs": [
+          {
+            "name": "configure_matplotlib",
+            "start": 21,
+            "end": 34,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "simulate_data",
+            "start": 37,
+            "end": 58,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "kde_1d",
+            "start": 61,
+            "end": 67,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "fit_line_with_ci",
+            "start": 70,
+            "end": 82,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "fisher_p_value",
+            "start": 85,
+            "end": 88,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "stars_for_p",
+            "start": 91,
+            "end": 98,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "style_small_axes",
+            "start": 101,
+            "end": 109,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_scatter_cell",
+            "start": 112,
+            "end": 121,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_hist_cell",
+            "start": 124,
+            "end": 131,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_corr_cell",
+            "start": 134,
+            "end": 151,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_figure",
+            "start": 154,
+            "end": 203,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 206,
+            "end": 207,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_cv_roc_ci.py",
+        "split": "development",
+        "sha256": "dcdfefa323e70303f17084b5cdd9eb6f2de452041a120b753fdb302aa80b5a00",
+        "defs": [
+          {
+            "name": "ModelSpec",
+            "start": 19,
+            "end": 25,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "configure_matplotlib",
+            "start": 37,
+            "end": 50,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "auc_to_curve_exponent",
+            "start": 53,
+            "end": 55,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "base_roc_curve",
+            "start": 58,
+            "end": 63,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "fold_auc_targets",
+            "start": 66,
+            "end": 71,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_empirical_fold_curve",
+            "start": 74,
+            "end": 92,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "interpolate_fold",
+            "start": 95,
+            "end": 99,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "simulate_cv_rocs",
+            "start": 102,
+            "end": 123,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_caption_and_table",
+            "start": 126,
+            "end": 181,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_figure",
+            "start": 184,
+            "end": 255,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 258,
+            "end": 259,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_grouped_circular_heatmap.py",
+        "split": "holdout",
+        "sha256": "73a0e33ebc6b74f9d8ec34ddb3e170010946cb6a686d56f39c6830b7956de538",
+        "defs": [
+          {
+            "name": "TraitSpec",
+            "start": 20,
+            "end": 23,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "PairGroup",
+            "start": 27,
+            "end": 30,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "configure_matplotlib",
+            "start": 57,
+            "end": 67,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_trait_cmap",
+            "start": 70,
+            "end": 80,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "simulate_heatmap_values",
+            "start": 83,
+            "end": 112,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_ring_cells",
+            "start": 115,
+            "end": 135,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_group_ring",
+            "start": 138,
+            "end": 159,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "text_rotation",
+            "start": 162,
+            "end": 166,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_outer_labels",
+            "start": 169,
+            "end": 189,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_stars",
+            "start": 192,
+            "end": 204,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_trait_colorbar_stack",
+            "start": 207,
+            "end": 240,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_center_legend",
+            "start": 243,
+            "end": 261,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_figure",
+            "start": 264,
+            "end": 313,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 316,
+            "end": 317,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_grouped_corr_split_violin.py",
+        "split": "development",
+        "sha256": "6ff0dd502ad2f5d3a28ee1d07e2e75d3dbc46c285a95ed46ca7eb0f6f9456b30",
+        "defs": [
+          {
+            "name": "FeatureSpec",
+            "start": 20,
+            "end": 23,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "configure_matplotlib",
+            "start": 43,
+            "end": 56,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "simulate_feature_data",
+            "start": 59,
+            "end": 95,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "rank_columns",
+            "start": 98,
+            "end": 105,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "spearman_corr",
+            "start": 108,
+            "end": 110,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "kde_1d",
+            "start": 113,
+            "end": 119,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_lower_corr",
+            "start": 122,
+            "end": 162,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_group_bracket",
+            "start": 165,
+            "end": 169,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_split_violin",
+            "start": 172,
+            "end": 207,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_figure",
+            "start": 210,
+            "end": 258,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 261,
+            "end": 262,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "latent_samples",
+            "start": 62,
+            "end": 67,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "build",
+            "start": 69,
+            "end": 91,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_multiclass_shap_combo.py",
+        "split": "development",
+        "sha256": "0fe4ecdd2b9399b3e8f4f11accdfa0b4c34713288c9574a17d068ea76462f441",
+        "defs": [
+          {
+            "name": "configure_matplotlib",
+            "start": 36,
+            "end": 53,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "importance_table",
+            "start": 56,
+            "end": 74,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "simulate_feature_values",
+            "start": 77,
+            "end": 82,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "simulate_shap_values",
+            "start": 85,
+            "end": 130,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "beeswarm_y",
+            "start": 133,
+            "end": 141,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "plot_multiclass_shap_combo",
+            "start": 144,
+            "end": 269,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 272,
+            "end": 283,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_nature_chord_diagram.py",
+        "split": "holdout",
+        "sha256": "8e76d3453e410296840cd292fe938b34aaf3d146e12e2c84e0171312009d605d",
+        "defs": [
+          {
+            "name": "NodeSpec",
+            "start": 21,
+            "end": 24,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "configure_matplotlib",
+            "start": 65,
+            "end": 75,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "polar_to_xy",
+            "start": 78,
+            "end": 80,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "lighten",
+            "start": 83,
+            "end": 85,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "text_rotation",
+            "start": 88,
+            "end": 92,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "compute_layout",
+            "start": 95,
+            "end": 115,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "build_flows",
+            "start": 118,
+            "end": 162,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "ribbon_patch",
+            "start": 165,
+            "end": 209,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_sector_ring",
+            "start": 212,
+            "end": 240,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_labels",
+            "start": 243,
+            "end": 266,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_figure",
+            "start": 269,
+            "end": 313,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 316,
+            "end": 317,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_paired_raincloud.py",
+        "split": "development",
+        "sha256": "32e8faeb0fd9d1455e2d557e45f8d3c7b7b5c326601767a569b7a1eb2621efb4",
+        "defs": [
+          {
+            "name": "configure_matplotlib",
+            "start": 24,
+            "end": 38,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "synthetic_sepal_width_data",
+            "start": 41,
+            "end": 59,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "kde_1d",
+            "start": 62,
+            "end": 68,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_half_violin",
+            "start": 71,
+            "end": 105,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_points",
+            "start": 108,
+            "end": 127,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_box",
+            "start": 130,
+            "end": 153,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_mean_trend",
+            "start": 156,
+            "end": 166,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_bottom_bracket",
+            "start": 169,
+            "end": 175,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_figure",
+            "start": 178,
+            "end": 305,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 308,
+            "end": 309,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_prediction_marginal_grid.py",
+        "split": "development",
+        "sha256": "d4a46d903f914dfe0a8e82e7cf88d56e9476172a0438302a5db2276f61041781",
+        "defs": [
+          {
+            "name": "ModelPanel",
+            "start": 20,
+            "end": 28,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "configure_matplotlib",
+            "start": 75,
+            "end": 90,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_actual_values",
+            "start": 93,
+            "end": 99,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "simulate_predictions",
+            "start": 102,
+            "end": 112,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "kde_1d",
+            "start": 115,
+            "end": 121,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_top_distribution",
+            "start": 124,
+            "end": 142,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_right_distribution",
+            "start": 145,
+            "end": 169,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_scatter_panel",
+            "start": 172,
+            "end": 216,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_model_panel",
+            "start": 219,
+            "end": 244,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_figure",
+            "start": 247,
+            "end": 268,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 271,
+            "end": 272,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_rf_tpe_surface.py",
+        "split": "development",
+        "sha256": "06f8770eb943b6b7d013ee9f8999e42680a281b8da10cee7ac5e409a8d4dd82e",
+        "defs": [
+          {
+            "name": "configure_matplotlib",
+            "start": 17,
+            "end": 27,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "true_rmse_surface",
+            "start": 30,
+            "end": 42,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "simulate_tpe_trials",
+            "start": 45,
+            "end": 77,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "idw_response_surface",
+            "start": 80,
+            "end": 106,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_figure",
+            "start": 109,
+            "end": 166,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 169,
+            "end": 170,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_taylor_diagram.py",
+        "split": "development",
+        "sha256": "104fa0c53dc4d908a521cce5400de6b90cd0d1587b4364f6d1c1b07becd6ddc3",
+        "defs": [
+          {
+            "name": "TaylorPoint",
+            "start": 19,
+            "end": 22,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "configure_matplotlib",
+            "start": 59,
+            "end": 70,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "polar_to_xy",
+            "start": 73,
+            "end": 77,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_taylor_grid",
+            "start": 80,
+            "end": 137,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_panel",
+            "start": 140,
+            "end": 170,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_header_and_caption",
+            "start": 173,
+            "end": 210,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_figure",
+            "start": 213,
+            "end": 230,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 233,
+            "end": 234,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "skills/mathmodel-figure-templates/scripts/templates/make_urban_park_cooling_combo.py",
+        "split": "development",
+        "sha256": "72d85ac625b06dd7462298f3263135ae58a0d4f139a669255c245c032cbdcea8",
+        "defs": [
+          {
+            "name": "CitySpec",
+            "start": 21,
+            "end": 23,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "configure_matplotlib",
+            "start": 104,
+            "end": 117,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "kde_1d",
+            "start": 120,
+            "end": 126,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "simulate_city_metric_data",
+            "start": 129,
+            "end": 166,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "style_axis",
+            "start": 169,
+            "end": 172,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_panel_a",
+            "start": 175,
+            "end": 212,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_horizontal_box",
+            "start": 215,
+            "end": 227,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_raincloud",
+            "start": 230,
+            "end": 269,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "draw_vertical_boxplot_panel",
+            "start": 272,
+            "end": 310,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_city_and_legend_panel",
+            "start": 313,
+            "end": 344,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "make_figure",
+            "start": 347,
+            "end": 388,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 391,
+            "end": 392,
+            "kind": "FunctionDef"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "agent-skills",
+    "url": "https://github.com/tech-leads-club/agent-skills.git",
+    "commit": "0ab82f644cd9caf94c65347a50ad934800b0cbc4",
+    "licenses": [
+      "LICENSE",
+      "packages/skills-catalog/skills/(cloud)/cloudflare-deploy/LICENSE.txt",
+      "packages/skills-catalog/skills/(cloud)/netlify-deploy/LICENSE.txt",
+      "packages/skills-catalog/skills/(cloud)/render-deploy/LICENSE.txt",
+      "packages/skills-catalog/skills/(cloud)/vercel-deploy/LICENSE.txt",
+      "packages/skills-catalog/skills/(design)/figma-implement-design/LICENSE.txt",
+      "packages/skills-catalog/skills/(design)/figma/LICENSE.txt",
+      "packages/skills-catalog/skills/(development)/gh-address-comments/LICENSE.txt",
+      "packages/skills-catalog/skills/(monitoring)/sentry/LICENSE.txt",
+      "packages/skills-catalog/skills/(security)/security-best-practices/LICENSE.txt",
+      "packages/skills-catalog/skills/(security)/security-ownership-map/LICENSE.txt",
+      "packages/skills-catalog/skills/(security)/security-threat-model/LICENSE.txt",
+      "packages/skills-catalog/skills/(tooling)/gh-fix-ci/LICENSE.txt"
+    ],
+    "files": [
+      {
+        "file": "packages/skills-catalog/skills/(cloud)/aws-advisor/scripts/architecture_validator.py",
+        "split": "development",
+        "sha256": "6e5e006a572cc7fa08e148aab951a3a73aa16ec5aea2fc6df8da087455cde2b1",
+        "defs": [
+          {
+            "name": "validate_architecture",
+            "start": 192,
+            "end": 243,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 245,
+            "end": 309,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(cloud)/aws-advisor/scripts/cost_considerations.py",
+        "split": "holdout",
+        "sha256": "71af89dbac88a61497df0c0d425210d85141633b5e88c2a6094fa33440a16676",
+        "defs": [
+          {
+            "name": "detect_services",
+            "start": 215,
+            "end": 236,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "generate_cost_report",
+            "start": 238,
+            "end": 264,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 266,
+            "end": 327,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(cloud)/aws-advisor/scripts/generate_diagram.py",
+        "split": "holdout",
+        "sha256": "d9f0315075feb77ab190d65c1991464817f80cea9ccd7d4948a5be81f999a8c2",
+        "defs": [
+          {
+            "name": "detect_pattern",
+            "start": 257,
+            "end": 265,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "detect_database",
+            "start": 267,
+            "end": 275,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "generate_diagram",
+            "start": 277,
+            "end": 306,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "generate_custom",
+            "start": 308,
+            "end": 326,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 328,
+            "end": 365,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(cloud)/aws-advisor/scripts/security_review.py",
+        "split": "development",
+        "sha256": "42c185c198561a56291d0b03315eec16b76c7dd39a7f0346689a92e407618fa2",
+        "defs": [
+          {
+            "name": "detect_services",
+            "start": 142,
+            "end": 168,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "generate_checklist",
+            "start": 170,
+            "end": 201,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 203,
+            "end": 241,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(cloud)/aws-advisor/scripts/well_architected_review.py",
+        "split": "development",
+        "sha256": "d9b100b196b91d1a407ccd715f9f5cd5bde7ca36393b75617a1b08a727f4c819",
+        "defs": [
+          {
+            "name": "detect_services",
+            "start": 231,
+            "end": 253,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "generate_review",
+            "start": 255,
+            "end": 278,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 280,
+            "end": 322,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(creation)/skill-architect/scripts/validate_skill.py",
+        "split": "development",
+        "sha256": "56fa253b7de06b6c8d30d4cb5011c8961ddb7b87af49d686dbeaad5e0b454910",
+        "defs": [
+          {
+            "name": "FrontmatterParseError",
+            "start": 32,
+            "end": 33,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "_parse_scalar",
+            "start": 36,
+            "end": 56,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_collect_block_scalar",
+            "start": 59,
+            "end": 95,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_parse_frontmatter_stdlib",
+            "start": 98,
+            "end": 205,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_frontmatter",
+            "start": 208,
+            "end": 219,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "validate_skill",
+            "start": 222,
+            "end": 458,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "print_report",
+            "start": 461,
+            "end": 484,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_check",
+            "start": 234,
+            "end": 246,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(decision-making)/the-jury/scripts/tally.py",
+        "split": "development",
+        "sha256": "d30fcaca2bd5910dc9d950b54dcd10e1192626724b50233a5dffe9b785d7defb",
+        "defs": [
+          {
+            "name": "weighted_scores",
+            "start": 69,
+            "end": 73,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "rank",
+            "start": 76,
+            "end": 77,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "margin_ratio",
+            "start": 80,
+            "end": 87,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "avg_grade_for",
+            "start": 90,
+            "end": 95,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "base_tier",
+            "start": 98,
+            "end": 106,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "audit_flips",
+            "start": 109,
+            "end": 125,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 128,
+            "end": 255,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/gh-address-comments/scripts/fetch_comments.py",
+        "split": "development",
+        "sha256": "d7bc64f6b26f7482f9ca9dd7c923a5b8b20e1ef13491ae2d9052cd208a7c1ad1",
+        "defs": [
+          {
+            "name": "_run",
+            "start": 95,
+            "end": 99,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_run_json",
+            "start": 102,
+            "end": 107,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_ensure_gh_authenticated",
+            "start": 110,
+            "end": 115,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "gh_pr_view_json",
+            "start": 118,
+            "end": 120,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_current_pr_ref",
+            "start": 123,
+            "end": 132,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "gh_api_graphql",
+            "start": 135,
+            "end": 167,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "fetch_all",
+            "start": 170,
+            "end": 226,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 229,
+            "end": 233,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/harness-eval/scripts/doc_scope.py",
+        "split": "development",
+        "sha256": "9caf0f7c5f1eeeaa9494d228f6a520c1fdd1b2c305d5b0335546852a0055a9c3",
+        "defs": [
+          {
+            "name": "normalize_rel",
+            "start": 31,
+            "end": 36,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_agent_harness_ref",
+            "start": 39,
+            "end": 42,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_excluded_decision_record",
+            "start": 45,
+            "end": 48,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "optional_doc_type",
+            "start": 51,
+            "end": 62,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "classify_t2_cite",
+            "start": 65,
+            "end": 75,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "filter_t2_paths",
+            "start": 78,
+            "end": 132,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "write_optional_docs_md",
+            "start": 135,
+            "end": 194,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/harness-eval/scripts/inventory_extract.py",
+        "split": "development",
+        "sha256": "6c51c12b99ba4ed1519f5ca6e71480a2dee7822c1385c6d7acac7f29c7c75bb4",
+        "defs": [
+          {
+            "name": "Claim",
+            "start": 63,
+            "end": 70,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "Inventory",
+            "start": 74,
+            "end": 81,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "default_out",
+            "start": 84,
+            "end": 85,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "rel",
+            "start": 88,
+            "end": 89,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_readme",
+            "start": 92,
+            "end": 93,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "normalize_cite",
+            "start": 96,
+            "end": 100,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "glob_files",
+            "start": 103,
+            "end": 104,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "discover_t0",
+            "start": 107,
+            "end": 117,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "discover_t1_skills",
+            "start": 120,
+            "end": 125,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "resolve_skill_by_name",
+            "start": 128,
+            "end": 140,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "extract_skill_refs",
+            "start": 143,
+            "end": 165,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "discover_from_seeds",
+            "start": 168,
+            "end": 190,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "strip_fenced_code",
+            "start": 199,
+            "end": 201,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "extract_outbound_paths",
+            "start": 204,
+            "end": 233,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "resolve_cite",
+            "start": 236,
+            "end": 247,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "discover_t2_candidates",
+            "start": 250,
+            "end": 271,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "discover_t2",
+            "start": 274,
+            "end": 289,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_uniq",
+            "start": 292,
+            "end": 299,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_parse_makefile_targets",
+            "start": 302,
+            "end": 308,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_parse_taskfile_tasks",
+            "start": 311,
+            "end": 328,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_parse_rakefile_tasks",
+            "start": 331,
+            "end": 364,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_parse_gradle_tasks",
+            "start": 367,
+            "end": 376,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_parse_pom_exec_ids",
+            "start": 379,
+            "end": 381,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_discover_bin_commands",
+            "start": 384,
+            "end": 400,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_manifest_commands",
+            "start": 403,
+            "end": 494,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "strip_frontmatter",
+            "start": 497,
+            "end": 503,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "frontmatter_description",
+            "start": 506,
+            "end": 523,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_is_noise_line",
+            "start": 526,
+            "end": 538,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "iter_atomic_from_text",
+            "start": 541,
+            "end": 603,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "extract_claims_from_file",
+            "start": 606,
+            "end": 617,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "build_plants",
+            "start": 629,
+            "end": 687,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "write_claims_md",
+            "start": 690,
+            "end": 727,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 730,
+            "end": 893,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/harness-eval/scripts/merge_agreement.py",
+        "split": "development",
+        "sha256": "003cac237951f51af097766e68be6171abd79519fed9c7246c791c2c217864e5",
+        "defs": [
+          {
+            "name": "family",
+            "start": 20,
+            "end": 25,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_scores",
+            "start": 28,
+            "end": 37,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_claims",
+            "start": 40,
+            "end": 46,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 49,
+            "end": 167,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "tier_bucket",
+            "start": 88,
+            "end": 89,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/harness-eval/scripts/merge_usefulness.py",
+        "split": "development",
+        "sha256": "752759b9ca1ece00b3bc90b7b83436721f4d092011e68b52c4c0bb3b441bacac",
+        "defs": [
+          {
+            "name": "family",
+            "start": 47,
+            "end": 59,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_scores",
+            "start": 62,
+            "end": 94,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_surfaces",
+            "start": 97,
+            "end": 99,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cell_or_missing",
+            "start": 102,
+            "end": 110,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "write_mixed_apply",
+            "start": 113,
+            "end": 181,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 184,
+            "end": 435,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "tier_bucket",
+            "start": 249,
+            "end": 250,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/harness-eval/scripts/slim_fanin.py",
+        "split": "holdout",
+        "sha256": "1acc0babdee248445ad7f4c2a5cfbbf570f6c42aad80eff55cfda5f98379ff9e",
+        "defs": [
+          {
+            "name": "normalize_cite",
+            "start": 46,
+            "end": 50,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "rel",
+            "start": 53,
+            "end": 54,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_readme",
+            "start": 57,
+            "end": 58,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "glob_files",
+            "start": 61,
+            "end": 62,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "discover_harness_markdown",
+            "start": 65,
+            "end": 82,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "path_aliases",
+            "start": 85,
+            "end": 107,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_line_span",
+            "start": 110,
+            "end": 115,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_mandate_window",
+            "start": 118,
+            "end": 132,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "find_mandate_fanin",
+            "start": 135,
+            "end": 176,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "infer_root_from_run_dir",
+            "start": 179,
+            "end": 184,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 187,
+            "end": 195,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/harness-eval/scripts/surfaces_extract.py",
+        "split": "holdout",
+        "sha256": "81caab902b98a9da03f07acef173a7134a7438ba655253cdbbdea3725913195f",
+        "defs": [
+          {
+            "name": "default_run",
+            "start": 59,
+            "end": 60,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "section_outline",
+            "start": 63,
+            "end": 72,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "truncate",
+            "start": 75,
+            "end": 78,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 81,
+            "end": 215,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/harness-eval/scripts/track_a_correctness.py",
+        "split": "development",
+        "sha256": "81d98ff1fe50adc7745af5166e63195e17f3ef730150b8c0dd1203e23674ed1e",
+        "defs": [
+          {
+            "name": "Finding",
+            "start": 148,
+            "end": 154,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "default_out",
+            "start": 157,
+            "end": 158,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "rel",
+            "start": 161,
+            "end": 162,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_readme",
+            "start": 165,
+            "end": 166,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "normalize_cite",
+            "start": 169,
+            "end": 173,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "strip_fenced_code",
+            "start": 176,
+            "end": 178,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "mentioned_skill_names",
+            "start": 211,
+            "end": 217,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "has_mandate_near_cite",
+            "start": 220,
+            "end": 229,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_code_tree_cite",
+            "start": 232,
+            "end": 233,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_placeholder_cite",
+            "start": 236,
+            "end": 248,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_concrete_checkable_cite",
+            "start": 251,
+            "end": 257,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "looks_like_path",
+            "start": 260,
+            "end": 269,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "extract_cites",
+            "start": 272,
+            "end": 284,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "extract_surface_cites",
+            "start": 287,
+            "end": 289,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "resolve_cite",
+            "start": 292,
+            "end": 337,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check_file",
+            "start": 340,
+            "end": 394,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_runner_kind",
+            "start": 397,
+            "end": 423,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_command_ok",
+            "start": 426,
+            "end": 442,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_command_findings",
+            "start": 445,
+            "end": 493,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "render_report",
+            "start": 496,
+            "end": 647,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 650,
+            "end": 707,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-driven/scripts/check_commit.py",
+        "split": "holdout",
+        "sha256": "20a0fc0f8423b958ea7bae5eec9286d47e8593c157d87fd9d92c2f17a1464567",
+        "defs": [
+          {
+            "name": "read_message",
+            "start": 39,
+            "end": 47,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check",
+            "start": 50,
+            "end": 88,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 91,
+            "end": 111,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-driven/scripts/lessons.py",
+        "split": "development",
+        "sha256": "258cdb508d9787aee1a840bf811e13637c52ef0dd76273b08fab8c19ebac9b09",
+        "defs": [
+          {
+            "name": "_now",
+            "start": 53,
+            "end": 54,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_parse_date",
+            "start": 57,
+            "end": 61,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_store_path",
+            "start": 64,
+            "end": 65,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_render_path",
+            "start": 68,
+            "end": 69,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_load",
+            "start": 72,
+            "end": 90,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_save",
+            "start": 93,
+            "end": 98,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_norm",
+            "start": 101,
+            "end": 115,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_selftest_norm",
+            "start": 118,
+            "end": 143,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_key",
+            "start": 146,
+            "end": 147,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_auto_prune",
+            "start": 150,
+            "end": 165,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_find",
+            "start": 168,
+            "end": 173,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_render",
+            "start": 176,
+            "end": 230,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_init",
+            "start": 235,
+            "end": 239,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_add",
+            "start": 242,
+            "end": 306,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_penalize",
+            "start": 309,
+            "end": 325,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_list",
+            "start": 328,
+            "end": 350,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_prune",
+            "start": 353,
+            "end": 358,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_status",
+            "start": 361,
+            "end": 368,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 371,
+            "end": 408,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check",
+            "start": 122,
+            "end": 124,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "block",
+            "start": 189,
+            "end": 211,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-driven/scripts/validate_spec.py",
+        "split": "development",
+        "sha256": "2a0b7e334d026f9556c665fbd0386cfa5b17c62a5e921fed52a9422bc27bc006",
+        "defs": [
+          {
+            "name": "resolve_spec",
+            "start": 50,
+            "end": 66,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_autodetect",
+            "start": 69,
+            "end": 85,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "split_row",
+            "start": 88,
+            "end": 90,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_separator",
+            "start": 93,
+            "end": 94,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "section_bounds",
+            "start": 97,
+            "end": 111,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "classify_ears",
+            "start": 114,
+            "end": 142,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check",
+            "start": 145,
+            "end": 234,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 237,
+            "end": 256,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-driven/scripts/validate_state.py",
+        "split": "development",
+        "sha256": "dc0997e2af32faeeb5e4cd241ce41c3a03a37c6ef25a77850557752988205d3c",
+        "defs": [
+          {
+            "name": "_feature_dirs",
+            "start": 41,
+            "end": 49,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_verdict",
+            "start": 52,
+            "end": 71,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_appears_complete",
+            "start": 74,
+            "end": 92,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_check_feature",
+            "start": 95,
+            "end": 115,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_resolve",
+            "start": 118,
+            "end": 138,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 141,
+            "end": 158,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-driven/scripts/validate_tasks.py",
+        "split": "development",
+        "sha256": "bfa8533fc3c63e19d999ed25dd79bddeb8ead5d43dc2c0149a0cfc0d9d2bc5d7",
+        "defs": [
+          {
+            "name": "resolve_tasks",
+            "start": 44,
+            "end": 58,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_autodetect",
+            "start": 61,
+            "end": 73,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "section_present",
+            "start": 76,
+            "end": 77,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_tasks",
+            "start": 80,
+            "end": 108,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_phase_membership",
+            "start": 111,
+            "end": 129,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_diagram_edges",
+            "start": 132,
+            "end": 159,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check",
+            "start": 162,
+            "end": 225,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 228,
+            "end": 247,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "intra_phase",
+            "start": 204,
+            "end": 211,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-lean/scripts/check_commit.py",
+        "split": "holdout",
+        "sha256": "b6c3cb118df9ba5127c01614bf25741926ef5dfbb136b9f52f9846d2c956cf4b",
+        "defs": [
+          {
+            "name": "read_message",
+            "start": 40,
+            "end": 52,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check",
+            "start": 55,
+            "end": 93,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 96,
+            "end": 117,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-lean/scripts/lessons.py",
+        "split": "development",
+        "sha256": "2813173d91d971e2dc46d75a3665e9d94bc90d8f1edd86aacd3ed2526421d916",
+        "defs": [
+          {
+            "name": "_now",
+            "start": 53,
+            "end": 54,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_parse_date",
+            "start": 57,
+            "end": 61,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_store_path",
+            "start": 64,
+            "end": 65,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_render_path",
+            "start": 68,
+            "end": 69,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_load",
+            "start": 72,
+            "end": 90,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_save",
+            "start": 93,
+            "end": 98,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_norm",
+            "start": 101,
+            "end": 115,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_selftest_norm",
+            "start": 118,
+            "end": 143,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_key",
+            "start": 146,
+            "end": 147,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_auto_prune",
+            "start": 150,
+            "end": 165,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_find",
+            "start": 168,
+            "end": 173,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_render",
+            "start": 176,
+            "end": 230,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_init",
+            "start": 235,
+            "end": 239,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_add",
+            "start": 242,
+            "end": 306,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_penalize",
+            "start": 309,
+            "end": 325,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_list",
+            "start": 328,
+            "end": 350,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_prune",
+            "start": 353,
+            "end": 358,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "cmd_status",
+            "start": 361,
+            "end": 368,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 371,
+            "end": 408,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check",
+            "start": 122,
+            "end": 124,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "block",
+            "start": 189,
+            "end": 211,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-lean/scripts/selftest.py",
+        "split": "development",
+        "sha256": "8f24f3da53eff371f5e8e80358d2494613561a3f147012dfc739d671262ed9ca",
+        "defs": [
+          {
+            "name": "scaffold",
+            "start": 210,
+            "end": 216,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run",
+            "start": 219,
+            "end": 224,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run_script",
+            "start": 227,
+            "end": 233,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run_tooling",
+            "start": 252,
+            "end": 316,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 319,
+            "end": 397,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-lean/scripts/validate_checks.py",
+        "split": "holdout",
+        "sha256": "93e0c98e3f6132770d9cdb50a16c9d335b75ebaf4c79f0758ed314e5d03e3fc6",
+        "defs": [
+          {
+            "name": "resolve_checks",
+            "start": 99,
+            "end": 112,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_autodetect",
+            "start": 115,
+            "end": 130,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "split_row",
+            "start": 133,
+            "end": 134,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_separator",
+            "start": 137,
+            "end": 138,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "section_bounds",
+            "start": 141,
+            "end": 155,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "table_rows",
+            "start": 158,
+            "end": 173,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "strip_fences",
+            "start": 176,
+            "end": 185,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_checks",
+            "start": 188,
+            "end": 210,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "count_members",
+            "start": 213,
+            "end": 216,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "plan_routes",
+            "start": 219,
+            "end": 235,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check_file",
+            "start": 238,
+            "end": 385,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 388,
+            "end": 413,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-lean/scripts/validate_plan.py",
+        "split": "holdout",
+        "sha256": "c1597ca36fdd39012d129f9b97f95645700ae4001402b5359c3bd4767cac4c24",
+        "defs": [
+          {
+            "name": "resolve_plan",
+            "start": 128,
+            "end": 142,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_autodetect",
+            "start": 145,
+            "end": 160,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "split_row",
+            "start": 163,
+            "end": 164,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_separator",
+            "start": 167,
+            "end": 168,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "section_bounds",
+            "start": 171,
+            "end": 191,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "first_table",
+            "start": 194,
+            "end": 214,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "strip_fences",
+            "start": 217,
+            "end": 235,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "classify_ears",
+            "start": 238,
+            "end": 263,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "sibling_profile",
+            "start": 266,
+            "end": 276,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check_criteria",
+            "start": 279,
+            "end": 319,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_warn_unresolved",
+            "start": 322,
+            "end": 331,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check_file",
+            "start": 334,
+            "end": 548,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 551,
+            "end": 576,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(development)/tlc-spec-lean/scripts/validate_verification.py",
+        "split": "development",
+        "sha256": "8e1a13f35699b81d181cdf92bf7dd4cbab66c02ac2771515cae36071e6acf9ce",
+        "defs": [
+          {
+            "name": "_feature_dirs",
+            "start": 56,
+            "end": 60,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "split_row",
+            "start": 63,
+            "end": 64,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_separator",
+            "start": 67,
+            "end": 68,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "strip_fences",
+            "start": 71,
+            "end": 80,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "find_tables",
+            "start": 83,
+            "end": 96,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "column",
+            "start": 99,
+            "end": 104,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "has_heading",
+            "start": 107,
+            "end": 113,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_profile",
+            "start": 116,
+            "end": 118,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_checks_context",
+            "start": 121,
+            "end": 128,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_verdict",
+            "start": 131,
+            "end": 147,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_check_feature",
+            "start": 150,
+            "end": 272,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_appears_complete",
+            "start": 275,
+            "end": 286,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_resolve",
+            "start": 289,
+            "end": 310,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 313,
+            "end": 353,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(monitoring)/sentry/scripts/sentry_api.py",
+        "split": "development",
+        "sha256": "688e4ba95c4a9780d1c15b4afbefaca9c1255a10d032dd66cfca160c89ad4608",
+        "defs": [
+          {
+            "name": "redact_string",
+            "start": 21,
+            "end": 24,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "redact_data",
+            "start": 27,
+            "end": 40,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "next_cursor",
+            "start": 43,
+            "end": 51,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "request_json",
+            "start": 54,
+            "end": 78,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "build_url",
+            "start": 81,
+            "end": 86,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "paged_get",
+            "start": 89,
+            "end": 105,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "require_org_project",
+            "start": 108,
+            "end": 112,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_list_issues",
+            "start": 115,
+            "end": 127,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_issue_detail",
+            "start": 130,
+            "end": 134,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_issue_events",
+            "start": 137,
+            "end": 141,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_event_detail",
+            "start": 144,
+            "end": 152,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "build_parser",
+            "start": 155,
+            "end": 203,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 206,
+            "end": 230,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(quality)/the-judge/scripts/post_review.py",
+        "split": "development",
+        "sha256": "dbf2ea0d0de802a6ca4f46fde252852ce1d3b5eacd0d90898b5b08b77f3130ae",
+        "defs": [
+          {
+            "name": "run",
+            "start": 11,
+            "end": 13,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "gh_json",
+            "start": 16,
+            "end": 20,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 23,
+            "end": 85,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(quality)/the-judge/scripts/review_gate.py",
+        "split": "holdout",
+        "sha256": "279f0a119907c6a0a178d2be7cb8b3f1a5642f99a83fc4008c92bfbf3faf486d",
+        "defs": [
+          {
+            "name": "norm",
+            "start": 41,
+            "end": 44,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "strip_code",
+            "start": 47,
+            "end": 50,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "text_violations",
+            "start": 53,
+            "end": 70,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "opener_violation",
+            "start": 73,
+            "end": 81,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check_finding",
+            "start": 84,
+            "end": 121,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check_summary",
+            "start": 124,
+            "end": 131,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check_verdict",
+            "start": 134,
+            "end": 146,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "check_round",
+            "start": 149,
+            "end": 166,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 169,
+            "end": 212,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(quality)/the-judge/scripts/scan_bypasses.py",
+        "split": "development",
+        "sha256": "5593c047757a29ea1b9f2d9b4e61e8c88f5709cfafdcb47112c7ab79b1e7aa62",
+        "defs": [
+          {
+            "name": "main",
+            "start": 33,
+            "end": 64,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(security)/security-ownership-map/scripts/build_ownership_map.py",
+        "split": "development",
+        "sha256": "c0454c47c7eb001b6e247cd7e473df1b28a3a148a2dca6b2fe88a74a7602cc9b",
+        "defs": [
+          {
+            "name": "parse_args",
+            "start": 65,
+            "end": 203,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_sensitive_rules",
+            "start": 206,
+            "end": 222,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_date",
+            "start": 225,
+            "end": 229,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "offset_minutes",
+            "start": 232,
+            "end": 236,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "format_offset",
+            "start": 239,
+            "end": 242,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "recency_weighted",
+            "start": 245,
+            "end": 249,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "match_sensitive",
+            "start": 252,
+            "end": 263,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "matches_glob",
+            "start": 266,
+            "end": 271,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_excluded",
+            "start": 274,
+            "end": 275,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "author_excluded",
+            "start": 278,
+            "end": 282,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "compute_community_owners",
+            "start": 285,
+            "end": 337,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run_git_log",
+            "start": 340,
+            "end": 381,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "iter_commits",
+            "start": 384,
+            "end": 404,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "ensure_out_dir",
+            "start": 407,
+            "end": 410,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "write_csv",
+            "start": 413,
+            "end": 418,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "build_ownership_map",
+            "start": 421,
+            "end": 940,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 943,
+            "end": 952,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(security)/security-ownership-map/scripts/community_maintainers.py",
+        "split": "development",
+        "sha256": "95adec5458cc85b41d0ae7965b0a17e4e8eaa6aaab274459324580d9a91cc3cc",
+        "defs": [
+          {
+            "name": "parse_args",
+            "start": 19,
+            "end": 124,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_date",
+            "start": 127,
+            "end": 134,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "month_key",
+            "start": 137,
+            "end": 138,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "quarter_key",
+            "start": 141,
+            "end": 143,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "month_end",
+            "start": 146,
+            "end": 153,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "quarter_start",
+            "start": 156,
+            "end": 159,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "quarter_end",
+            "start": 162,
+            "end": 170,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_months",
+            "start": 173,
+            "end": 176,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "recency_weight",
+            "start": 179,
+            "end": 182,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "read_csv",
+            "start": 185,
+            "end": 188,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_people",
+            "start": 191,
+            "end": 200,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_graph_json",
+            "start": 203,
+            "end": 210,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "find_file_node",
+            "start": 213,
+            "end": 223,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_community_files",
+            "start": 226,
+            "end": 258,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "iter_commits_from_json",
+            "start": 261,
+            "end": 301,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "iter_commits_from_git",
+            "start": 304,
+            "end": 347,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_git_block",
+            "start": 350,
+            "end": 375,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 378,
+            "end": 540,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "in_bucket",
+            "start": 468,
+            "end": 469,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "in_bucket",
+            "start": 474,
+            "end": 475,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "in_bucket",
+            "start": 478,
+            "end": 482,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(security)/security-ownership-map/scripts/query_ownership.py",
+        "split": "development",
+        "sha256": "0f8d1a1ac3ef807a9b66939a8cdfd02564f4cda018489a3664d37f8c3a7b1b93",
+        "defs": [
+          {
+            "name": "parse_args",
+            "start": 15,
+            "end": 75,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "to_int",
+            "start": 78,
+            "end": 82,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "to_float",
+            "start": 85,
+            "end": 89,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "read_csv",
+            "start": 92,
+            "end": 95,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_people",
+            "start": 98,
+            "end": 107,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_files",
+            "start": 110,
+            "end": 122,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_summary",
+            "start": 125,
+            "end": 128,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_communities",
+            "start": 131,
+            "end": 136,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_cochange_edges",
+            "start": 139,
+            "end": 149,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "select_single",
+            "start": 152,
+            "end": 162,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "top_edges_for_person",
+            "start": 165,
+            "end": 180,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "top_edges_for_file",
+            "start": 183,
+            "end": 198,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "sort_records",
+            "start": 201,
+            "end": 202,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_people",
+            "start": 205,
+            "end": 224,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_files",
+            "start": 227,
+            "end": 249,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_person",
+            "start": 252,
+            "end": 283,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_file",
+            "start": 286,
+            "end": 318,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_cochange",
+            "start": 321,
+            "end": 358,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_tag",
+            "start": 361,
+            "end": 405,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_summary",
+            "start": 408,
+            "end": 416,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_communities",
+            "start": 419,
+            "end": 430,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "handle_community",
+            "start": 433,
+            "end": 444,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 447,
+            "end": 479,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(security)/security-ownership-map/scripts/run_ownership_map.py",
+        "split": "development",
+        "sha256": "362b547d6133659eb5c4fe889b8b930bea790f31e412f3198671baae09eec692",
+        "defs": [
+          {
+            "name": "parse_args",
+            "start": 12,
+            "end": 130,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 133,
+            "end": 196,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(tooling)/excalidraw-studio/scripts/add-arrow.py",
+        "split": "development",
+        "sha256": "2895b8bc96d3fc298c3c33c5ff0470e0f89fd3727c7668d007fc9a635d779778",
+        "defs": [
+          {
+            "name": "generate_unique_id",
+            "start": 28,
+            "end": 30,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "prepare_edit_path",
+            "start": 33,
+            "end": 55,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "finalize_edit_path",
+            "start": 58,
+            "end": 66,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "create_arrow",
+            "start": 69,
+            "end": 181,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_arrow_to_diagram",
+            "start": 184,
+            "end": 231,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 234,
+            "end": 308,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(tooling)/excalidraw-studio/scripts/add-icon-to-diagram.py",
+        "split": "development",
+        "sha256": "2f8a013d3ea6f73b4154a3abb86fa1781d32786d0ec905517de0628f1493b203",
+        "defs": [
+          {
+            "name": "generate_unique_id",
+            "start": 31,
+            "end": 33,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "calculate_bounding_box",
+            "start": 36,
+            "end": 58,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "transform_icon_elements",
+            "start": 61,
+            "end": 155,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_icon",
+            "start": 158,
+            "end": 177,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "prepare_edit_path",
+            "start": 180,
+            "end": 202,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "finalize_edit_path",
+            "start": 205,
+            "end": 213,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "create_text_label",
+            "start": 216,
+            "end": 264,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "add_icon_to_diagram",
+            "start": 267,
+            "end": 327,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 330,
+            "end": 399,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(tooling)/excalidraw-studio/scripts/split-excalidraw-library.py",
+        "split": "development",
+        "sha256": "160fa6e88cf10a0f3300aa948daa32abf3925f90c3befccba5afb9240cf360a8",
+        "defs": [
+          {
+            "name": "sanitize_filename",
+            "start": 26,
+            "end": 48,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "find_library_file",
+            "start": 51,
+            "end": 76,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "split_library",
+            "start": 79,
+            "end": 163,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 166,
+            "end": 179,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "packages/skills-catalog/skills/(tooling)/gh-fix-ci/scripts/inspect_pr_checks.py",
+        "split": "development",
+        "sha256": "9459e5b03f86785d184a83e5cd8d621b832e918ec04158a2962d867785812c6c",
+        "defs": [
+          {
+            "name": "GhResult",
+            "start": 51,
+            "end": 55,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "run_gh_command",
+            "start": 58,
+            "end": 65,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run_gh_command_raw",
+            "start": 68,
+            "end": 75,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_args",
+            "start": 78,
+            "end": 93,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 96,
+            "end": 135,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "find_git_root",
+            "start": 138,
+            "end": 147,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "ensure_gh_available",
+            "start": 150,
+            "end": 159,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "resolve_pr",
+            "start": 162,
+            "end": 179,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "fetch_checks",
+            "start": 182,
+            "end": 224,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_failing",
+            "start": 227,
+            "end": 235,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "analyze_check",
+            "start": 238,
+            "end": 285,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "extract_run_id",
+            "start": 288,
+            "end": 295,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "extract_job_id",
+            "start": 298,
+            "end": 307,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "fetch_run_metadata",
+            "start": 310,
+            "end": 330,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "fetch_check_log",
+            "start": 333,
+            "end": 355,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "fetch_run_log",
+            "start": 358,
+            "end": 363,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "fetch_job_log",
+            "start": 366,
+            "end": 377,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "fetch_repo_slug",
+            "start": 380,
+            "end": 391,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "normalize_field",
+            "start": 394,
+            "end": 397,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_available_fields",
+            "start": 400,
+            "end": 415,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_log_pending_message",
+            "start": 418,
+            "end": 420,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_zip_payload",
+            "start": 423,
+            "end": 424,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "extract_failure_snippet",
+            "start": 427,
+            "end": 441,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "find_failure_index",
+            "start": 444,
+            "end": 449,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "tail_lines",
+            "start": 452,
+            "end": 456,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "render_results",
+            "start": 459,
+            "end": 501,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "indent_block",
+            "start": 504,
+            "end": 505,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "__init__",
+            "start": 52,
+            "end": 55,
+            "kind": "FunctionDef"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "omarchy",
+    "url": "https://github.com/omacom/omarchy.git",
+    "commit": "b679363bed05415771a1b1dc92c6899a908236f7",
+    "licenses": [
+      "LICENSE"
+    ],
+    "files": [
+      {
+        "file": "default/nautilus-python/extensions/localsend.py",
+        "split": "holdout",
+        "sha256": "c5b2ddaf1bb5ae6fa3b21da8ae13215877db504effe6d088db3b1618bb47205a",
+        "defs": [
+          {
+            "name": "SendViaLocalSendAction",
+            "start": 11,
+            "end": 84,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "_launch_localsend",
+            "start": 12,
+            "end": 22,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_resolve_command",
+            "start": 24,
+            "end": 39,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_has_flatpak_app",
+            "start": 41,
+            "end": 46,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_selected_paths",
+            "start": 48,
+            "end": 60,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_make_item",
+            "start": 62,
+            "end": 72,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_on_activate",
+            "start": 74,
+            "end": 75,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_file_items",
+            "start": 77,
+            "end": 84,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "default/nautilus-python/extensions/transcode.py",
+        "split": "development",
+        "sha256": "4f4428a741325d9c776f3c28884c8a21e96bcd52c65949b16dca21ea1d5ae819",
+        "defs": [
+          {
+            "name": "TranscodeAction",
+            "start": 18,
+            "end": 94,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "_launch_transcode",
+            "start": 19,
+            "end": 34,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_is_supported",
+            "start": 36,
+            "end": 46,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_selected_paths",
+            "start": 48,
+            "end": 64,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_make_item",
+            "start": 66,
+            "end": 74,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_on_activate",
+            "start": 76,
+            "end": 77,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_tools_available",
+            "start": 79,
+            "end": 83,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "get_file_items",
+            "start": 85,
+            "end": 94,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "shell/plugins/panels/dropbox/status.py",
+        "split": "development",
+        "sha256": "32a9be54c2149622bb96c2fc0742f490ea75f637bac13f07255c7c0095fcf835",
+        "defs": [
+          {
+            "name": "read_info",
+            "start": 19,
+            "end": 27,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "dropbox_account",
+            "start": 30,
+            "end": 35,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "command_output",
+            "start": 38,
+            "end": 43,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "scan_dropbox",
+            "start": 46,
+            "end": 80,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 83,
+            "end": 124,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "test/shell.d/fixtures/kitty/check-config.py",
+        "split": "development",
+        "sha256": "5654d23577506bcadab295b40e850fcdf2512b6aa0ad11a300beef3f32ec6e51",
+        "defs": [
+          {
+            "name": "binding",
+            "start": 39,
+            "end": 41,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "test/shell.d/fixtures/tray-menu-activation/mock-sni.py",
+        "split": "development",
+        "sha256": "52fff59aa28045433d2af103fb2f84c97991e1ac5559805a80e0b2b5b69b7de1",
+        "defs": [
+          {
+            "name": "variant",
+            "start": 18,
+            "end": 19,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "StatusNotifierItem",
+            "start": 22,
+            "end": 71,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "DBusMenu",
+            "start": 74,
+            "end": 140,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "register_with_watcher",
+            "start": 143,
+            "end": 148,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 151,
+            "end": 156,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run",
+            "start": 159,
+            "end": 183,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "__init__",
+            "start": 23,
+            "end": 24,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "Get",
+            "start": 27,
+            "end": 28,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "GetAll",
+            "start": 31,
+            "end": 51,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "Set",
+            "start": 54,
+            "end": 55,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "ContextMenu",
+            "start": 58,
+            "end": 59,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "Activate",
+            "start": 62,
+            "end": 63,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "SecondaryActivate",
+            "start": 66,
+            "end": 67,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "Scroll",
+            "start": 70,
+            "end": 71,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "__init__",
+            "start": 75,
+            "end": 77,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "Get",
+            "start": 80,
+            "end": 81,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "GetAll",
+            "start": 84,
+            "end": 92,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "Set",
+            "start": 95,
+            "end": 96,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "AboutToShow",
+            "start": 99,
+            "end": 100,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "AboutToShowGroup",
+            "start": 103,
+            "end": 104,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "GetLayout",
+            "start": 107,
+            "end": 119,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "GetGroupProperties",
+            "start": 122,
+            "end": 123,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "GetProperty",
+            "start": 126,
+            "end": 127,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "Event",
+            "start": 130,
+            "end": 134,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "EventGroup",
+            "start": 137,
+            "end": 140,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "test/shell.d/qml-text-format-scan.py",
+        "split": "development",
+        "sha256": "577ac771ca2ac171b108d49c48d4d33b01d9fe8887bdc1563d9190d480a4bcc4",
+        "defs": [
+          {
+            "name": "strip_block_comments",
+            "start": 24,
+            "end": 67,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "strip_noise",
+            "start": 86,
+            "end": 116,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "is_pure_literal",
+            "start": 119,
+            "end": 122,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "binding_expression",
+            "start": 125,
+            "end": 161,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "exempt_as_literal",
+            "start": 164,
+            "end": 166,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "blocks",
+            "start": 169,
+            "end": 192,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "inline_violations",
+            "start": 202,
+            "end": 225,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "opens_component",
+            "start": 249,
+            "end": 256,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "unscannable_violations",
+            "start": 259,
+            "end": 298,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "unreadable",
+            "start": 306,
+            "end": 310,
+            "kind": "FunctionDef"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "claude-plugins-community",
+    "url": "https://github.com/anthropics/claude-plugins-community.git",
+    "commit": "a727be1c7bd6064419b6f60d71993a19198adc17",
+    "licenses": [
+      "LICENSE",
+      "quickdesign/LICENSE",
+      "testdino/LICENSE",
+      "tres-finance-plugin/LICENSE"
+    ],
+    "files": [
+      {
+        "file": "tres-finance-plugin/skills/tres-asc845-swap-reprice-skill/scripts/orchestrate_reprice.py",
+        "split": "development",
+        "sha256": "3ebc82946ad86fe0129f7f956bc6d937760a1944d06094a8d2f1443b3453882c",
+        "defs": [
+          {
+            "name": "generate_graphql_mutations",
+            "start": 36,
+            "end": 50,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "generate_execution_script",
+            "start": 53,
+            "end": 88,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 91,
+            "end": 171,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "tres-finance-plugin/skills/tres-asc845-swap-reprice-skill/scripts/reprice_swaps.py",
+        "split": "development",
+        "sha256": "0f4025b76624260aa5e198625278be023a1d81f482a3de7cf6b7c272c7e88aae",
+        "defs": [
+          {
+            "name": "parse_args",
+            "start": 79,
+            "end": 94,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "load_subtransactions",
+            "start": 97,
+            "end": 103,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "matches_target_account",
+            "start": 106,
+            "end": 122,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "group_by_transaction",
+            "start": 125,
+            "end": 131,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "classify_legs",
+            "start": 134,
+            "end": 138,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "determine_case",
+            "start": 141,
+            "end": 154,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "compute_repricing",
+            "start": 157,
+            "end": 284,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "build_reprice_plan",
+            "start": 287,
+            "end": 399,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "print_preview",
+            "start": 402,
+            "end": 445,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 448,
+            "end": 482,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "tres-finance-plugin/skills/tres-report-analyzer/scripts/analyze_report.py",
+        "split": "holdout",
+        "sha256": "509074d30fa462b686f8117d204409e313de20922f366a45deee5ba985e5244a",
+        "defs": [
+          {
+            "name": "read_sheet_as_dicts",
+            "start": 26,
+            "end": 55,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "safe_float",
+            "start": 58,
+            "end": 65,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "identify_report_type",
+            "start": 68,
+            "end": 141,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "analyze_reconciliation_ledger",
+            "start": 144,
+            "end": 234,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "analyze_asset_roll_forward",
+            "start": 237,
+            "end": 275,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "analyze_realized_gains",
+            "start": 278,
+            "end": 327,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "analyze_balances",
+            "start": 330,
+            "end": 396,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "analyze_cost_basis_stack",
+            "start": 399,
+            "end": 428,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "analyze_erp_pre_sync",
+            "start": 431,
+            "end": 447,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "analyze_erp_post_sync",
+            "start": 450,
+            "end": 469,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "analyze_generic",
+            "start": 472,
+            "end": 487,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "analyze",
+            "start": 490,
+            "end": 526,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 529,
+            "end": 545,
+            "kind": "FunctionDef"
+          }
+        ]
+      },
+      {
+        "file": "tres-finance-plugin/skills/tres-report-create/tests/run_report_matrix.py",
+        "split": "development",
+        "sha256": "89ca00d332d72fb48dca05dceec4dfd64406c6563b579b6b7c0450f9cbe23393",
+        "defs": [
+          {
+            "name": "McpClient",
+            "start": 55,
+            "end": 139,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "_normalize",
+            "start": 142,
+            "end": 149,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "extract_graphql",
+            "start": 152,
+            "end": 165,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "find_execute_tool",
+            "start": 168,
+            "end": 173,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "run_query",
+            "start": 176,
+            "end": 178,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "build_trigger",
+            "start": 181,
+            "end": 231,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "poll_report",
+            "start": 241,
+            "end": 248,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 251,
+            "end": 404,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "__init__",
+            "start": 58,
+            "end": 62,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "initialize",
+            "start": 64,
+            "end": 74,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "list_tools",
+            "start": 76,
+            "end": 77,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "call_tool",
+            "start": 79,
+            "end": 80,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_headers",
+            "start": 82,
+            "end": 91,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_rpc",
+            "start": 93,
+            "end": 107,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_notify",
+            "start": 109,
+            "end": 111,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_post",
+            "start": 113,
+            "end": 124,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "_parse",
+            "start": 127,
+            "end": 139,
+            "kind": "FunctionDef"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "OpenLogi",
+    "url": "https://github.com/AprilNEA/OpenLogi.git",
+    "commit": "e846e6f4b4405e33bd6a9aaf949a482ce34cb6d8",
+    "licenses": [
+      "crates/openlogi-hidpp/LICENSE",
+      "design/LICENSE"
+    ],
+    "files": [
+      {
+        "file": ".github/scripts/i18n/merge_crowdin_download.py",
+        "split": "holdout",
+        "sha256": "4c4e34645cdb1a18a8805f2e6dfa965208181b12b43c711a8e16a0e0bf2155d1",
+        "defs": [
+          {
+            "name": "parse_entries",
+            "start": 28,
+            "end": 47,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "parse_entries_path",
+            "start": 50,
+            "end": 51,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "header_lines",
+            "start": 54,
+            "end": 63,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "toml_string",
+            "start": 66,
+            "end": 68,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "merge_catalog",
+            "start": 71,
+            "end": 97,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "merge_locales",
+            "start": 100,
+            "end": 143,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "main",
+            "start": 146,
+            "end": 180,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "catalog",
+            "start": 183,
+            "end": 191,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "MergeTests",
+            "start": 194,
+            "end": 300,
+            "kind": "ClassDef"
+          },
+          {
+            "name": "flatten",
+            "start": 32,
+            "end": 39,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "test_sparse_download_keeps_parity_and_accepts_real_updates",
+            "start": 195,
+            "end": 249,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "test_english_fill_in_does_not_clobber_real_translations",
+            "start": 251,
+            "end": 286,
+            "kind": "FunctionDef"
+          },
+          {
+            "name": "test_english_only_export_restores_git_values",
+            "start": 288,
+            "end": 300,
+            "kind": "FunctionDef"
+          }
+        ]
+      }
+    ]
+  }
+]
