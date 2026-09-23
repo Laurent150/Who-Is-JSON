@@ -1,11 +1,11 @@
-const $=id=>document.getElementById(id);let current=null,selected=null,imageData=null,fileName='',revision=0,config={};let recoverAfterClean=false;let busy=false;let sourceOffset=0,analyzedSource="",presentation=null,activeMode="studio";
+const $=id=>document.getElementById(id);let current=null,selected=null,imageData=null,fileName='',revision=0,config={};let busy=false;let sourceOffset=0,analyzedSource="",presentation=null,activeMode="studio";
 try{config=JSON.parse(localStorage.getItem('codelingo.config')||'{}');}catch{}config.key='';
 const sample=`def calculate_total(prices, discount=0.9):\n    total = 0\n    for price in prices:\n        if price > 0:\n            total += price\n    return round(total * discount, 2)\n\ncart = [29, 49, 99]\nfinal_price = calculate_total(cart)\nprint(final_price)\n`;
 function toast(s){$('toast').textContent=s;$('toast').hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').hidden=true,6000);}
 async function api(route,data,method='POST',signal){const r=await fetch('/api/'+route,{signal:signal||AbortSignal.timeout(130000),method,headers:{'Content-Type':'application/json','X-CodeLingo-Token':window.APP_TOKEN},...(method==='POST'?{body:JSON.stringify(data||{})}:{})});const b=await r.json();if(!r.ok)throw Error(b.error||'操作未完成');return b;}
 function element(tag,text,cls){const el=document.createElement(tag);if(text!==undefined)el.textContent=String(text);if(cls)el.className=cls;return el;}
 function meta(){const n=$('source').value.split('\n').length;$('numbers').textContent=Array.from({length:n},(_,i)=>i+1).join('\n');$('sourceMeta').textContent=($('source').value?n:0)+' 行 · 原代码不会被执行';$('filename').textContent=fileName||'未命名片段';}
-function invalidate(){resetTalk();studioReset();studioSource=null;analysisAbort?.abort();revision++;document.body.classList.remove('has-report');current=null;selected=null;presentation=null;$('scopeNotice').textContent='代码已变化，请重新生成。';$('results').hidden=true;$('empty').hidden=false;$('resultMode').textContent='等待分析';meta();}
+function invalidate(){resetTalk();studioReset();studioSource=null;analysisAbort?.abort();revision++;document.body.classList.remove('has-report');current=null;selected=null;presentation=null;$('scopeNotice').textContent='代码已变化，请重新生成。';$('results').hidden=true;$('empty').hidden=false;$('resultMode').textContent='等待分析';meta();if(typeof formatSourceChanged==='function')formatSourceChanged();}
 function setCode(code,name){$('examples').value='';$('exampleSource').hidden=true;$('source').value=code;fileName=name||'';invalidate();}
 function setImage(data,name){revision++;imageData=data;$('preview').src=data;$('imageBox').hidden=false;$('ocrNotice').textContent='内置英文与简体中文语言包。识别后请对照图片核对代码。';setCode('',name||'截图.png');toast('图片已导入。点击「识别代码」，核对后再开始讲解。');}
 function settings(){for(const k of ['base','model','key'])$(k).value=config[k]||'';$('settings').showModal();}
@@ -18,25 +18,27 @@ async function run(selectionOnly=false){
  const full=$('source').value;let code=full,offset=0;
  if(selectionOnly){const start=$('source').selectionStart,end=$('source').selectionEnd;if(start===end)return toast('请先在代码框里选中要讲的内容。');const a=full.lastIndexOf('\n',start-1)+1;let z=full.indexOf('\n',end-1);if(z<0)z=full.length;code=full.slice(a,z);offset=full.slice(0,a).split('\n').length-1;}
  await task(selectionOnly?$('selectionBtn'):$('analyzeBtn'),async()=>{
-  if(!code.trim())throw Error('先放入一段代码，或点击「试一段示例」。');
+  if(!code.trim())throw Error('先放入一段代码，或选择一个示例。');
   const ai=$('useAI').checked;if(ai)ensureAI();const rev=revision;
   const data=await api('analyze',{code,name:fileName,ai:false});
   if(rev!==revision)return;
-  sourceOffset=offset;analyzedSource=code;current=data;
+  sourceOffset=offset;analyzedSource=code;current=data;updateFormatHint(data);
   $('scopeNotice').textContent=selectionOnly?`本次分析：原文件第 ${offset+1}—${offset+code.split('\n').length} 行（完整行）。`:'本次分析：整个文件。';render();
-  $('aiProgress').hidden=!ai;if(!ai)return;
+  const identifyLanguage=connected()&&data.needsLanguageHelp;
+  $('aiProgress').hidden=!ai&&!identifyLanguage;if(!ai&&!identifyLanguage)return;
   const controller=new AbortController();analysisAbort=controller;
   $('cancelAnalysis').hidden=false;
-  const started=Date.now();const update=()=>{$('aiProgressText').textContent='本地流程已就绪，可以先阅读。AI 正在补充用途说明 · 已等待 '+Math.floor((Date.now()-started)/1000)+' 秒';};update();const timer=setInterval(update,1000);
+  const started=Date.now();const update=()=>{$('aiProgressText').textContent=(identifyLanguage?'本地识别未确定，AI 正在辅助判断语言':'本地流程已就绪，可以先阅读。AI 正在补充用途说明')+' · 已等待 '+Math.floor((Date.now()-started)/1000)+' 秒';};update();const timer=setInterval(update,1000);
   try {
-   const enhanced=await api('analyze',{code,name:fileName,ai:true,config},'POST',AbortSignal.any([controller.signal,AbortSignal.timeout(130000)]));
+   const enhanced=await api('analyze',{code,name:fileName,ai,identifyLanguage,config},'POST',AbortSignal.any([controller.signal,AbortSignal.timeout(130000)]));
    if(rev!==revision)return;
    const focused=activeStructure?.block.start, selection=lineReadingSelection && {...lineReadingSelection}, step=flowReadingStep;
-   current=enhanced;render();
+   const languageChanged=enhanced.language!==current.language||enhanced.languageIdentification?.status==='verified';
+   current=enhanced;if(languageChanged){studioReset();studioSource=null;}render();updateFormatHint(enhanced);
    const item=WhoStructure.modules(current).find(x=>x.block.start===focused);
    if(item){openStructure(item,[...$('structureModules').querySelectorAll('.module-node')].find(x=>x.dataset.function===item.block.title));if(step)openFlowReading(step.node,item.block);}
    if(selection){flowReadingSync=true;try{selectReadingLines(selection.requestedStart,selection.requestedEnd);}finally{flowReadingSync=false;}}
-   $('aiProgressText').textContent='AI 用途说明已完成；流程和源码位置仍来自本地解析。';
+   $('aiProgressText').textContent=[enhanced.languageIdentification?.message,enhanced.aiOverviewError?'AI 总览未完成：'+enhanced.aiOverviewError:ai?'AI 用途说明已完成；流程和源码位置仍来自本地解析。':''].filter(Boolean).join(' ');
   }catch(error){if(rev===revision)$('aiProgressText').textContent=controller.signal.aborted?'已停止 AI 补充，本地流程仍可阅读。':'AI 补充未完成：'+(error.name==='TimeoutError'?'等待超时，请稍后重试。':error.message)+' 本地流程仍可阅读。';}
   finally{clearInterval(timer);if(analysisAbort===controller)analysisAbort=null;$('cancelAnalysis').hidden=true;}
  });
@@ -62,7 +64,7 @@ function removeImage(){imageData=null;$('imageBox').hidden=true;$('preview').rem
 async function ask(q){if(!current)return toast('先分析一段代码。');if(current.mode!=='ai'&&!connected()){const b=selected||current.blocks[0];if(!b)return toast('当前没有可解释的模块，请补全代码或连接 AI。');$('answer').hidden=false;$('answer').textContent=`本地学习提示：${b.concept}\n\n${b.usage}\n\n连接 AI 后，可以结合你的实际代码回答「${q}」。`;return;}await task($('askBtn'),async()=>{ensureAI();const rev=revision;const r=await api('ask',{question:q,code:analyzedSource,config});if(rev!==revision)return;$('answer').hidden=false;$('answer').textContent=r.answer;});}
 $('settingsBtn').onclick=settings;$('saveSettings').onclick=()=>{config={base:$('base').value.trim().replace(/\/$/,''),model:$('model').value.trim(),key:$('key').value.trim()};if(!connected())return toast('请填写基础地址和模型名称。');try{const u=new URL(config.base);if(u.protocol!=='https:'&&!['localhost','127.0.0.1','[::1]'].includes(u.hostname))throw Error();}catch{return toast('请填写有效 HTTPS 地址，或本机 HTTP 地址。');}localStorage.setItem('codelingo.config',JSON.stringify({base:config.base,model:config.model}));connection();if(current){renderStudio();renderTalk();}$('settings').close();toast('已配置。下一次 AI 操作会发送内容到此服务；连接尚未验证。');};$('disconnect').onclick=()=>{config={};localStorage.removeItem('codelingo.config');connection();if(current){renderStudio();renderTalk();}$('settings').close();toast('已断开 AI 连接。');};
 $('libraryBtn').onclick=library;$('knowledgeLibraryBtn').onclick=library;$('source').oninput=invalidate;$('source').addEventListener('paste',e=>{const t=e.currentTarget;if(e.clipboardData?.getData('text/plain')&&t.selectionStart===0&&t.selectionEnd===t.value.length){fileName='';meta();}});$('source').onscroll=()=>$('numbers').scrollTop=$('source').scrollTop;$('source').onkeydown=e=>{if(e.key==='Tab'){e.preventDefault();const t=e.target,s=t.selectionStart,end=t.selectionEnd;t.value=t.value.slice(0,s)+'    '+t.value.slice(end);t.setSelectionRange(s+4,s+4);invalidate();}};
-$('analyzeBtn').onclick=()=>run();$('selectionBtn').onclick=()=>run(true);$('clearBtn').onclick=()=>{removeImage();setCode('','');};const demo=()=>{removeImage();setCode(sample,'shopping_cart.py');run();};$('demoBtn').onclick=demo;$('emptyDemo').onclick=demo;$('fileBtn').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>{loadFile(e.target.files[0]).catch(e=>toast(e.message));e.target.value='';};$('removeImage').onclick=removeImage;
+$('analyzeBtn').onclick=()=>run();$('selectionBtn').onclick=()=>run(true);$('clearBtn').onclick=()=>{removeImage();setCode('','');};const demo=()=>{removeImage();setCode(sample,'shopping_cart.py');run();};$('emptyDemo').onclick=demo;$('fileBtn').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>{loadFile(e.target.files[0]).catch(e=>toast(e.message));e.target.value='';};$('removeImage').onclick=removeImage;
 $('ocrBtn').onclick=()=>task($('ocrBtn'),async()=>{const ai=$('useAI').checked;if(ai)ensureAI();const rev=revision;const image=ai?imageData:await prepareOcrImage(imageData);if(rev!==revision)return;const r=await api('ocr',{image,ai,config});if(rev!==revision)return;$('ocrNotice').textContent=[r.method,...(r.warnings||['请核对缩进与符号。'])].join('；');setCode(r.code,fileName.replace(/\.[^.]+$/,'')+'.txt');toast('已提取代码，请对照原图核对后再分析。');});
 $('captureBtn').onclick=()=>task($('captureBtn'),async()=>{toast('拖动选择代码区域；按 Esc 取消。');const r=await api('capture');if(!r.cancelled)setImage(r.image,'截图.png');});$('widgetBtn').onclick=()=>task($('widgetBtn'),async()=>{await api('widget');toast('悬浮入口已打开，可截图或拖入文件。');});$('quitBtn').onclick=async()=>{try{await api('quit');document.body.replaceChildren(element('p','Who Is JSON 已退出。可以关闭页面；下次双击「启动 Who Is JSON.vbs」重新打开。'));}catch(e){toast(e.message);}};
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>ask(b.dataset.q));$('askBtn').onclick=()=>{const q=$('question').value.trim();if(q)ask(q);else toast('写下你想了解或修改的地方。');};$('question').onkeydown=e=>{if(e.key==='Enter')$('askBtn').click();};
@@ -86,10 +88,6 @@ function renderSymbols(host,symbols){
 let exampleList=[];
 api('examples',null,'GET').then(list=>{exampleList=list;for(const [i,x]of list.entries()){const opt=element('option',x.name);opt.value=String(i);$('examples').append(opt);}}).catch(()=>{});
 $('examples').onchange=()=>{if($('examples').value==='')return;const x=exampleList[Number($('examples').value)];if(!x)return;removeImage();setCode(x.code,x.name);$('exampleSource').href=x.source;$('exampleSource').hidden=false;run();};
-$('cleanBtn').onclick=()=>{recoverAfterClean=false;$('applyClean').textContent='应用这份预览';previewCleanup($('cleanBtn'));};
-async function previewCleanup(btn){await task(btn,async()=>{const r=await api('prepare',{code:$('source').value});if(!r.changes.length){locateProblem();return toast('没有可自动清理的复制格式。已展开源码，请核对标记行，或导入原始文件。');}$('cleanPreview').value=r.code;$('cleanChanges').textContent=r.changes.join(' ');$('cleanup').showModal();});}
-$('applyClean').onclick=()=>{const retry=recoverAfterClean;recoverAfterClean=false;setCode($('cleanPreview').value,fileName);$('cleanup').close();if(retry)run();else toast('已应用清理，请核对后重新分析。');};
-
 function setMode(mode){mode=mode==='learn'?'map':mode;activeMode=mode;document.body.classList.toggle('line-mode',mode==='line'||mode==='map'||mode==='studio');for(const [key,panel,tab]of [['studio','studioPanel','studioTab'],['line','linePanel','lineTab'],['map','mapPanel','mapTab'],['talk','talkPanel','talkTab']]){$(panel).hidden=mode!==key;$(tab).setAttribute('aria-pressed',String(mode===key));}layoutFlowReading();closeStudioToken();}
 
 function renderTalk(){
@@ -111,7 +109,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.body.class
 function locateProblem(){document.body.classList.add('source-open');const issue=(presentation?.diagnostics||[]).find(x=>/第\s*\d+\s*行/.test(x));const relative=Number(issue?.match(/第\s*(\d+)\s*行/)?.[1]||1);const line=relative+sourceOffset;const lines=$('source').value.split('\n');const start=lines.slice(0,line-1).reduce((n,l)=>n+l.length+1,0);$('source').focus({preventScroll:true});$('source').setSelectionRange(start,start+(lines[line-1]||'').length);$('source').scrollTop=Math.max(0,(line-3)*24);$('numbers').scrollTop=$('source').scrollTop;$('source').scrollIntoView({behavior:'smooth',block:'nearest'});}
 $('locateIssue').onclick=locateProblem;
 $('replaceSource').onclick=()=>$('fileInput').click();
-$('repairFormat').onclick=()=>{recoverAfterClean=true;$('applyClean').textContent='应用清理并重新生成整段';previewCleanup($('repairFormat'));};
+$('repairFormat').onclick=()=>previewCleanup();
 
 function renderFormatGuide(){
  const host=$('formatGuide');host.replaceChildren();const changes=current.formatChanges||[],unknown=current.unexplained||[];host.hidden=!changes.length&&!current.syntaxErrors;if(host.hidden)return;

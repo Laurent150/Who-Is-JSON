@@ -3,7 +3,8 @@ const keywordHelp={if:'如果条件成立，就执行后面的步骤。',return:
 const nativeHelp={Number:'JavaScript 提供的数字转换与数字相关工具。',String:'JavaScript 提供的文字转换与文字相关工具。',Array:'JavaScript 提供的数组工具；数组用来按顺序保存多项内容。',Object:'JavaScript 提供的对象工具；对象按名字保存各项信息。',Promise:'表示一个可能稍后成功或失败的结果。',Math:'JavaScript 提供的数学工具。',isFinite:'检查转换成数字后是否为有限值；与 Number.isFinite 的转换规则不同。',Boolean:'把值转换成 true 或 false。'};
 function javascript(code,name,language){
  const kind=/\.tsx$/i.test(name)?ts.ScriptKind.TSX:/\.jsx$/i.test(name)?ts.ScriptKind.JSX:language==='TypeScript'?ts.ScriptKind.TS:ts.ScriptKind.JS;
- const fileName=name||('input.'+(language==='TypeScript'?'ts':'js'));
+ // The compiler needs a script extension even when text was imported as .txt.
+ const fileName=/\.(?:[cm]?[jt]s|[jt]sx)$/i.test(name||'')?name:('input.'+(language==='TypeScript'?'ts':'js'));
  const source=ts.createSourceFile(fileName,code,ts.ScriptTarget.Latest,true,kind);
  const host={getSourceFile:f=>f===fileName?source:undefined,getDefaultLibFileName:()=>'',writeFile:()=>{},getCurrentDirectory:()=>'',getDirectories:()=>[],fileExists:f=>f===fileName,readFile:f=>f===fileName?code:undefined,getCanonicalFileName:f=>f,useCaseSensitiveFileNames:()=>true,getNewLine:()=> '\n'};
  const program=ts.createProgram([fileName],{noLib:true,noResolve:true,allowJs:true},host),checker=program.getTypeChecker();

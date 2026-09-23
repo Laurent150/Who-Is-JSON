@@ -25,6 +25,8 @@ function knowledgeCard(entry, source, open = false) {
     card.open = open;
     card.append(element('summary', c.title));
     card.append(element('p', c.plain, 'knowledge-plain'));
+    card.append(element('p', WhoLibrary.category(c)+' · '+WhoLibrary.tags(c).join(' · '), 'knowledge-meta'));
+    if(c.origin==='ai')card.append(element('small','AI 知识卡 · 示例为推演'));
     if (entry.context) {
         card.append(element('div', '在这段源码里', 'knowledge-label'), element('p', entry.context));
         if (entry.why)
@@ -130,7 +132,14 @@ function renderKnowledgeLibrary(host) {
     }
     if (!items.length)
         host.append(element('p', '点击流程节点，在知识卡片里选择“收藏知识点”。', 'tiny'));
-    for (const item of items) {
+    const controls=element('div',undefined,'knowledge-filters'),filter=element('select'),search=element('input'),list=element('div');
+    filter.setAttribute('aria-label','按知识种类筛选');search.type='search';search.placeholder='搜索知识、标签或源码';search.setAttribute('aria-label','搜索收藏知识');
+    const all=element('option','全部知识');all.value='';filter.append(all);
+    for(const name of WhoLibrary.categories){if(!items.some(x=>WhoLibrary.category({...x.card,category:x.category||x.card.category})===name))continue;const option=element('option',name);option.value=name;filter.append(option);}
+    controls.append(filter,search);host.append(controls,list);
+    function draw(){list.replaceChildren();const selected=items.filter(item=>WhoLibrary.matches(item,filter.value,search.value));
+    if(items.length&&!selected.length)list.append(element('p','没有符合条件的收藏。'));
+    for (const item of selected) {
         const article = element('article', undefined, 'saved-knowledge');
         article.dataset.concept = item.id;
         const card = item.card, detail = element('details');
@@ -141,8 +150,12 @@ function renderKnowledgeLibrary(host) {
             detail.append(source);
         }
         article.append(detail);
+        const meta=element('div',undefined,'knowledge-meta'),category=element('select');category.setAttribute('aria-label','修改知识分类：'+card.title);
+        for(const name of WhoLibrary.categories){const option=element('option',name);option.value=name;category.append(option);}category.value=WhoLibrary.category({...card,category:item.category||card.category});
+        category.onchange=()=>{try{const next=knowledgeSaved();const entry=next.find(x=>x.id===item.id);if(!entry)throw Error('收藏已不存在，请重新打开收藏库。');entry.category=category.value;localStorage.setItem(KNOWLEDGE_KEY,JSON.stringify(next));library();}catch(e){category.value=WhoLibrary.category({...card,category:item.category||card.category});toast(e.message);}};
+        meta.append(category,element('span',WhoLibrary.tags(card).join(' · ')));if(card.origin==='ai')meta.append(element('span','AI 知识卡 · 示例为推演'));article.append(meta);
         const exportBtn = element('button', '导出知识卡');
-        exportBtn.onclick = () => download('Who-Is-JSON-知识卡.md', WhoKnowledge.markdown(item));
+        exportBtn.onclick = () => download('Who-Is-JSON-知识卡.md', '分类：'+WhoLibrary.category({...card,category:item.category||card.category})+'\n标签：'+WhoLibrary.tags(card).join('、')+'\n'+(card.origin==='ai'?'来源：AI 生成，示例为推演\n':'')+'\n'+WhoKnowledge.markdown(item));
         const del = element('button', '取消收藏');
         del.onclick = () => { try {
             localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(knowledgeSaved().filter(x => x.id !== item.id)));
@@ -152,6 +165,8 @@ function renderKnowledgeLibrary(host) {
             toast('取消收藏失败，原数据已保留。');
         } };
         article.append(exportBtn, del);
-        host.append(article);
+        list.append(article);
     }
+    }
+    filter.onchange=draw;search.oninput=draw;draw();
 }
