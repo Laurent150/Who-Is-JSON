@@ -13,14 +13,14 @@ const assert=require('node:assert/strict'),fs=require('node:fs');
    if(mode==='wait'){pending=route;return;}
    await route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'AI 服务返回 401。密钥无效或未填写，请重新配置密钥。'})});
   });
-  await page.locator('#demoBtn').click();await page.locator('#cancelAnalysis').waitFor({state:'visible'});
+  await page.locator('#emptyDemo').click();await page.locator('#cancelAnalysis').waitFor({state:'visible'});
   assert.ok(await page.locator('.module-node').count());assert.match(await page.locator('#aiProgressText').innerText(),/本地流程已就绪/);
   await page.locator('#cancelAnalysis').click();await page.waitForFunction(()=>!document.querySelector('#analyzeBtn').disabled);
   assert.match(await page.locator('#aiProgressText').innerText(),/已停止/);assert.ok(await page.locator('.module-node').count());
   if(pending)await pending.abort().catch(()=>{});report.checks.push('local result is available while AI waits; cancellation restores controls');
-  mode='fail';await page.locator('#mapTab').click();await page.locator('#mapSource').click();await page.locator('#demoBtn').click();await page.waitForFunction(()=>document.querySelector('#aiProgressText').textContent.includes('401'));
+  mode='fail';await page.locator('#mapTab').click();await page.locator('#mapSource').click();await page.locator('#analyzeBtn').click();await page.waitForFunction(()=>document.querySelector('#aiProgressText').textContent.includes('401'));
   assert.ok(await page.locator('.module-node').count());assert.match(await page.locator('#aiProgressText').innerText(),/本地流程仍可阅读/);report.checks.push('AI auth failure preserves local result and actionable error');
-  mode='wait';await page.locator('#mapSource').click();await page.locator('#demoBtn').click();await page.locator('#cancelAnalysis').waitFor({state:'visible'});
+  mode='wait';await page.locator('#mapSource').click();await page.locator('#analyzeBtn').click();await page.locator('#cancelAnalysis').waitFor({state:'visible'});
   await page.locator('#fileInput').setInputFiles({name:'new.py',mimeType:'text/plain',buffer:Buffer.from('x = 1')});
   await page.waitForFunction(()=>!document.querySelector('#analyzeBtn').disabled);assert.equal(await page.locator('#results').isVisible(),false);
   if(pending)await pending.abort().catch(()=>{});report.checks.push('new input cancels stale AI work');

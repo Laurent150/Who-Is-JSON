@@ -22,7 +22,7 @@ fs.mkdirSync(out,{recursive:true});
         const page=await browser.newPage({viewport:{width:1600,height:1050}});
         page.on('pageerror',e=>report.errors.push(e.message));
         await page.goto('http://127.0.0.1:'+port);
-        await page.locator('#demoBtn').click();
+        await page.locator('#emptyDemo').click();
         await page.locator('#mapTab').click();
         await page.locator('#mapPanel').waitFor({state:'visible'});
         assert.equal(await page.locator('#linePanel').isVisible(),false);

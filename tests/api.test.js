@@ -3,6 +3,9 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  const reservation=http.createServer();await new Promise(r=>reservation.listen(0,'127.0.0.1',r));const port=reservation.address().port;await new Promise(r=>reservation.close(r));const base='http://127.0.0.1:'+port;let token='',calls=[];
  const mock=http.createServer(async(req,res)=>{let data='';for await(const c of req)data+=c;const b=JSON.parse(data);calls.push(b);let content;
  if(b.model==='bad-json')content='not json';else if(b.model==='bad-lines')content=JSON.stringify({blocks:[{start:99,end:100,title:'bad'}]});
+ else if(b.messages[0].content.includes('definition 或 lesson'))content=JSON.stringify({kind:'definition',answer:'x 是传入函数的参数名。'});
+ else if(b.messages[0].content.includes('只判断源码'))content=JSON.stringify({language:'JavaScript',confidence:'high'});
+ else if(b.messages[0].content.includes('复制格式修复建议'))content=JSON.stringify({code:'def f():\n    return 1',changes:['为函数体补上缩进'],uncertainty:'假设 return 属于该函数，请核对。'});
  else if(b.messages[0].content.includes('中文代码解释稿'))content=JSON.stringify({title:'输入怎样返回',sections:[{title:'先看结果',text:'这个函数把传入的值原样交回。'}],questions:[]});
  else if(b.messages[0].content.includes('给定 graph')){const g=JSON.parse(b.messages[1].content).graph;content=JSON.stringify({summary:'按步骤处理输入。',nodes:g.nodes.map(n=>({id:n.id,title:'交回输入',explanation:'把输入交回调用者。'}))});}
  else if(Array.isArray(b.messages[1].content))content='const count = 2;';
@@ -15,6 +18,7 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  token=JSON.parse((await(await fetch(base+'/config.js')).text()).match(/window.APP_TOKEN=(.*);/)[1]);
  const post=async(route,data)=>{const r=await fetch(base+'/api/'+route,{method:'POST',headers:{'Content-Type':'application/json','X-CodeLingo-Token':token},body:JSON.stringify(data)});return {status:r.status,body:await r.json()};};
  assert.equal((await fetch(base+'/api/inbox')).status,403);
+ assert.equal((await fetch(base+'/knowledge-library.js')).status,200);
  let imported=await post('inbox',{path:path.join(__dirname,'fixtures/user-python.Dockerfile')});assert.equal(imported.status,200);
  let incoming=await(await fetch(base+'/api/inbox',{headers:{'X-CodeLingo-Token':token}})).json();assert.match(incoming.code,/FROM python:3.12-slim/);assert.equal(incoming.name,'user-python.Dockerfile');
  let r=await post('analyze',{code:'SELECT name FROM people;',name:'x.sql'});assert.equal(r.status,200);assert.equal(r.body.language,'SQL');
@@ -26,7 +30,20 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  r=await post('talk',{code:'x',options:{duration:'bad'},config:{base:mockBase,model:'good'}});assert.equal(r.status,400);
  r=await post('ocr',{image:'data:image/png;base64,aGVsbG8=',ai:true,config:{base:mockBase,model:'vision'}});assert.equal(r.status,200);assert.equal(r.body.code,'const count = 2;');assert.ok(calls.some(x=>Array.isArray(x.messages[1].content)));
  r=await post('ask',{code:'function f(x){return x}',question:'解释 x',selection:{start:1,end:1},config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.match(r.body.answer,/模拟服务/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).selectedSource.code,'function f(x){return x}');
+ r=await post('ask',{code:'const x = 1;',question:'解释 x',knowledge:true,token:{line:1,startColumn:6,endColumn:7,text:'fake'},config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.equal(r.body.knowledge,undefined);assert.match(r.body.answer,/参数名/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).selectedToken.text,'x');
  r=await post('prepare',{code:'{\n&#x20; "name": "x"\n}'});assert.ok(r.body.changes.length);assert.ok(!r.body.code.includes('&#x20;'));
  const samples=await(await fetch(base+'/api/examples',{headers:{'X-CodeLingo-Token':token}})).json();assert.equal(samples.length,require('./corpus/manifest.json').filter(x=>x.licenseRetrieved).length);assert.ok(samples.some(x=>x.name.endsWith('.java')));
+ const beforeRepairCalls=calls.length;
+ const ambiguous='class Box { read(value) { return value; } }';
+ r=await post('analyze',{code:ambiguous,name:'',ai:false});assert.equal(r.body.needsLanguageHelp,true);assert.equal(calls.length,beforeRepairCalls);
+ r=await post('analyze',{code:ambiguous,name:'',ai:false,identifyLanguage:true,config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.equal(r.body.language,'JavaScript');assert.equal(r.body.languageIdentification.status,'verified');
+ const method=r.body.blocks.find(b=>b.title==='read');assert.ok(method);
+ r=await post('flow',{code:ambiguous,name:'',languageHint:'JavaScript',start:method.start,config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.equal(r.body.origin,'ai');
+ r=await post('analyze',{code:ambiguous,name:'',ai:false,identifyLanguage:true,config:{base:mockBase,model:'bad-json'}});assert.equal(r.status,200);assert.equal(r.body.languageIdentification.status,'failed');assert.equal(r.body.language,'未确定');
+ const afterLanguageCalls=calls.length;
+ r=await post('repair',{code:'字'.repeat(34000),config:{base:mockBase,model:'good'}});assert.equal(r.status,400);assert.equal(calls.length,afterLanguageCalls);
+ r=await post('repair',{code:'def f():\nreturn 1',name:'x.py',config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.equal(r.body.origin,'ai');assert.equal(r.body.code,'def f():\n    return 1');assert.match(r.body.notice,/假设/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).source,'def f():\nreturn 1');
+ r=await post('repair',{code:'x',config:{base:mockBase,model:'bad-json'}});assert.equal(r.status,400);
+ assert.equal((await fetch(base+'/api/repair',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:'x'})})).status,403);
  }finally{child.kill();await new Promise(r=>mock.close(r));}
 });

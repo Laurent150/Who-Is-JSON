@@ -11,7 +11,7 @@ function studioIdentity(){
 }
 async function studioApi(route,data){
  const c=new AbortController();studioControllers.add(c);
- try{return await api(route,{code:analyzedSource,name:fileName,config,...data},'POST',AbortSignal.any([c.signal,AbortSignal.timeout(130000)]));}
+ try{return await api(route,{code:analyzedSource,name:fileName,config,...(current.languageIdentification?.status==='verified'?{languageHint:current.languageIdentification.language}:{}),...data},'POST',AbortSignal.any([c.signal,AbortSignal.timeout(130000)]));}
  finally{studioControllers.delete(c);}
 }
 function renderStudio(){
@@ -142,12 +142,16 @@ async function studioExplainSelection(){
 function closeStudioToken(){studioTokenRequest++;const p=$('studioTokenPopup');if(p)p.hidden=true;}
 async function openStudioToken(anchor,token){
  studioIdentity();studioTokenAnchor=anchor;const id=++studioTokenRequest,version=studioVersion,popup=$('studioTokenPopup');
+ $('studioTokenLesson').replaceChildren();
  $('studioTokenTitle').textContent=token.text;$('studioTokenText').textContent=connected()?'AI 正在结合这一行解释…':'请先连接 AI，然后再次点击这个词语。';popup.hidden=false;
  const box=anchor.getBoundingClientRect(),width=Math.min(360,innerWidth-24);popup.style.width=width+'px';popup.style.left=Math.max(12,Math.min(box.left,innerWidth-width-12))+'px';popup.style.top=Math.max(12,Math.min(box.bottom+8,innerHeight-310))+'px';$('studioTokenClose').focus({preventScroll:true});
  if(!connected())return;
  const key='token:'+token.line+':'+token.startColumn+':'+token.endColumn;
- try{let answer=studioAnswers.get(key);if(!answer){answer=(await studioApi('ask',{selection:{start:token.line,end:token.line},token,question:'解释 selectedToken 在这句代码中的作用，再说明它的基础含义。变量和函数名结合当前上下文说明，不能确定来源则直说。最多150字，给一个极小的例子。'})).answer;if(version!==studioVersion)return;studioAnswers.set(key,answer);}
-  if(id===studioTokenRequest&&version===studioVersion)$('studioTokenText').textContent=answer;
+ try{let response=studioAnswers.get(key);if(!response){response=await studioApi('ask',{selection:{start:token.line,end:token.line},token,knowledge:true,question:'解释选中词语；简单定义不需要知识卡。'});if(version!==studioVersion)return;studioAnswers.set(key,response);}
+  if(id===studioTokenRequest&&version===studioVersion){
+   $('studioTokenText').textContent=response.answer;
+   if(response.knowledge){const source={file:fileName||'代码片段',language:current.language,start:token.line+sourceOffset,end:token.line+sourceOffset,startColumn:token.startColumn,endColumn:token.endColumn,code:analyzedSource.split('\n')[token.line-1],context:response.answer};$('studioTokenLesson').append(knowledgeCard({card:response.knowledge},source,true));}
+  }
  }catch(e){if(id===studioTokenRequest&&version===studioVersion)$('studioTokenText').textContent=e.message;}
 }
 $('studioTokenClose').onclick=()=>{closeStudioToken();studioTokenAnchor?.focus({preventScroll:true});};

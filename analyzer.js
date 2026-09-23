@@ -17,7 +17,10 @@ function detect(code, name = '') {
     if(named)return named;
     if(require('./public/gitignore-syntax').evidence(code))return 'Gitignore';
     if (require('./parsers/dockerfile-reader').evidence(code)) return 'Dockerfile';
-    if (require('./parsers/shell-detect').shellEvidence(code))
+    const syntax = mask(code);
+    // ES/TS declarations are not shell's `export NAME=value` command.
+    const moduleDeclaration=/^\s*export\s+(?:(?:default|declare)\s+)?(?:interface|type|class|(?:async\s+)?function|const|let|var)\b/m.test(syntax);
+    if (!moduleDeclaration && require('./parsers/shell-detect').shellEvidence(code))
         return 'Shell';
     if (/^\s*(async\s+)?def\s+\w+\s*\(/m.test(code) || /^\s*(from\s+\w+\s+import|import\s+\w+\s*$)/m.test(code))
         return 'Python';
@@ -29,11 +32,12 @@ function detect(code, name = '') {
         return 'SQL';
     if (/^(?:on|jobs|services|apiVersion|lockfileVersion):/m.test(code) || (/^name:/m.test(code) && /^\s*(?:steps|uses):/m.test(code)))
         return 'YAML';
-    if (/\b(?:export\s+)?(?:interface|type)\s+\w+/.test(code) || /\b(?:const|let)\s+\w+\s*:\s*(?:string|number|boolean)/.test(code))
+    // Language keywords in comments and string literals are not syntax evidence.
+    if (/\b(?:export\s+)?(?:interface|type)\s+\w+/.test(syntax) || /\b(?:const|let)\s+\w+\s*:\s*(?:string|number|boolean)/.test(syntax))
         return 'TypeScript';
-    if (/\b(?:public\s+|private\s+|protected\s+)?(?:class|interface|enum)\s+\w+/.test(code) && /\b(?:package|import\s+java\.|public\s+static|private\s+|implements|int\s+)\b/.test(code))
+    if (/\b(?:public\s+|private\s+|protected\s+)?(?:class|interface|enum)\s+\w+/.test(syntax) && /(?:^\s*(?:package\s+[\w.]+\s*;|import\s+java\.)|\b(?:public\s+static|private\s+|implements\s+\w|int\s+\w))/.test(syntax))
         return 'Java';
-    if (/\b(function|const|let)\b|=>/.test(code))
+    if (/\b(function|const|let)\b|=>|\bexport\s+(?:default\s+)?class\b|\bimport\s+[\w$*{][\s\S]*?\bfrom\b/.test(syntax))
         return 'JavaScript';
     if (/[^{}]+\{\s*(?:--[\w-]+|color|display|margin|padding|font-size|background)[\w-]*\s*:/.test(code))
         return 'CSS';
