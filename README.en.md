@@ -1,5 +1,7 @@
 # Who Is JSON
 
+Use **解释风格** (Explanation style) in the header to switch between **零基础友好** (Beginner-friendly, the default) and **标准** (Standard). The browser remembers your choice. Beginner-friendly AI explanations focus on the immediate action in one or two short sentences, adding a small example only when useful. Local reference details can be expanded. Switching clears current AI explanations and the talk draft without changing source code or saved cards; generating again is an explicit action. Style constraints do not guarantee model accuracy.
+
 [简体中文](README.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
 **Understand the code you find, and learn from it.**
@@ -8,7 +10,7 @@ An **AI-assisted code reading tool for vibe coders**, with interactive explanati
 
 **This is a documentation translation.** The application UI, built-in knowledge cards and default AI explanations are still primarily in Chinese. An interface language switch has not been implemented. Chinese button labels below help you find the current controls; linked supporting documents may also be in Chinese.
 
-The current version is **0.8.0 preview**. See the [release notes](docs/releases/v0.8.0.md). The app reads and explains code; it does not execute imported source. Successful parsing does not prove that a program runs correctly.
+The current version is **1.0.0 (source release)**. See the [release notes](docs/releases/v1.0.0.md). The app reads and explains code; it does not execute imported source. Successful parsing does not prove that a program runs correctly.
 
 This is the clean public distribution of v0.8.0. Original feedback test snippets have been replaced with independently authored samples, while development history remains in the original private repository. See the [public migration notes](docs/PUBLIC_MIGRATION.md) and [contributors](CONTRIBUTORS.md).
 

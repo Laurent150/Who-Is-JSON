@@ -1,5 +1,5 @@
 let talkResult=null,talkIdentity='',talkConfig=null,talkController=null,talkTimer=null;
-function talkKey(){return JSON.stringify([analyzedSource,fileName,sourceOffset,$('duration').value,$('audience').value,$('coverage').value]);}
+function talkKey(){return JSON.stringify([readingMode,analyzedSource,fileName,sourceOffset,$('duration').value,$('audience').value,$('coverage').value]);}
 function resetTalk(){
  talkController?.abort();talkController=null;clearInterval(talkTimer);talkResult=null;talkIdentity='';
  $('generateTalk').disabled=false;$('cancelTalk').hidden=true;$('talkStatus').textContent='';

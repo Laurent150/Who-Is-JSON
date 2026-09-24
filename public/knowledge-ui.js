@@ -27,14 +27,16 @@ function knowledgeCard(entry, source, open = false) {
     card.append(element('p', c.plain, 'knowledge-plain'));
     card.append(element('p', WhoLibrary.category(c)+' · '+WhoLibrary.tags(c).join(' · '), 'knowledge-meta'));
     if(c.origin==='ai')card.append(element('small','AI 知识卡 · 示例为推演'));
+    const more=beginnerMode()?element('details',undefined,'knowledge-more'):card;
+    if(more!==card){more.append(element('summary','写法与例子'));card.append(more);}
     if (entry.context) {
-        card.append(element('div', '在这段源码里', 'knowledge-label'), element('p', entry.context));
+        more.append(element('div', '在这段源码里', 'knowledge-label'), element('p', entry.context));
         if (entry.why)
-            card.append(element('p', entry.why, 'knowledge-why'));
+            more.append(element('p', entry.why, 'knowledge-why'));
     }
-    card.append(element('div', '哪些名字可以自己起？', 'knowledge-label'), element('p', c.naming));
-    appendRelatedSyntax(card,c);
-    appendKnowledgeExample(card,c);
+    more.append(element('div', '哪些名字可以自己起？', 'knowledge-label'), element('p', c.naming));
+    appendRelatedSyntax(more,c);
+    appendKnowledgeExample(more,c);
     card.append(element('p', '容易弄错：' + c.pitfall, 'knowledge-pitfall'));
     const save = element('button', '＋ 收藏知识点', 'save-knowledge');
     try {

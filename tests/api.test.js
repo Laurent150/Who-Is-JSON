@@ -19,6 +19,7 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  const post=async(route,data)=>{const r=await fetch(base+'/api/'+route,{method:'POST',headers:{'Content-Type':'application/json','X-CodeLingo-Token':token},body:JSON.stringify(data)});return {status:r.status,body:await r.json()};};
  assert.equal((await fetch(base+'/api/inbox')).status,403);
  assert.equal((await fetch(base+'/knowledge-library.js')).status,200);
+ assert.equal((await fetch(base+'/reading-mode.js')).status,200);
  let imported=await post('inbox',{path:path.join(__dirname,'fixtures/user-python.Dockerfile')});assert.equal(imported.status,200);
  let incoming=await(await fetch(base+'/api/inbox',{headers:{'X-CodeLingo-Token':token}})).json();assert.match(incoming.code,/FROM python:3.12-slim/);assert.equal(incoming.name,'user-python.Dockerfile');
  let r=await post('analyze',{code:'SELECT name FROM people;',name:'x.sql'});assert.equal(r.status,200);assert.equal(r.body.language,'SQL');
@@ -45,6 +46,13 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  r=await post('repair',{code:'def f():\nreturn 1',name:'x.py',config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.equal(r.body.origin,'ai');assert.equal(r.body.code,'def f():\n    return 1');assert.match(r.body.notice,/假设/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).source,'def f():\nreturn 1');
  r=await post('repair',{code:'x',config:{base:mockBase,model:'bad-json'}});assert.equal(r.status,400);
  assert.equal((await fetch(base+'/api/repair',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:'x'})})).status,403);
+ for(const mode of ['beginner','standard']){
+  const common={code:'function f(x){return x}',name:'x.js',config:{base:mockBase,model:'good'},readingMode:mode};
+  for(const [route,extra]of [['analyze',{ai:true}],['flow',{start:1}],['talk',{}],['ask',{question:'解释',selection:{start:1,end:1}}],['ask',{question:'解释',knowledge:true,token:{line:1,startColumn:11,endColumn:12}}]]){
+   const response=await post(route,{...common,...extra});assert.equal(response.status,200);
+   assert.match(calls.at(-1).messages[0].content,mode==='beginner'?/当前为零基础友好模式/:/当前为标准模式/);
+  }
+ }
  const teaching=['整份代码的用途','给定 graph','中文代码解释稿','面向零基础者','definition 或 lesson'];
  for(const marker of teaching){
   const requests=calls.filter(c=>c.messages[0].content.includes(marker));
