@@ -10,7 +10,11 @@ function setCode(code,name){$('examples').value='';$('exampleSource').hidden=tru
 function setImage(data,name){revision++;imageData=data;$('preview').src=data;$('imageBox').hidden=false;$('ocrNotice').textContent='内置英文与简体中文语言包。识别后请对照图片核对代码。';setCode('',name||'截图.png');toast('图片已导入。点击「识别代码」，核对后再开始讲解。');}
 function settings(){for(const k of ['base','model','key'])$(k).value=config[k]||'';$('settings').showModal();}
 function connected(){return !!(config.base&&config.model);}
-function connection(){ $('connection').textContent=connected()?'● 已配置 AI':'● 本地模式';}
+function connection(){
+ const model=connected()?String(config.model).trim().replace(/^deepseek-/i,'DEEPSEEK-'):'';
+ $('connection').textContent=model?'● 已接入 '+model:'● 本地模式';
+ $('connection').title=model;
+}
 function ensureAI(){if(!connected()){settings();throw Error('请先连接 AI，或关闭「AI 深入讲解」使用本地模式。');}}
 async function task(btn,fn){if(busy)return;busy=true;const old=btn.textContent;btn.disabled=true;btn.classList.add('busy');btn.textContent='正在处理…';const started=Date.now();const timer=setInterval(()=>{btn.textContent='正在处理 · '+Math.floor((Date.now()-started)/1000)+' 秒';},1000);try{await fn();}catch(e){toast(e.message);}finally{clearInterval(timer);btn.textContent=old;btn.disabled=false;btn.classList.remove('busy');busy=false;}}
 let analysisAbort=null;

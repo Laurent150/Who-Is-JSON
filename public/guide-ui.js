@@ -165,7 +165,7 @@ function renderDocumentGuide() {
     host.hidden = !g;
     if (!g)
         return;
-    host.append(element('div', '先看整份内容', 'section-label'), element('h3', g.title), element('p', g.plain?.purpose || g.purpose));
+    host.append(element('h3', g.title==='这份代码包含什么'?'代码概览':g.title), element('p', g.plain?.purpose || g.purpose));
     const evidence=element('details',undefined,'document-evidence');
     evidence.append(element('summary','用途依据与术语'));
     appendTerms(evidence,g);
