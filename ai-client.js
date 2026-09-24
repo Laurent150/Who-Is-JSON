@@ -6,7 +6,8 @@ function requestOptions(config, messages, options = {}) {
     try { url = new URL(config.base.replace(/\/$/, '') + '/chat/completions'); }
     catch { throw Error('服务地址格式不正确'); }
     if (url.protocol !== 'https:' && !(url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))) throw Error('远程模型服务需使用 HTTPS；本机服务可使用 HTTP。');
-    const body = {model:config.model, messages, stream:false, max_tokens:options.maxTokens || 1800};
+    const preparedMessages=options.explanation ? messages.map(m=>m.role==='system'&&typeof m.content==='string'?{...m,content:m.content+'\n'+require('./ai-explanation-rules')}:m) : messages;
+    const body = {model:config.model, messages:preparedMessages, stream:false, max_tokens:options.maxTokens || 1800};
     // Provider-specific options must not leak to other compatible services.
     if (url.hostname === 'api.deepseek.com') {
         body.thinking = {type:'disabled'};
@@ -67,7 +68,7 @@ function mergeOverview(result, text) {
 
 async function explainOverview(result, source, name, config, options={}) {
     const blocks=result.blocks.map((b,index)=>({index,name:b.title,start:b.start,end:b.end,kind:b.kind}));
-    const text=await modelCall(config,[{role:'system',content:overviewPrompt},{role:'user',content:JSON.stringify({filename:name,source,blocks})}],{...options,json:true,maxTokens:5000});
+    const text=await modelCall(config,[{role:'system',content:overviewPrompt},{role:'user',content:JSON.stringify({filename:name,source,blocks})}],{...options,explanation:true,json:true,maxTokens:5000});
     return mergeOverview(result,text);
 }
 function selectedSource(source, selection) {
