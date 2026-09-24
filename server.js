@@ -3,7 +3,7 @@ const { spawn, execFile } = require('node:child_process');
 const { analyze } = require('./analyzer');
 const { recognize } = require('./local-ocr');
 const buildInfo = require('./build-info');
-const cloudAccount = require('./cloud-account').createCloudAccount();
+const cloudAccount = require('./cloud-account').createCloudAccount({ env: require('./cloud-config').releaseCloudEnv() });
 const PORT = Number(process.env.CODELINGO_PORT || 43127), HOST = '127.0.0.1', token = crypto.randomBytes(24).toString('hex');
 const python = process.env.CODELINGO_PYTHON || 'python';
 let inbox = null, widget = null, capturing = false;

@@ -107,7 +107,7 @@ Simple name definitions only show an explanation. A save button appears when AI 
 
 “我的收藏” (My favorites) defaults to all cards. Filter by syntax and fundamentals; flow and functions; data structures and algorithms; async and error handling; files, networking and systems; or engineering and design. Search titles, tags and associated source. Only populated categories appear, and each card can be reclassified manually. Existing favorites remain available and receive automatic topic categories. Identical cards can link to multiple source snippets; exports include categories and AI attribution.
 
-Favorites remain in the current browser. There is no account login, cloud sync or centrally paid AI service; users configure their own AI provider.
+Guest favorites stay in the current browser. Optional GitHub login synchronizes account favorites and their associated source code; existing guest favorites are not uploaded automatically. Public cloud configuration is included for the default address `http://127.0.0.1:43127/`, so no `.env` is required. Cloud access depends on network reachability: VPN-free access is not guaranteed. Users still configure and pay for their own AI provider. See [cloud account details](docs/CLOUD_ACCOUNTS.md).
 
 ### Quick path for C/C++
 
