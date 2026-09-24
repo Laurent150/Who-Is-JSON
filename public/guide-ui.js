@@ -25,8 +25,9 @@ function appendGuideDetails(host, guide, {overview=false,symbols=[]}={}) {
         }
         host.append(list);
     }
-    const body=overview?element('details',undefined,'overview-more'):host;
-    if(overview){body.append(element('summary','输入、结果与处理细节'));host.append(body);}
+    const fold=overview||beginnerMode();
+    const body=fold?element('details',undefined,'overview-more'):host;
+    if(fold){body.append(element('summary',beginnerMode()?'深入了解':'输入、结果与处理细节'));host.append(body);}
     const plain = guide.plain || {};
     for (const [label,value] of [['需要提供什么',plain.input || guide.input],['执行后有什么变化',plain.output || guide.output]]) {
         if (!value) continue;

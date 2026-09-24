@@ -1,5 +1,7 @@
 # Who Is JSON
 
+Use **解释风格** (Explanation style) in the header to switch between **零基础友好** (Beginner-friendly, the default) and **标准** (Standard). The browser remembers your choice. Beginner-friendly AI explanations focus on the immediate action in one or two short sentences, adding a small example only when useful. Local reference details can be expanded. Switching clears current AI explanations and the talk draft without changing source code or saved cards; generating again is an explicit action. Style constraints do not guarantee model accuracy.
+
 [简体中文](README.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
 **Understand the code you find, and learn from it.**

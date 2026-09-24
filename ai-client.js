@@ -6,7 +6,7 @@ function requestOptions(config, messages, options = {}) {
     try { url = new URL(config.base.replace(/\/$/, '') + '/chat/completions'); }
     catch { throw Error('服务地址格式不正确'); }
     if (url.protocol !== 'https:' && !(url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))) throw Error('远程模型服务需使用 HTTPS；本机服务可使用 HTTP。');
-    const preparedMessages=options.explanation ? messages.map(m=>m.role==='system'&&typeof m.content==='string'?{...m,content:m.content+'\n'+require('./ai-explanation-rules')}:m) : messages;
+    const preparedMessages=options.explanation ? messages.map(m=>m.role==='system'&&typeof m.content==='string'?{...m,content:m.content+'\n'+require('./ai-explanation-rules')+'\n'+require('./ai-reading-style').prompt(options.readingMode)}:m) : messages;
     const body = {model:config.model, messages:preparedMessages, stream:false, max_tokens:options.maxTokens || 1800};
     // Provider-specific options must not leak to other compatible services.
     if (url.hostname === 'api.deepseek.com') {

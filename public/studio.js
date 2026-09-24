@@ -41,7 +41,7 @@ function studioFunction(block,path){
  const summary=element('summary');summary.append(element('span',type,'studio-function-type'),element('strong',block.role==='script-entry'?'从这里开始':block.title),element('small','第 '+(block.start+sourceOffset)+'—'+(block.end+sourceOffset)+' 行 · 点击定位源码'));details.append(summary);
  summary.addEventListener('click',()=>{
   studioAnchor=block.start;studioSelect(block.start,block.end,false);studioRevealLine(block.start);
-  $('studioExplain').replaceChildren(element('h3',type+' · '+block.title),element('p',block.kind==='function'?'这是函数名。函数是一段可以通过名字调用的代码；中间已高亮它的定义和函数体。展开后生成 AI 流程，可以了解它具体做什么。':'中间已高亮这段'+type+'对应的源码。展开流程后，可以逐步对照阅读。'));
+  $('studioExplain').replaceChildren(element('h3',type+' · '+block.title),element('p',block.kind==='function'?(beginnerMode()?'这里定义了'+block.title+'。展开后，可以看它分几步做完。':'这是函数名。函数是一段可以通过名字调用的代码；中间已高亮它的定义和函数体。展开后生成 AI 流程，可以了解它具体做什么。'):'中间已高亮这段'+type+'对应的源码。展开流程后，可以逐步对照阅读。'));
  });
  const body=element('div',undefined,'studio-function-body');details.append(body);
  let loaded=false,loading=false;
@@ -141,7 +141,7 @@ async function studioExplainSelection(){
  if(!connected()){settings();return;}
  const selection={...studioSelected};studioIdentity();studioSelected=selection;const version=studioVersion,id=++studioRequest,key='line:'+selection.start+':'+selection.end;
  $('studioExplain').replaceChildren(element('p','AI 正在解释选中的原文…','studio-empty'));
- try{let answer=studioAnswers.get(key);if(!answer){answer=(await studioApi('ask',{selection,question:'请只解释 selectedSource：先说这一步做什么，再用很小的假设输入说明数据变化，最后说明下一步。术语就地用日常中文解释，不猜作者动机。'})).answer;if(version!==studioVersion)return;studioAnswers.set(key,answer);}
+ try{let answer=studioAnswers.get(key);if(!answer){answer=(await studioApi('ask',{selection,question:beginnerMode()?'请只用一两句解释 selectedSource 在做什么。像朋友指着这一行回答；没有必要就不要举例，不补充下一步或术语背景。':'请只解释 selectedSource：先说这一步做什么，再用很小的假设输入说明数据变化，最后说明下一步。术语就地用日常中文解释，不猜作者动机。'})).answer;if(version!==studioVersion)return;studioAnswers.set(key,answer);}
   if(version===studioVersion&&id===studioRequest)$('studioExplain').replaceChildren(element('span','AI 解释 · 请对照源码核对','studio-provenance'),element('p',answer));
  }catch(e){if(version===studioVersion&&id===studioRequest)$('studioExplain').replaceChildren(element('p',e.message,'studio-error'));}
 }
