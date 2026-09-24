@@ -10,7 +10,7 @@ An **AI-assisted code reading tool for vibe coders**, with interactive explanati
 
 **This is a documentation translation.** The application UI, built-in knowledge cards and default AI explanations are still primarily in Chinese. An interface language switch has not been implemented. Chinese button labels below help you find the current controls; linked supporting documents may also be in Chinese.
 
-The current version is **0.8.0 preview**. See the [release notes](docs/releases/v0.8.0.md). The app reads and explains code; it does not execute imported source. Successful parsing does not prove that a program runs correctly.
+The current version is **1.0.0 (source release)**. See the [release notes](docs/releases/v1.0.0.md). The app reads and explains code; it does not execute imported source. Successful parsing does not prove that a program runs correctly.
 
 This is the clean public distribution of v0.8.0. Original feedback test snippets have been replaced with independently authored samples, while development history remains in the original private repository. See the [public migration notes](docs/PUBLIC_MIGRATION.md) and [contributors](CONTRIBUTORS.md).
 
