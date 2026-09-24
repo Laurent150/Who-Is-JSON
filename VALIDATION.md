@@ -112,3 +112,7 @@ Flask JSON provider 和 node-jsonfile 是在规则写完后取得的新样本，
 ## 三列 AI 工作台验收
 
 `tests/ai-flow.test.js` 验证分支、源码范围、顶层与嵌套调用、名称覆盖和 UTF-16 词语位置；`tests/api.test.js` 通过模拟模型服务验证 `/api/flow` 完整请求链路。启动服务后，设置 `CODELINGO_URL`、`CODELINGO_PYTHON` 和 `WHO_PLAYWRIGHT_MODULE`，运行 `node tests/browser-studio.cjs`，验证嵌套展开、递归终止、缓存、过期响应、词语弹窗与 390px 布局。该脚本使用模拟 AI 回复。新流程接口的真实 DeepSeek 测试收到 401，未完成新功能的实际模型质量验收。
+
+## 可选云端账户（本地验证）
+
+237 项自动测试与 19 个公开样本通过。新增模拟服务与存储/UI 测试覆盖身份核验、账户隔离、未登录收藏不自动上传、过期/退出、并发保存、版本冲突、断网与损坏数据保留。浏览器确认账户弹窗、云服务未配置提示和登录按钮禁用。没有创建云项目；真实 SMTP、两邮箱登录、跨设备同步、SQL 权限隔离脚本尚未运行。当前环境没有 PostgreSQL/Supabase CLI。不能将模拟通过视为生产云端验收完成。

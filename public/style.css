@@ -271,3 +271,12 @@ header{gap:20px;flex-wrap:wrap;height:auto;min-height:82px;padding-top:16px;padd
 }
 .reading-mode-label select:focus-visible{outline:2px solid #63884a;outline-offset:3px}
 @media(max-width:600px){.header-slogan{font-size:clamp(18px,5.5vw,26px)}header{gap:12px}.header-actions{flex-wrap:wrap}}
+#account{width:min(560px,calc(100vw - 32px));max-height:85vh;overflow:auto}
+#account [hidden]{display:none!important}
+#account label{display:grid;gap:8px;margin:18px 0 12px}
+#account input{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #dce3d5;border-radius:12px;background:#fafbf7;color:#283c2e;font:inherit}
+#accountStatus{padding:14px 16px;border-radius:12px;background:#eef3e7;line-height:1.6;overflow-wrap:anywhere}
+.account-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+#accountReplace{border-top:1px solid #dce3d5;margin-top:18px;padding-top:8px}
+#account button:disabled{opacity:.55;cursor:not-allowed}
+#accountIdentity{overflow-wrap:anywhere}

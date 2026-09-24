@@ -88,3 +88,7 @@ Python 的 `line_reading_python.py` 从 AST 与现有教学模型生成逐句 re
 ## 三列 AI 工作台
 
 `ai-flow.js` 为选中功能建立带固定节点 id、源码范围、分支和已确认本文件调用目标的结构，AI 仅补充节点标题、解释与例子，不改写调用关系或源码位置。`public/studio.js` 组合流程、源码和解释三列，按功能生成并缓存 AI 流程；词语位置使用 UTF-16 列，在服务端重新截取核对。源码或 AI 配置变化会取消请求并清空缓存。旧结构与讲稿作为资料视图保留。
+
+## 可选账户边界
+
+`cloud-account.js` 仅承载 Supabase OTP 与收藏 RPC，由已有本机 API 令牌保护；上游访问令牌仅在服务内存中。`public/library-store.js` 为现有两种收藏提供本地/账户存储适配，`public/account.js` 处理登录、退出与版本冲突。数据库迁移启用 RLS，写入 RPC 从 auth.uid() 取所有者并原子比较版本。AI、解析器和源码解释流程不依赖账户服务。详见 docs/CLOUD_ACCOUNTS.md。

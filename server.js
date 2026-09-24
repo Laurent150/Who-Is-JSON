@@ -3,6 +3,7 @@ const { spawn, execFile } = require('node:child_process');
 const { analyze } = require('./analyzer');
 const { recognize } = require('./local-ocr');
 const buildInfo = require('./build-info');
+const cloudAccount = require('./cloud-account').createCloudAccount();
 const PORT = Number(process.env.CODELINGO_PORT || 43127), HOST = '127.0.0.1', token = crypto.randomBytes(24).toString('hex');
 const python = process.env.CODELINGO_PYTHON || 'python';
 let inbox = null, widget = null, capturing = false;
@@ -33,6 +34,11 @@ const server = http.createServer(async (req, res) => {
         if (url.pathname.startsWith('/api/')) {
             if (req.headers['x-codelingo-token'] !== token)
                 return json(res, 403, { error: '请重新打开 CodeLingo 页面。' });
+            if (url.pathname.startsWith('/api/account/')) {
+                if (req.method !== 'POST') return json(res, 405, { error: 'POST required' });
+                try { return json(res, 200, await cloudAccount.handle(req, url.pathname.slice('/api/account/'.length), await body(req))); }
+                catch (e) { return json(res, e.status || 400, { error: e.message }); }
+            }
             if (req.method === 'GET' && url.pathname === '/api/examples') {
                 const dir = path.join(__dirname, 'tests', 'corpus');
                 const list = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')).filter(x => x.licenseRetrieved);
@@ -171,6 +177,8 @@ const server = http.createServer(async (req, res) => {
         routes['/studio.js']='studio.js';
         routes['/talk.js']='talk.js';
         routes['/reading-mode.js']='reading-mode.js';
+        routes['/library-store.js']='library-store.js';
+        routes['/account.js']='account.js';
         routes['/format-repair.js']='format-repair.js';
         routes['/knowledge-library.js']='knowledge-library.js';
         routes['/line-reading.js']='line-reading.js';

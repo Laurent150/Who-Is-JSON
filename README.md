@@ -162,3 +162,7 @@ pnpm run test:release
 - [桌面打包说明](desktop/README.md)
 
 项目代码采用 [MIT 许可证](LICENSE)。第三方测试样本、OCR 数据等保留各自的来源和许可，不能将它们的许可证一并替换为 MIT。
+
+## 可选云端账户（开发中）
+
+支持邮箱验证码登录与独立账户收藏同步；AI 仍由用户配置。需要自行配置 Supabase 项目与邮件服务，未配置时仍使用本地收藏。部署步骤、同步边界和待验收项见 [云端账户说明](docs/CLOUD_ACCOUNTS.md)。
