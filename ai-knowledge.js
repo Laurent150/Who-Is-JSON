@@ -13,5 +13,5 @@ function parse(text){
  card.id='ai.'+createHash('sha256').update(JSON.stringify([card.language,card.title,card.plain,card.example,card.result,card.pitfall])).digest('hex');
  return {answer,knowledge:card};
 }
-async function explain(source,selectedToken,config,options={}){return parse(await modelCall(config,[{role:'system',content:prompt},{role:'user',content:JSON.stringify({source,selectedToken})}],{...options,json:true,maxTokens:2200}));}
+async function explain(source,selectedToken,config,options={}){return parse(await modelCall(config,[{role:'system',content:prompt},{role:'user',content:JSON.stringify({source,selectedToken})}],{...options,explanation:true,json:true,maxTokens:2200}));}
 module.exports={parse,explain};

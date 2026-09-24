@@ -2,6 +2,18 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const http=require('node:http');
 const {requestOptions,mergeOverview,modelCall,networkMessage}=require('../ai-client');
+test('teaching rules preserve source and response format and stay out of non-explanation requests',()=>{
+ const messages=[{role:'system',content:'Only return JSON.'},{role:'user',content:'async function f(){ return 1; }'}];
+ const config={base:'https://api.deepseek.com',model:'deepseek-flash'};
+ const body=requestOptions(config,messages,{explanation:true,json:true}).body;
+ assert.match(body.messages[0].content,/async 声明使函数每次调用返回 Promise/);
+ assert.match(body.messages[0].content,/普通同步上下文用 .then\(\)/);
+ assert.match(body.messages[0].content,/try\/catch/);
+ assert.equal(body.messages[1].content,messages[1].content);
+ assert.equal(body.response_format.type,'json_object');
+ assert.equal(messages[0].content,'Only return JSON.');
+ assert.equal(requestOptions(config,messages).body.messages[0].content,'Only return JSON.');
+});
 test('DeepSeek uses bounded non-thinking output without changing other providers',()=>{
  const options=requestOptions({base:'https://api.deepseek.com',model:'deepseek-flash'},[],{json:true,maxTokens:5000});
  assert.equal(options.url.pathname,'/chat/completions');assert.equal(options.body.thinking.type,'disabled');assert.equal(options.body.max_tokens,5000);assert.equal(options.body.response_format.type,'json_object');

@@ -11,7 +11,13 @@ function studioIdentity(){
 }
 async function studioApi(route,data){
  const c=new AbortController();studioControllers.add(c);
- try{return await api(route,{code:analyzedSource,name:fileName,config,...(current.languageIdentification?.status==='verified'?{languageHint:current.languageIdentification.language}:{}),...data},'POST',AbortSignal.any([c.signal,AbortSignal.timeout(130000)]));}
+ const signal=AbortSignal.any([c.signal,AbortSignal.timeout(130000)]);
+ try{const result=await api(route,{code:analyzedSource,name:fileName,config,...(current.languageIdentification?.status==='verified'?{languageHint:current.languageIdentification.language}:{}),...data},'POST',signal);signal.throwIfAborted();return result;}
+ catch(error){
+  if(c.signal.aborted)throw new Error('已停止生成，源码未修改，可以重试。');
+  if(signal.aborted||error.name==='TimeoutError')throw new Error('AI 服务响应超时，源码未修改，请稍后重试。');
+  throw error;
+ }
  finally{studioControllers.delete(c);}
 }
 function renderStudio(){

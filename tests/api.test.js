@@ -45,5 +45,12 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  r=await post('repair',{code:'def f():\nreturn 1',name:'x.py',config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.equal(r.body.origin,'ai');assert.equal(r.body.code,'def f():\n    return 1');assert.match(r.body.notice,/假设/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).source,'def f():\nreturn 1');
  r=await post('repair',{code:'x',config:{base:mockBase,model:'bad-json'}});assert.equal(r.status,400);
  assert.equal((await fetch(base+'/api/repair',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:'x'})})).status,403);
+ const teaching=['整份代码的用途','给定 graph','中文代码解释稿','面向零基础者','definition 或 lesson'];
+ for(const marker of teaching){
+  const requests=calls.filter(c=>c.messages[0].content.includes(marker));
+  assert.ok(requests.length,'missing explanation route: '+marker);
+  for(const request of requests)assert.match(request.messages[0].content,/async 声明使函数每次调用返回 Promise/);
+ }
+ for(const request of calls.filter(c=>/只判断源码|复制格式修复建议|只转录图片/.test(c.messages[0].content)))assert.ok(!request.messages[0].content.includes('async 声明使函数每次调用返回 Promise'));
  }finally{child.kill();await new Promise(r=>mock.close(r));}
 });
