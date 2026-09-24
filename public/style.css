@@ -246,6 +246,7 @@ pre.reading-code .reading-number{line-height:1.6}
 .knowledge-meta{font-size:13px;color:#64765a}
 
 .reading-mode-label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
-.reading-mode-label select{max-width:160px;padding:9px 12px;border:1px solid #dce3d5;border-radius:12px;background:#fafbf7;color:#283c2e;font:inherit}
+.reading-mode-label select{appearance:none;max-width:160px;padding:9px 36px 9px 12px;border:1px solid #dce3d5;border-radius:12px;background:#fafbf7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='m3 5 4 4 4-4' fill='none' stroke='%23283c2e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;color:#283c2e;font:inherit}
+@media(forced-colors:active){.reading-mode-label select{appearance:auto;background-image:none}}
 .knowledge-more{margin:12px 0}.knowledge-more>summary{cursor:pointer}
 @media(max-width:800px){.header-actions{flex-wrap:wrap}.reading-mode-label{flex-wrap:wrap;gap:4px}.reading-mode-label select{max-width:145px}}
