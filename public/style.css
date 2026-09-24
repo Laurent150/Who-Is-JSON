@@ -280,3 +280,8 @@ header{gap:20px;flex-wrap:wrap;height:auto;min-height:82px;padding-top:16px;padd
 #accountReplace{border-top:1px solid #dce3d5;margin-top:18px;padding-top:8px}
 #account button:disabled{opacity:.55;cursor:not-allowed}
 #accountIdentity{overflow-wrap:anywhere}
+
+.rail>button{height:72px;padding:8px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;line-height:1}
+.rail>button .rail-icon{height:28px;display:flex;align-items:center;justify-content:center}
+.rail>button small{height:18px;line-height:18px;padding:0}
+#accountGithub,#accountCancel{display:block;margin:20px auto}

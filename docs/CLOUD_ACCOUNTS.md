@@ -1,17 +1,19 @@
-# 邮箱账户与收藏云同步（可选，待真实云端验收）
+# GitHub 账户与收藏云同步（可选，待真实云端验收）
 
-当前实现仍由本机应用运行。Supabase 托管邮箱身份和收藏数据库；没有部署公共网站，没有平台代付 AI。未配置云服务时，原来的本地收藏、分析和 AI 设置继续可用。
+当前实现仍由本机应用运行。Supabase 托管 GitHub 登录身份和收藏数据库；没有部署公共网站，没有平台代付 AI。未配置云服务时，原来的本地收藏、分析和 AI 设置继续可用。
 
 ## 配置云服务
 
 1. 自行创建 Supabase 项目，在 SQL Editor 执行 `supabase/migrations/202609240001_accounts.sql`。不要关闭 RLS，也不要给予客户端直接写表的权限。
-2. 启用 Email 登录和新用户注册。将 **Confirm signup** 和 **Magic Link** 邮件模板都设置为展示数字验证码，例如 `验证码：{{ .Token }}`，不要只保留登录链接。第一次验证邮箱会创建账户。
-3. 面向真实用户前配置自己的 SMTP，测试邮件送达、过期验证码和发送频率限制。Supabase 默认邮件服务有限制，不能据此承诺任意用户可登录。本版未接入 CAPTCHA；启用要求 CAPTCHA 的认证策略前需要补充对应 UI。
+2. 在 GitHub 的 Settings → Developer settings → OAuth Apps 创建 OAuth App。Authorization callback URL 填入 Supabase 的 `https://项目引用.supabase.co/auth/v1/callback`，**不是本机地址**。将 Client ID / Client Secret 填入 Supabase 的 GitHub provider 并启用。Client Secret 只留在 Supabase 后台，不放进应用或仓库。
+3. 在 Supabase Auth → URL Configuration 的 Redirect URLs 添加本机回调白名单：`http://127.0.0.1:43127/auth/callback?state=*`。若使用 localhost 或其他固定端口，单独添加相应地址；不要允许任意域名跳转。当前预览端口使用 43134。可将 Site URL 设为本机首页。
 4. 把 `cloud.env.example` 复制为 `.env`，填写项目 URL 和 **publishable key**（也兼容 legacy anon key）。不要填写 secret / service_role 管理员密钥。应用会拒绝已知管理员密钥格式。
-5. 使用 Node 20.6+：`node --env-file=.env server.js`。环境变量只由服务端读取，页面只获取是否启用的状态。现有 `pnpm start` 也支持预先设置的环境变量；不会自动读取 `.env`。
-6. 打开侧栏“账户”，填写邮箱、发送验证码、验证登录。登录后看到独立的账户收藏库；点击“将本地收藏复制到账户”才会上传原有收藏。
+5. 使用 Node 20.6+：`node --env-file=.env server.js`。已有 `pnpm start` 支持预先设置的环境变量，不会自动读取 .env。修改端口需同时设置 CODELINGO_PORT 并更新回调白名单。
+6. 打开侧栏“账户”→“使用 GitHub 登录”，在新窗口授权，然后回到原应用。只用于登录身份，不请求仓库读写权限。登录窗口不会刷新原编辑器或清空内存中的 AI 配置；登录不会自动上传原本地收藏。
 
-项目未包含云凭证，也未创建云项目或购买服务。托管服务的费用、地区和邮件服务需由项目所有者选择。本机服务器仍只绑定 127.0.0.1，包含桌面操作接口，**不能直接改为公网监听来充当网站后端**。
+这一方案不需要购买发信域名、SMTP 或自有服务器。在免费额度内使用 Supabase；免费项目仍有容量、流量及不活跃暂停等限制，以官方套餐为准。当前不提供邮箱验证码登录。
+
+项目未包含云凭证，也未创建云项目或购买服务。云项目所属账号和地区需由项目所有者选择。本机服务器仍只绑定 127.0.0.1，包含桌面操作接口，**不能直接改为公网监听来充当网站后端**。
 
 ## 数据和同步行为
 
@@ -25,8 +27,8 @@
 
 ## 验证和上线前缺口
 
-本地自动测试使用模拟服务，覆盖邮箱身份核验、过期/退出、账户隔离、限流、冲突、断网保留、损坏存储和保存期间退出等情况。模拟测试不能证明实际 Supabase RLS 配置正确。
+本地自动测试使用模拟服务，不会访问 GitHub 或 Supabase，覆盖GitHub 身份核验和 PKCE 单次回调绑定、过期/退出、账户隔离、限流、冲突、断网保留、损坏存储和保存期间退出等情况。模拟测试不能证明实际 Supabase RLS 配置正确。
 
-在一次性测试项目执行 `supabase/isolation-test.sql`，确认两账户读写隔离和旧版本写入被拒绝（脚本最后回滚）。随后用两封真实邮箱、两个浏览器完成登录、收藏、退出、跨设备冲突和断网恢复验收。没有云项目时这两项无法执行，不能称为已上线或已通过生产验收。
+在一次性测试项目执行 `supabase/isolation-test.sql`，确认两账户读写隔离和旧版本写入被拒绝（脚本最后回滚）。随后用两个真实 GitHub 账户、两个浏览器完成授权成功/拒绝、关闭登录窗口、取消与过期、收藏、退出、跨设备冲突和断网恢复验收。没有云项目时这两项无法执行，不能称为已上线或已通过生产验收。
 
-参考：[邮箱 OTP](https://supabase.com/docs/guides/auth/auth-email-passwordless)、[SMTP](https://supabase.com/docs/guides/auth/auth-smtp)、[行级权限](https://supabase.com/docs/guides/database/postgres/row-level-security)、[Auth REST API](https://github.com/supabase/auth/blob/master/openapi.yaml)。
+参考：[GitHub 登录](https://supabase.com/docs/guides/auth/social-login/auth-github)、[跳转白名单](https://supabase.com/docs/guides/auth/redirect-urls)、[免费套餐](https://supabase.com/pricing)、[行级权限](https://supabase.com/docs/guides/database/postgres/row-level-security)。

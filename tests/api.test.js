@@ -33,10 +33,11 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  r=await post('ask',{code:'function f(x){return x}',question:'解释 x',selection:{start:1,end:1},config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.match(r.body.answer,/模拟服务/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).selectedSource.code,'function f(x){return x}');
  r=await post('ask',{code:'const x = 1;',question:'解释 x',knowledge:true,token:{line:1,startColumn:6,endColumn:7,text:'fake'},config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.equal(r.body.knowledge,undefined);assert.match(r.body.answer,/参数名/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).selectedToken.text,'x');
  r=await post('prepare',{code:'{\n&#x20; "name": "x"\n}'});assert.ok(r.body.changes.length);assert.ok(!r.body.code.includes('&#x20;'));
- for(const asset of ['account.js','library-store.js'])assert.equal((await fetch(base+'/'+asset)).status,200);
+ for(const asset of ['account.js','library-store.js','account-callback.js'])assert.equal((await fetch(base+'/'+asset)).status,200);
  assert.equal((await fetch(base+'/api/account/status',{method:'POST'})).status,403);
+ const callback=await fetch(base+'/auth/callback?state=invalid&code=do-not-reflect');const callbackBody=await callback.text();assert.match(callbackBody,/登录未完成/);assert.ok(!callbackBody.includes('do-not-reflect'));assert.equal(callback.headers.get('referrer-policy'),'no-referrer');
  const accountStatus=await post('account/status',{});assert.equal(accountStatus.status,200);assert.equal(accountStatus.body.enabled,false);
- assert.equal((await post('account/send-code',{email:'test@example.com'})).status,503);
+ assert.equal((await post('account/github-start',{})).status,503);
  const samples=await(await fetch(base+'/api/examples',{headers:{'X-CodeLingo-Token':token}})).json();assert.equal(samples.length,require('./corpus/manifest.json').filter(x=>x.licenseRetrieved).length);assert.ok(samples.some(x=>x.name.endsWith('.java')));
  const beforeRepairCalls=calls.length;
  const ambiguous='class Box { read(value) { return value; } }';

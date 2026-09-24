@@ -165,4 +165,4 @@ pnpm run test:release
 
 ## 可选云端账户（开发中）
 
-支持邮箱验证码登录与独立账户收藏同步；AI 仍由用户配置。需要自行配置 Supabase 项目与邮件服务，未配置时仍使用本地收藏。部署步骤、同步边界和待验收项见 [云端账户说明](docs/CLOUD_ACCOUNTS.md)。
+支持 GitHub 登录与独立账户收藏同步；AI 仍由用户配置。需要自行配置 Supabase 免费项目与 GitHub OAuth 应用，未配置时仍使用本地收藏。部署步骤、同步边界和待验收项见 [云端账户说明](docs/CLOUD_ACCOUNTS.md)。
