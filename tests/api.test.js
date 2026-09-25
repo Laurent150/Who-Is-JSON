@@ -12,7 +12,7 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  else if(b.messages[0].content.includes('只返回 JSON'))content=JSON.stringify({language:'JavaScript',summary:'简单测试功能',purpose:'测试服务生成，非真实模型评估。',warnings:[],blocks:[{index:0,kind:'function',title:'f',start:1,end:1,purpose:'把收到的值交回去。',inputs:'x',output:'x',symbols:[]}]});else content='这是模拟服务的追问答复。';
  res.setHeader('Content-Type','application/json');res.end(JSON.stringify({choices:[{message:{content}}]}));
  });await new Promise(r=>mock.listen(0,'127.0.0.1',r));const mockBase='http://127.0.0.1:'+mock.address().port+'/v1';
- const child=spawn(process.execPath,[path.join(__dirname,'../server.js')],{env:{...process.env,CODELINGO_PORT:String(port)},windowsHide:true,stdio:['ignore','pipe','pipe']});
+ const child=spawn(process.execPath,[path.join(__dirname,'../server.js')],{env:{...process.env,WHO_SUPABASE_URL:"",WHO_SUPABASE_PUBLISHABLE_KEY:"",CODELINGO_PORT:String(port)},windowsHide:true,stdio:['ignore','pipe','pipe']});
  try{
  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('server start timeout')),20000);child.stdout.on('data',()=>{clearTimeout(timer);resolve();});child.on('error',reject);child.on('exit',code=>{clearTimeout(timer);reject(Error('server exited '+code));});});
  token=JSON.parse((await(await fetch(base+'/config.js')).text()).match(/window.APP_TOKEN=(.*);/)[1]);
@@ -33,6 +33,11 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  r=await post('ask',{code:'function f(x){return x}',question:'解释 x',selection:{start:1,end:1},config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.match(r.body.answer,/模拟服务/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).selectedSource.code,'function f(x){return x}');
  r=await post('ask',{code:'const x = 1;',question:'解释 x',knowledge:true,token:{line:1,startColumn:6,endColumn:7,text:'fake'},config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.equal(r.body.knowledge,undefined);assert.match(r.body.answer,/参数名/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).selectedToken.text,'x');
  r=await post('prepare',{code:'{\n&#x20; "name": "x"\n}'});assert.ok(r.body.changes.length);assert.ok(!r.body.code.includes('&#x20;'));
+ for(const asset of ['account.js','library-store.js','account-callback.js'])assert.equal((await fetch(base+'/'+asset)).status,200);
+ assert.equal((await fetch(base+'/api/account/status',{method:'POST'})).status,403);
+ const callback=await fetch(base+'/auth/callback?state=invalid&code=do-not-reflect');const callbackBody=await callback.text();assert.match(callbackBody,/登录未完成/);assert.ok(!callbackBody.includes('do-not-reflect'));assert.equal(callback.headers.get('referrer-policy'),'no-referrer');
+ const accountStatus=await post('account/status',{});assert.equal(accountStatus.status,200);assert.equal(accountStatus.body.enabled,false);
+ assert.equal((await post('account/github-start',{})).status,503);
  const samples=await(await fetch(base+'/api/examples',{headers:{'X-CodeLingo-Token':token}})).json();assert.equal(samples.length,require('./corpus/manifest.json').filter(x=>x.licenseRetrieved).length);assert.ok(samples.some(x=>x.name.endsWith('.java')));
  const beforeRepairCalls=calls.length;
  const ambiguous='class Box { read(value) { return value; } }';

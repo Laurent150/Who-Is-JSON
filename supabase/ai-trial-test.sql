@@ -1,0 +1,27 @@
+begin;
+do $$ declare q jsonb; r jsonb; a uuid:=gen_random_uuid(); b uuid:=gen_random_uuid(); begin
+ if has_function_privilege('authenticated','public.who_ai_reserve(text,uuid,bigint)','EXECUTE') or has_table_privilege('anon','public.who_ai_wallets','SELECT') then raise exception 'Unexpected privileges'; end if;
+ update public.who_ai_campaign set enabled=true,spent=0,held=0 where id;
+ q:=public.who_ai_quota('999999999999999999999991');
+ if (q->>'remaining')::bigint is distinct from 1000000 then raise exception 'Grant';end if;
+ r:=public.who_ai_reserve('999999999999999999999991',a,200000);
+ if r->>'ok' is distinct from 'true' then raise exception 'Reserve';end if;
+ r:=public.who_ai_reserve('999999999999999999999991',b,200000);
+ if r->>'error' is distinct from 'busy' then raise exception 'Concurrent wallet';end if;
+ perform public.who_ai_settle(a,100000);
+ perform public.who_ai_settle(a,100000);
+ q:=public.who_ai_quota('999999999999999999999991');
+ if (q->>'remaining')::bigint is distinct from 900000 then raise exception 'Duplicate settlement';end if;
+ update public.who_ai_wallets set last_request=null where github_id='999999999999999999999991';
+ r:=public.who_ai_reserve('999999999999999999999991',a,1);
+ if r->>'error' is distinct from 'duplicate' then raise exception 'Replay';end if;
+ r:=public.who_ai_reserve('999999999999999999999991',b,1000000);
+ if r->>'error' is distinct from 'quota' then raise exception 'Wallet cap';end if;
+ update public.who_ai_campaign set spent=14900000 where id;
+ r:=public.who_ai_reserve('999999999999999999999992',b,200000);
+ if r->>'error' is distinct from 'quota' then raise exception 'Global cap';end if;
+ update public.who_ai_campaign set enabled=false where id;
+ r:=public.who_ai_reserve('999999999999999999999992',b,1);
+ if r->>'error' is distinct from 'disabled' then raise exception 'Kill switch';end if;
+end $$;
+rollback;

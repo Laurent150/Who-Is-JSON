@@ -1,6 +1,6 @@
 const KNOWLEDGE_KEY = 'whoisjson.knowledge.v1';
 function knowledgeSaved() {
-    const raw = localStorage.getItem(KNOWLEDGE_KEY);
+    const raw = WhoLibraryStore.getItem(KNOWLEDGE_KEY);
     if (!raw)
         return [];
     const items = JSON.parse(raw);
@@ -12,7 +12,7 @@ function knowledgeSaved() {
 }
 function saveKnowledge(card, source, button) { try {
     const next = WhoKnowledge.merge(knowledgeSaved(), card, source);
-    localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(next));
+    WhoLibraryStore.setItem(KNOWLEDGE_KEY, JSON.stringify(next));
     button.textContent = '已收藏 · 可关联新源码';
     toast('已收藏知识点，相同知识点的源码会合并保存。');
 }
@@ -154,13 +154,13 @@ function renderKnowledgeLibrary(host) {
         article.append(detail);
         const meta=element('div',undefined,'knowledge-meta'),category=element('select');category.setAttribute('aria-label','修改知识分类：'+card.title);
         for(const name of WhoLibrary.categories){const option=element('option',name);option.value=name;category.append(option);}category.value=WhoLibrary.category({...card,category:item.category||card.category});
-        category.onchange=()=>{try{const next=knowledgeSaved();const entry=next.find(x=>x.id===item.id);if(!entry)throw Error('收藏已不存在，请重新打开收藏库。');entry.category=category.value;localStorage.setItem(KNOWLEDGE_KEY,JSON.stringify(next));library();}catch(e){category.value=WhoLibrary.category({...card,category:item.category||card.category});toast(e.message);}};
+        category.onchange=()=>{try{const next=knowledgeSaved();const entry=next.find(x=>x.id===item.id);if(!entry)throw Error('收藏已不存在，请重新打开收藏库。');entry.category=category.value;WhoLibraryStore.setItem(KNOWLEDGE_KEY,JSON.stringify(next));library();}catch(e){category.value=WhoLibrary.category({...card,category:item.category||card.category});toast(e.message);}};
         meta.append(category,element('span',WhoLibrary.tags(card).join(' · ')));if(card.origin==='ai')meta.append(element('span','AI 知识卡 · 示例为推演'));article.append(meta);
         const exportBtn = element('button', '导出知识卡');
         exportBtn.onclick = () => download('Who-Is-JSON-知识卡.md', '分类：'+WhoLibrary.category({...card,category:item.category||card.category})+'\n标签：'+WhoLibrary.tags(card).join('、')+'\n'+(card.origin==='ai'?'来源：AI 生成，示例为推演\n':'')+'\n'+WhoKnowledge.markdown(item));
         const del = element('button', '取消收藏');
         del.onclick = () => { try {
-            localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(knowledgeSaved().filter(x => x.id !== item.id)));
+            WhoLibraryStore.setItem(KNOWLEDGE_KEY, JSON.stringify(knowledgeSaved().filter(x => x.id !== item.id)));
             library();
         }
         catch {

@@ -3,6 +3,7 @@ const { spawn, execFile } = require('node:child_process');
 const { analyze } = require('./analyzer');
 const { recognize } = require('./local-ocr');
 const buildInfo = require('./build-info');
+const cloudAccount = require('./cloud-account').createCloudAccount({ env: require('./cloud-config').releaseCloudEnv() });
 const PORT = Number(process.env.CODELINGO_PORT || 43127), HOST = '127.0.0.1', token = crypto.randomBytes(24).toString('hex');
 const python = process.env.CODELINGO_PYTHON || 'python';
 let inbox = null, widget = null, capturing = false;
@@ -30,9 +31,22 @@ const server = http.createServer(async (req, res) => {
         const url = new URL(req.url, `http://${HOST}:${PORT}`);
         if (url.pathname === '/health')
             return json(res, 200, { app: 'CodeLingo', ...buildInfo, product: 'Who Is JSON', edition: buildInfo.version });
+        if (url.pathname === '/auth/callback') {
+            if (req.method !== 'GET') return json(res, 405, { error: 'GET required' });
+            let success = false;
+            try { success = (await cloudAccount.callback(url.searchParams)).ok; } catch {}
+            // No code, token or upstream error is reflected into HTML or logs.
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer', 'Content-Security-Policy': "default-src 'none'; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'none'" });
+            return res.end('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GitHub 登录</title><link rel="stylesheet" href="/style.css"><script defer src="/account-callback.js"></script><body><main><h1>' + (success ? 'GitHub 验证完成' : '登录未完成') + '</h1><p>' + (success ? '请回到 Who Is JSON 原窗口，账户会自动载入。可以关闭此页。' : '请回到 Who Is JSON 原窗口重新登录。') + '</p></main></body></html>');
+        }
         if (url.pathname.startsWith('/api/')) {
             if (req.headers['x-codelingo-token'] !== token)
                 return json(res, 403, { error: '请重新打开 CodeLingo 页面。' });
+            if (url.pathname.startsWith('/api/account/')) {
+                if (req.method !== 'POST') return json(res, 405, { error: 'POST required' });
+                try { return json(res, 200, await cloudAccount.handle(req, url.pathname.slice('/api/account/'.length), await body(req))); }
+                catch (e) { return json(res, e.status || 400, { error: e.message }); }
+            }
             if (req.method === 'GET' && url.pathname === '/api/examples') {
                 const dir = path.join(__dirname, 'tests', 'corpus');
                 const list = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')).filter(x => x.licenseRetrieved);
@@ -46,6 +60,7 @@ const server = http.createServer(async (req, res) => {
             if (req.method !== 'POST')
                 return json(res, 405, { error: '请求方式不支持' });
             const b = await body(req);
+            if (b.config?.provider === 'platform') b.config = cloudAccount.trialConfig(req);
             if (url.pathname === '/api/prepare') {
                 if(typeof b.code!=='string'||Buffer.byteLength(b.code)>100000)throw Error('请选择不超过 100 KB 的源码。');
                 return json(res, 200, require('./prepare').prepare(String(b.code || '')));
@@ -171,6 +186,9 @@ const server = http.createServer(async (req, res) => {
         routes['/studio.js']='studio.js';
         routes['/talk.js']='talk.js';
         routes['/reading-mode.js']='reading-mode.js';
+        routes['/library-store.js']='library-store.js';
+        routes['/account.js']='account.js';
+        routes['/account-callback.js']='account-callback.js';
         routes['/format-repair.js']='format-repair.js';
         routes['/knowledge-library.js']='knowledge-library.js';
         routes['/line-reading.js']='line-reading.js';
