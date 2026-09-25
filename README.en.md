@@ -10,7 +10,7 @@ An **AI-assisted code reading tool for vibe coders**, with interactive explanati
 
 **This is a documentation translation.** The application UI, built-in knowledge cards and default AI explanations are still primarily in Chinese. An interface language switch has not been implemented. Chinese button labels below help you find the current controls; linked supporting documents may also be in Chinese.
 
-The current version is **1.0.0 (source release)**. See the [release notes](docs/releases/v1.0.0.md). The app reads and explains code; it does not execute imported source. Successful parsing does not prove that a program runs correctly.
+The current version is **1.1.0 (Windows desktop release)**. See the [release notes](docs/releases/v1.1.0.md). The app reads and explains code; it does not execute imported source. Successful parsing does not prove that a program runs correctly.
 
 This is the clean public distribution of v0.8.0. Original feedback test snippets have been replaced with independently authored samples, while development history remains in the original private repository. See the [public migration notes](docs/PUBLIC_MIGRATION.md) and [contributors](CONTRIBUTORS.md).
 
@@ -51,6 +51,8 @@ This is the clean public distribution of v0.8.0. Original feedback test snippets
 
 ## Installation
 
+Download `Who-Is-JSON-1.1.0-Windows-x64-Setup.exe` from [Releases](https://github.com/Laurent150/Who-Is-JSON/releases/latest) for Windows 10/11 x64. It includes Node.js and Python and creates desktop shortcuts. The installer is unsigned. Cloud login, sync and AI require reachable network services. The instructions below are for running from source.
+
 ### Requirements
 
 - Node.js **20 or later**; **24** is recommended to match CI. Make sure `node` and its bundled `npm` are available.
@@ -85,7 +87,7 @@ pnpm start
 
 If Python is not found at the default location, set `CODELINGO_PYTHON` before starting. On macOS / Linux: `export CODELINGO_PYTHON="$(command -v python3)"`. In PowerShell: `$env:CODELINGO_PYTHON = (Get-Command python.exe).Source`.
 
-Open **http://127.0.0.1:43127**. Stop the server with `Ctrl+C`; use `CODELINGO_PORT` to change its port. The app only listens on localhost. Screenshot capture and the floating window are Windows-only. This release provides source to run after installing dependencies; no desktop installer was rebuilt.
+Open **http://127.0.0.1:43127**. Stop the server with `Ctrl+C`; use `CODELINGO_PORT` to change its port. The app only listens on localhost. Screenshot capture and the floating window are Windows-only. Windows users can download the EXE installer from Releases. Source ZIPs still require the development environment.
 
 ## Usage
 

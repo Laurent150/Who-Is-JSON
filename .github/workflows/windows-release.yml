@@ -1,0 +1,81 @@
+name: Windows installer
+on:
+  pull_request:
+    branches: [main]
+    paths: ['desktop/**', '.github/workflows/windows-release.yml', 'package.json']
+  push:
+    branches: [main]
+    paths: ['desktop/**', '.github/workflows/windows-release.yml', 'package.json']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12.14'
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413
+        with:
+          run_install: false
+      - name: Install and verify source
+        shell: pwsh
+        run: |
+          pnpm install --frozen-lockfile --ignore-scripts
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $env:CODELINGO_PYTHON = (Get-Command python).Source
+          pnpm test
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          pnpm run test:release
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Prepare installer toolchain
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory .runtime -Force | Out-Null
+          Invoke-WebRequest https://nodejs.org/dist/v24.19.0/LICENSE -OutFile .runtime/NODE-LICENSE.txt
+          Invoke-WebRequest https://downloads.sourceforge.net/project/nsis/NSIS%203/3.12/nsis-3.12.zip -OutFile .runtime/nsis.zip
+          if ((Get-FileHash .runtime/nsis.zip -Algorithm SHA256).Hash -ne '56581F90DB321581C5381193D796FFFCF2D24B2F8FED2160A6C6A3BAA67F2C4F') { throw 'NSIS hash mismatch' }
+          Expand-Archive .runtime/nsis.zip .runtime/nsis
+      - name: Build and verify installer
+        shell: pwsh
+        run: |
+          ./desktop/build.ps1 -Output .runtime/desktop-release -NodeRuntime (Get-Command node).Source -PythonRuntime (Split-Path (Get-Command python).Source) -NodeLicense .runtime/NODE-LICENSE.txt -MakeNSIS (Join-Path $PWD '.runtime/nsis/nsis-3.12/makensis.exe')
+          ./desktop/verify.ps1 -Build .runtime/desktop-release
+      - name: Upload tested installer
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: windows-installer
+          path: |
+            .runtime/desktop-release/*Setup.exe
+            .runtime/desktop-release/SHA256SUMS.txt
+            .runtime/desktop-release/installer-verification.json
+          if-no-files-found: error
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: windows-installer
+          path: release-assets
+      - name: Publish versioned Windows release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          gh release create "v$version" release-assets/*Setup.exe release-assets/SHA256SUMS.txt --target "$GITHUB_SHA" --title "Who Is JSON v$version · Windows 桌面版" --notes-file "docs/releases/v$version.md" --latest
