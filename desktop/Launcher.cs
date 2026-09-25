@@ -13,17 +13,18 @@ using System.Windows.Forms;
 using System.Reflection;
 [assembly: AssemblyTitle("Who Is JSON")]
 [assembly: AssemblyProduct("Who Is JSON Desktop")]
-[assembly: AssemblyVersion("0.7.3.1")]
+[assembly: AssemblyVersion("1.1.0.0")]
 static class DesktopHost {
  public static readonly string Root=AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
  public static readonly string Data=Path.Combine(Root,"data");
  public static readonly string Id=BitConverter.ToString(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(Root.ToLowerInvariant()))).Replace("-","").Substring(0,24);
  public static int Port=43127;
- static Process server;static readonly JavaScriptSerializer Json=new JavaScriptSerializer();
+ static bool selfTesting;static Process server;static readonly JavaScriptSerializer Json=new JavaScriptSerializer();
  public static string Url {get{return "http://127.0.0.1:"+Port;}}
  static string Request(string route,string body,string token) {
-  var req=(HttpWebRequest)WebRequest.Create(Url+route);req.Proxy=null;req.Timeout=1500;req.ReadWriteTimeout=5000;
-  if(body!=null){req.Method="POST";req.ContentType="application/json";if(token!=null)req.Headers["X-CodeLingo-Token"]=token;byte[] bytes=Encoding.UTF8.GetBytes(body);req.ContentLength=bytes.Length;using(var s=req.GetRequestStream())s.Write(bytes,0,bytes.Length);}
+  var req=(HttpWebRequest)WebRequest.Create(Url+route);req.Proxy=null;req.Timeout=15000;req.ReadWriteTimeout=15000;
+  if(token!=null)req.Headers["X-CodeLingo-Token"]=token;
+  if(body!=null){req.Method="POST";req.ContentType="application/json";byte[] bytes=Encoding.UTF8.GetBytes(body);req.ContentLength=bytes.Length;using(var s=req.GetRequestStream())s.Write(bytes,0,bytes.Length);}
   using(var res=req.GetResponse())using(var r=new StreamReader(res.GetResponseStream()))return r.ReadToEnd();
  }
  public static Dictionary<string,object> Health(){try{return Json.Deserialize<Dictionary<string,object>>(Request("/health",null,null));}catch{return null;}}
@@ -34,6 +35,7 @@ static class DesktopHost {
  public static void Start(){
   Directory.CreateDirectory(Data);var h=Health();if(IsOurs(h))return;
   // Keep the same origin when moving from the development launch to the installed edition.
+  if(selfTesting&&h!=null)throw new Exception("Self-test port became occupied; retry.");
   if(IsProduct(h)){Request("/api/quit","{}",Token());Thread.Sleep(800);}else if(h!=null)throw new Exception("启动位置已被其他程序使用，请关闭占用本地 43127 端口的程序后再试。");
   var node=Path.Combine(Root,"runtime","node","node.exe");var py=Path.Combine(Root,"runtime","python","python.exe");var app=Path.Combine(Root,"app");
   if(!File.Exists(node)||!File.Exists(py)||!File.Exists(Path.Combine(app,"server.js")))throw new Exception("安装文件不完整，请重新安装 Who Is JSON。");
@@ -46,16 +48,16 @@ static class DesktopHost {
  static readonly object LogLock=new object();static void Log(string line){if(line==null)return;try{lock(LogLock){var file=Path.Combine(Data,"desktop.log");if(File.Exists(file)&&new FileInfo(file).Length>2000000)File.WriteAllText(file,"");File.AppendAllText(file,DateTime.Now.ToString("s")+" "+line+Environment.NewLine);}}catch{}}
  public static void Open(){
   var edge=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),"Microsoft","Edge","Application","msedge.exe");if(!File.Exists(edge))edge=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"Microsoft","Edge","Application","msedge.exe");
-  if(File.Exists(edge)){var info=new ProcessStartInfo(edge,"--app="+Url+"/?v=0.7.3-desktop --no-first-run");info.UseShellExecute=false;Process.Start(info);}else Process.Start(new ProcessStartInfo(Url+"/?v=0.7.3-desktop"){UseShellExecute=true});
+  if(File.Exists(edge)){var info=new ProcessStartInfo(edge,"--app="+Url+"/?v=1.1.0-desktop --no-first-run");info.UseShellExecute=false;Process.Start(info);}else Process.Start(new ProcessStartInfo(Url+"/?v=1.1.0-desktop"){UseShellExecute=true});
  }
- public static void SelfTest(){try{Start();var payload=new Dictionary<string,object>{{"name","desktop-check.py"},{"code","def total(values):\n    result = 0\n    for value in values:\n        result += value\n    return result"}};var r=Json.Deserialize<Dictionary<string,object>>(Request("/api/analyze",Json.Serialize(payload),Token()));if(Convert.ToString(r["language"])!="Python"||Convert.ToString(r["status"])!="ready")throw new Exception("Bundled Python analysis failed");File.WriteAllText(Path.Combine(Data,"self-test.json"),Json.Serialize(new {pass=true,version="0.7.3",language=r["language"],health=Health()}));}finally{Stop();}}
+ public static void SelfTest(){try{Start();var payload=new Dictionary<string,object>{{"name","desktop-check.py"},{"code","def total(values):\n    result = 0\n    for value in values:\n        result += value\n    return result"}};var r=Json.Deserialize<Dictionary<string,object>>(Request("/api/analyze",Json.Serialize(payload),Token()));if(Convert.ToString(r["language"])!="Python"||Convert.ToString(r["status"])!="ready")throw new Exception("Bundled Python analysis failed");var account=Json.Deserialize<Dictionary<string,object>>(Request("/api/account/status","{}",Token()));if(!Convert.ToBoolean(account["enabled"]))throw new Exception("Bundled cloud configuration missing");File.WriteAllText(Path.Combine(Data,"self-test.json"),Json.Serialize(new {pass=true,version="1.1.0",language=r["language"],cloud=account,health=Health()}));}finally{Stop();}}
  [STAThread] public static int Main(string[] args){
   // Some launch hosts supply both Path and PATH. .NET Framework rejects that
   // when constructing a child environment; normalize only this process's copies.
   var env=Environment.GetEnvironmentVariables();var names=new Dictionary<string,List<string>>(StringComparer.OrdinalIgnoreCase);
   foreach(System.Collections.DictionaryEntry entry in env){var key=(string)entry.Key;if(!names.ContainsKey(key))names[key]=new List<string>();names[key].Add(key);}
   foreach(var group in names.Values)if(group.Count>1){string value=Convert.ToString(env[group[0]]);foreach(var key in group)Environment.SetEnvironmentVariable(key,null);Environment.SetEnvironmentVariable(group[0],value);}
-  bool test=Array.IndexOf(args,"--self-test")>=0;if(test)Port=43134;
+  bool test=Array.IndexOf(args,"--self-test")>=0;selfTesting=test;if(test){var listener=new System.Net.Sockets.TcpListener(IPAddress.Loopback,0);listener.Start();Port=((IPEndPoint)listener.LocalEndpoint).Port;listener.Stop();}
   Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
   try{if(Array.IndexOf(args,"--stop")>=0){Stop();return 0;}if(test){SelfTest();return 0;}
    bool created;using(var mutex=new Mutex(true,"Local\\WhoIsJSON-"+Id,out created)){if(!created){for(int i=0;i<40&&!IsOurs(Health());i++)Thread.Sleep(250);if(IsOurs(Health()))Open();return 0;}Application.Run(new DesktopContext());}

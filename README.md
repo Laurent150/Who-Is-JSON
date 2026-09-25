@@ -8,7 +8,7 @@
 
 Who Is JSON 是面向 **vibe coders（使用 AI 写代码的人）** 的 **AI 代码阅读工具**：导入源码，用中文理解用途、步骤和变量变化，点读不懂的词语，再生成便于复习或面试解释代码的讲解稿。对于能够本地解析的语言，还可以沿函数、分支和循环对照源码阅读。
 
-当前是 **1.0.0 正式版（源码发布）**，包含已合并的 AI 代码工作台、源码点读、独立讲解稿与新版使用文档。版本说明见 [v1.0.0 发布说明](docs/releases/v1.0.0.md)。它是阅读和解释工具，不会执行导入的代码，也不能以“解析成功”证明程序运行正确。
+当前是 **1.1.0 Windows 桌面版**，包含 AI 代码工作台、源码点读、独立讲解稿、GitHub 登录、收藏云同步与有限 AI 试用。版本说明见 [v1.1.0 发布说明](docs/releases/v1.1.0.md)。它是阅读和解释工具，不会执行导入的代码，也不能以“解析成功”证明程序运行正确。
 
 本仓库是 v0.8.0 的干净公开发行：应用代码保持一致，原始反馈测试片段已换成自编样本。开发历史保留在原私有仓库，迁移范围见 [公开迁移说明](docs/PUBLIC_MIGRATION.md)，开发者署名见 [贡献者](CONTRIBUTORS.md)。
 
@@ -49,6 +49,12 @@ Who Is JSON 是面向 **vibe coders（使用 AI 写代码的人）** 的 **AI �
 
 ## 安装方法
 
+### Windows 10 / 11 64 位（推荐）
+
+在 [Releases](https://github.com/Laurent150/Who-Is-JSON/releases/latest) 下载 `Who-Is-JSON-1.1.0-Windows-x64-Setup.exe`，双击安装后通过桌面快捷方式打开，无需安装 Node.js、Python 或 pnpm。使用 Edge 独立窗口，没有 Edge 时使用默认浏览器。关闭窗口后可从系统托盘完全退出。安装包未作商业代码签名；SHA-256 校验文件随 Release 提供。
+
+GitHub 登录、云同步和 AI 需要网络可达，不承诺各地区直连稳定。未登录时仍可使用本地解析与本地收藏。下方为源码运行方式。
+
 ### 准备环境
 
 - Node.js：最低 20；建议使用 CI 验证采用的 **24**，并确保 `node` 和随安装附带的 `npm` 可用。
@@ -83,7 +89,7 @@ pnpm start
 
 Python 不在默认位置时，启动前设置 `CODELINGO_PYTHON`。macOS / Linux 可运行 `export CODELINGO_PYTHON="$(command -v python3)"`；PowerShell 可运行 `$env:CODELINGO_PYTHON = (Get-Command python.exe).Source`。
 
-浏览器打开 **http://127.0.0.1:43127**。终端按 `Ctrl+C` 停止服务；可通过 `CODELINGO_PORT` 更换端口。应用只监听本机地址，Windows 截图与悬浮窗不适用于其他系统。本次 Release 提供源码，安装依赖后运行；没有重新构建桌面安装包。
+浏览器打开 **http://127.0.0.1:43127**。终端按 `Ctrl+C` 停止服务；可通过 `CODELINGO_PORT` 更换端口。应用只监听本机地址，Windows 截图与悬浮窗不适用于其他系统。源码 ZIP 需要按上述步骤安装依赖；Windows 普通用户请下载 EXE 安装包。
 
 ## 使用方法
 

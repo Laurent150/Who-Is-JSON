@@ -30,7 +30,7 @@ const server = http.createServer(async (req, res) => {
             return json(res, 403, { error: '不接受此来源' });
         const url = new URL(req.url, `http://${HOST}:${PORT}`);
         if (url.pathname === '/health')
-            return json(res, 200, { app: 'CodeLingo', ...buildInfo, product: 'Who Is JSON', edition: buildInfo.version });
+            return json(res, 200, { app: 'CodeLingo', ...buildInfo, product: 'Who Is JSON', edition: buildInfo.version, desktopId: process.env.WHO_DESKTOP_ID || null });
         if (url.pathname === '/auth/callback') {
             if (req.method !== 'GET') return json(res, 405, { error: 'GET required' });
             let success = false;

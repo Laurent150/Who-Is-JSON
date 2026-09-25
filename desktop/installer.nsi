@@ -10,10 +10,10 @@ InstallDirRegKey HKCU "Software\WhoIsJSON" "InstallDir"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
 SetCompressorDictSize 32
-VIProductVersion "0.7.3.1"
+VIProductVersion "1.1.0.0"
 VIAddVersionKey /LANG=2052 "ProductName" "Who Is JSON"
 VIAddVersionKey /LANG=2052 "FileDescription" "Who Is JSON 离线安装包"
-VIAddVersionKey /LANG=2052 "FileVersion" "0.7.3.1"
+VIAddVersionKey /LANG=2052 "FileVersion" "1.1.0.0"
 VIAddVersionKey /LANG=2052 "LegalCopyright" "Who Is JSON contributors"
 !define MUI_ICON "${PAYLOAD}\who.ico"
 !define MUI_UNICON "${PAYLOAD}\who.ico"
@@ -66,7 +66,7 @@ Section "程序与离线运行环境（必选）" SecMain
     StrCpy $DesktopDir "$DESKTOP"
     WriteRegStr HKCU "Software\WhoIsJSON" "InstallDir" "$INSTDIR"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "DisplayName" "Who Is JSON"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "DisplayVersion" "0.7.3.1"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "DisplayVersion" "1.1.0.0"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "Publisher" "Who Is JSON contributors"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "InstallLocation" "$INSTDIR"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "DisplayIcon" "$INSTDIR\WhoIsJSON.exe"

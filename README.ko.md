@@ -10,7 +10,7 @@ Who Is JSON은 **vibe coders(AI로 코드를 작성하는 사람)를 위한 AI �
 
 **이 한국어판은 문서 번역입니다.** 현재 앱 화면, 기본 지식 카드, AI의 기본 설명은 주로 중국어입니다. 화면 언어 전환은 아직 구현되지 않았습니다. 아래에는 현재 버튼을 찾을 수 있도록 중국어 이름을 함께 표기했습니다. 연결된 참고 문서도 중국어일 수 있습니다.
 
-현재 버전은 **1.0.0 정식 버전(소스 코드 배포)**입니다. [릴리스 노트](docs/releases/v1.0.0.md)를 참고하세요. 코드를 읽고 설명하는 도구이며 가져온 소스를 실행하지 않습니다. 분석 성공이 프로그램의 정상 동작을 보장하지는 않습니다.
+현재 버전은 **1.1.0 Windows 데스크톱 버전**입니다. [릴리스 노트](docs/releases/v1.1.0.md)를 참고하세요. 코드를 읽고 설명하는 도구이며 가져온 소스를 실행하지 않습니다. 분석 성공이 프로그램의 정상 동작을 보장하지는 않습니다.
 
 이 저장소는 v0.8.0의 공개 배포본입니다. 기존 피드백에서 가져온 테스트 조각은 자체 작성한 예제로 교체했으며, 개발 이력은 원래 비공개 저장소에 남아 있습니다. [공개 이전 안내](docs/PUBLIC_MIGRATION.md)와 [기여자](CONTRIBUTORS.md)를 참고하세요.
 
@@ -51,6 +51,8 @@ Who Is JSON은 **vibe coders(AI로 코드를 작성하는 사람)를 위한 AI �
 
 ## 설치
 
+Windows 10/11 x64용 `Who-Is-JSON-1.1.0-Windows-x64-Setup.exe`를 [Releases](https://github.com/Laurent150/Who-Is-JSON/releases/latest)에서 받으세요. Node.js와 Python이 포함되어 있으며 바탕 화면 바로 가기가 생성됩니다. 설치 파일에는 코드 서명이 없습니다. 클라우드 로그인·동기화·AI는 서비스에 연결할 수 있는 네트워크가 필요합니다. 아래는 소스 실행 방법입니다.
+
 ### 필요한 환경
 
 - Node.js: 최소 **20**, CI 환경에 맞춰 **24** 권장. `node`와 함께 설치되는 `npm`을 사용할 수 있어야 합니다.
@@ -85,7 +87,7 @@ pnpm start
 
 기본 위치에서 Python을 찾을 수 없다면 실행 전에 `CODELINGO_PYTHON`을 설정하세요. macOS / Linux: `export CODELINGO_PYTHON="$(command -v python3)"`. PowerShell: `$env:CODELINGO_PYTHON = (Get-Command python.exe).Source`.
 
-브라우저에서 **http://127.0.0.1:43127**을 엽니다. 터미널의 `Ctrl+C`로 종료하며, 포트는 `CODELINGO_PORT`로 변경합니다. 앱은 로컬 주소에서만 연결을 받습니다. 캡처와 플로팅 창은 Windows 전용입니다. 이번 릴리스는 의존성을 설치해 실행하는 소스 배포이며, 데스크톱 설치 파일을 새로 빌드하지 않았습니다.
+브라우저에서 **http://127.0.0.1:43127**을 엽니다. 터미널의 `Ctrl+C`로 종료하며, 포트는 `CODELINGO_PORT`로 변경합니다. 앱은 로컬 주소에서만 연결을 받습니다. 캡처와 플로팅 창은 Windows 전용입니다. Windows EXE 설치 파일은 Releases에서 받을 수 있습니다. 소스 ZIP은 개발 환경이 필요합니다.
 
 ## 사용 방법
 
