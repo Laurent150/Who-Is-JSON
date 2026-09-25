@@ -285,3 +285,14 @@ header{gap:20px;flex-wrap:wrap;height:auto;min-height:82px;padding-top:16px;padd
 .rail>button .rail-icon{height:28px;display:flex;align-items:center;justify-content:center}
 .rail>button small{height:18px;line-height:18px;padding:0}
 #accountGithub,#accountCancel{display:block;margin:20px auto}
+#account{padding:30px 34px;border-radius:24px}
+#accountLogin{text-align:center}#accountLogin h3{font-size:24px;margin:16px 0 12px}
+.account-welcome-mark{width:54px;height:54px;display:grid;place-items:center;margin:12px auto 20px;border-radius:16px;background:#edf3e5;color:#607f43;font-size:27px}
+#accountGithub.github-login{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px 20px;margin:26px auto 12px;font-size:16px}
+.github-login svg{width:22px;height:22px;flex:none}#accountSkip{border:0;background:transparent;color:#8b977e;display:block;margin:6px auto 16px}
+.account-identity{text-align:center;margin-top:25px}.account-identity strong{display:block;font-size:17px;color:#344b38;margin-top:5px}
+.account-trial{text-align:center;background:#f4f7ee;border-radius:17px;padding:24px 18px;margin:26px 0 30px}.account-trial p{margin:0 0 17px}.account-trial button{min-width:162px}
+.account-actions{justify-content:center;gap:14px;border-top:1px solid #e8ecdf;padding-top:25px}.account-actions button{flex:1;padding:13px 10px}
+#account .account-hint{text-align:center;font-size:12px;margin-top:18px}#accountGuest{border-top:1px solid #e8ecdf;margin-top:18px;padding-top:8px}
+#accountStatus{background:none;padding:0;color:#8d573b}#accountSyncToast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#2d4833;color:#f3f7ee;padding:14px 24px;border:0;border-radius:12px;box-shadow:0 8px 30px #20321e2a;font-size:14px;margin:0;max-width:90vw}
+@media(max-width:600px){#account{padding:24px 22px}.account-actions{gap:10px}}

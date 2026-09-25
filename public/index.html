@@ -12,20 +12,25 @@
 <dialog id="cleanup" aria-labelledby="cleanupTitle"><form method="dialog"><div class="dialog-head"><h2 id="cleanupTitle">核对修复建议</h2><button class="quiet" aria-label="关闭修复预览">✕</button></div></form><p id="cleanChanges" role="status"></p><div class="repair-comparison"><section><h3>原文</h3><pre id="cleanOriginal" aria-label="修复前的原文"></pre></section><section><h3>修复建议</h3><pre id="cleanPreview" aria-label="修复后的预览"></pre></section></div><p id="repairNotice"></p><div class="repair-actions"><button id="applyClean" class="primary" disabled>应用修复</button><button id="aiRepair">让 AI 提供修复建议</button><button id="cancelRepair" hidden>停止生成</button></div><p class="tiny">点击 AI 按钮会将本次源码发送到你配置的服务。</p></dialog><dialog id="settings"><form method="dialog"><div class="dialog-head"><h2>设置</h2><button class="quiet">✕</button></div></form><p>连接后，识别不确定时会用 AI 辅助判断语言；相关源码会发送到所用的 AI 服务。使用平台试用时，经由 Supabase 转发到 DeepSeek。密钥仅保留在当前页面内存，刷新后需重新输入。</p><label>兼容 OpenAI 的 API 基础地址<input id="base" placeholder="https://你的服务地址/v1"></label><label>模型名称<input id="model" placeholder="填写服务商提供的模型 ID"></label><label>API 密钥<input id="key" type="password" autocomplete="off" placeholder="本机无鉴权服务可以留空"></label><p class="tiny">本地截图识别自带语言包，不需要 API 密钥。使用 AI 识图时，请选择支持图片的模型。</p><button id="saveSettings" class="primary">应用设置</button><button id="disconnect" class="quiet">断开连接并清除配置</button></dialog>
 <dialog id="library"><form method="dialog"><div class="dialog-head"><h2>我的收藏</h2><button class="quiet">✕</button></div></form><p><span id="libraryLocation">本地收藏，仅保存在当前浏览器。</span></p><div id="savedCards"></div></dialog><section id="studioTokenPopup" role="dialog" aria-labelledby="studioTokenTitle" hidden><div><strong id="studioTokenTitle"></strong><button id="studioTokenClose" aria-label="关闭词语解释">×</button></div><span class="studio-provenance">AI 上下文解释</span><p id="studioTokenText"></p><section id="studioTokenLesson"></section></section><div id="toast" role="status" hidden></div>
 <dialog id="account" aria-labelledby="accountTitle">
+<div id="accountSyncToast" role="status" hidden>✓ 收藏已同步</div>
 <div class="dialog-head"><h2 id="accountTitle">我的账户</h2><button id="accountClose" aria-label="关闭账户窗口">✕</button></div>
 <p id="accountStatus" role="status" hidden></p>
 <div id="accountLogin">
-<p>使用 GitHub 账户登录，跨设备保留收藏。无需登录也能使用本地功能。</p>
-<button id="accountGithub" class="primary" disabled>使用 GitHub 登录</button>
+<div class="account-welcome-mark" aria-hidden="true">✦</div>
+<h3>登录后，直接用 AI 读代码</h3>
+<p>使用 GitHub 登录，领取 DeepSeek 赠送额度。<br>无需填写密钥，登录后自动接入。</p>
+<button id="accountGithub" class="primary github-login" disabled><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg><span>使用 GitHub 登录</span></button>
 <button id="accountCancel" hidden>取消登录</button>
-<p>登录不会自动上传本地收藏。平台试用可用时会自动连接 AI，也可使用自己的服务。</p>
+<button id="accountSkip" class="quiet">先用本地模式</button>
+<p class="account-hint">赠送试用受可用额度限制，也可自行配置 AI。<br>登录不会自动上传本地收藏。</p>
 </div>
 <div id="accountSignedIn" hidden>
-<strong id="accountIdentity"></strong>
-<p id="accountTrial">正在检查 AI 试用状态…</p><button id="accountUseTrial" disabled>使用 AI 试用</button>
-<p>账户内新增或修改的收藏会同步到云端，包括关联源码。AI 密钥与未收藏的编辑器内容不会随收藏同步。</p>
-<div class="account-actions"><button id="accountSync">重试同步</button><button id="accountImport">将本地收藏复制到账户</button><button id="accountExport">导出本机账户备份</button><button id="accountBackup">导出替换前备份</button><button id="accountReload">重新载入云端收藏</button><button id="accountLogout">退出登录</button></div>
-<div id="accountReplace" hidden><p>将用云端版本替换本机账户收藏。请先导出备份；系统也会保留替换前的一份本机备份。</p><button id="accountReplaceConfirm">确认使用云端版本</button></div>
+<p class="account-identity">已登录 GitHub 账号：<strong id="accountIdentity"></strong></p>
+<section class="account-trial"><p id="accountTrial">正在检查 AI 试用状态…</p><button id="accountUseTrial" disabled>使用 AI 试用</button></section>
+<div class="account-actions"><button id="accountSync">刷新云端收藏</button><button id="accountLogout">退出登录</button></div>
+<p class="account-hint">收藏及关联源码自动同步到当前账户。</p>
+<div id="accountGuest" hidden><p>发现本地收藏，要复制到当前账户吗？</p><button id="accountImport">复制到当前账户</button><button id="accountGuestSkip">暂不导入</button></div>
+<div id="accountReplace" hidden><p>本机与云端收藏有冲突，本机内容已保留。可保留本机修改稍后处理，或先导出备份，再使用云端版本。</p><button id="accountExport">导出本机备份</button><button id="accountReplaceConfirm">使用云端版本</button><button id="accountKeepLocal">保留本机修改</button></div>
 </div>
 </dialog>
 </body></html>

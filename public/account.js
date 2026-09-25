@@ -1,7 +1,26 @@
 (() => {
   let session = '', user = null, epoch = 0, syncing = false, timer, blocked = false;
   const store = window.WhoLibraryStore;
-  let loginAttempt = null, loginTimer;
+  let loginAttempt = null, loginTimer, syncWork, toastTimer;
+  try { window.WhoTrialOptOut = sessionStorage.getItem('who.trial.off') === '1'; } catch {}
+  function trialActive() { return typeof effectiveConfig === 'function' ? effectiveConfig().provider === 'platform' : window.WhoTrial.enabled && !window.WhoTrialOptOut; }
+  function trialView() {
+    const active = trialActive();
+    $('accountUseTrial').textContent = active ? '取消 AI 试用' : '使用 AI 试用';
+    $('accountUseTrial').disabled = !active && !window.WhoTrial.enabled;
+    if (active) $('accountTrial').textContent = '正在使用 DeepSeek AI 试用';
+    else if (window.WhoTrial.enabled) $('accountTrial').textContent = '可使用 AI 试用，也可自行配置服务。';
+  }
+  function setTrial(on) {
+    window.WhoTrialOptOut = !on;
+    try { sessionStorage.setItem('who.trial.off', on ? '0' : '1'); } catch {}
+    if (typeof config !== 'undefined') config = {};
+    if (typeof analysisAbort !== 'undefined') analysisAbort?.abort();
+    if (typeof studioReset === 'function') studioReset();
+    if (typeof resetTalk === 'function') resetTalk();
+    if (typeof connection === 'function') connection();
+    trialView();
+  }
   window.WhoAccountSession = () => session;
   window.WhoTrial = { enabled: false };
   async function trialQuota() {
@@ -17,13 +36,11 @@
       window.WhoTrial = { enabled: false };
       $('accountTrial').textContent = '平台试用暂不可用，仍可自行配置 AI。';
     }
-    $('accountUseTrial').disabled = !window.WhoTrial.enabled;
+    trialView();
     if (typeof connection === 'function') connection();
   }
   $('accountUseTrial').onclick = () => {
-    window.WhoTrialOptOut = false;
-    if (typeof config !== 'undefined') config = {};
-    if (typeof connection === 'function') connection();
+    setTrial(!trialActive());
   };
   window.WhoRefreshTrial = () => { if (user) return trialQuota(); };
   try { session = sessionStorage.getItem('who.account.session') || ''; } catch {}
@@ -48,24 +65,27 @@
     note(error.name === 'TimeoutError' ? '同步超时，本机修改已保留，可以重试。' : error.message);
     if (error.status === 401) note(user ? '登录已过期。本机修改已保留，请退出后重新登录。' : 'GitHub 登录未完成或已过期，请重新登录。');
   }
-  async function sync() {
-    if (!user || syncing || blocked) return;
+  function sync() {
+    if (syncing) return syncWork;
+    if (!user || blocked) return Promise.resolve(false);
     const currentEpoch = epoch, currentUser = user;
     syncing = true;
+    syncWork = (async () => {
     try {
       const snapshot = store.snapshot();
-      if (!snapshot.dirty) { note('收藏已同步。'); return; }
-      note('正在同步收藏…');
+      if (!snapshot.dirty) return true;
       const result = await call('save', { userId: currentUser.id, revision: snapshot.revision, payload: snapshot.payload });
-      if (epoch !== currentEpoch) return;
-      store.acknowledged(result.revision, snapshot.sequence, snapshot.payload); note('收藏已同步。');
-    } catch (error) { if (epoch === currentEpoch) fail(error); }
+      if (epoch !== currentEpoch) return false;
+      store.acknowledged(result.revision, snapshot.sequence, snapshot.payload); note(''); return true;
+    } catch (error) { if (epoch === currentEpoch) { fail(error); if (error.status === 409) $('accountReplace').hidden = false; } return false; }
     finally {
       if (epoch === currentEpoch) {
         syncing = false;
         try { if (!blocked && store.snapshot().dirty) schedule(); } catch (error) { fail(error); }
       }
     }
+    })();
+    return syncWork;
   }
   function schedule() { clearTimeout(timer); timer = setTimeout(() => sync(), 500); }
   async function enter() {
@@ -73,7 +93,14 @@
     const remote = await call('library');
     if (ticket !== epoch) return;
     store.activate(remote.user.id, remote); user = remote.user; blocked = false;
-    refresh(); note(store.snapshot().dirty ? '本机有待同步修改，正在尝试同步。' : '已登录，收藏已从云端载入。'); schedule();
+    refresh(); note(''); schedule();
+    try {
+      const promptKey = 'who.guest.prompted.' + user.id;
+      const hasGuest = ['whoisjson.knowledge.v1','codelingo.cards'].some(k => JSON.parse(localStorage.getItem(k) || '[]').length > 0);
+      $('accountGuest').hidden = !hasGuest || localStorage.getItem(promptKey) === '1';
+      localStorage.setItem(promptKey, '1');
+      localStorage.setItem('who.welcome.seen', '1');
+    } catch { $('accountGuest').hidden = true; }
     void trialQuota();
   }
   async function action(button, work) {
@@ -81,8 +108,11 @@
     try { await work(); } catch (error) { fail(error); }
     finally { button.disabled = false; }
   }
-  $('accountBtn').onclick = () => $('account').showModal();
-  $('accountClose').onclick = () => $('account').close();
+  const dismiss = () => { try { localStorage.setItem('who.welcome.seen', '1'); } catch {} $('account').close(); };
+  $('accountBtn').onclick = () => { trialView(); $('account').showModal(); };
+  $('accountClose').onclick = dismiss;
+  $('accountSkip').onclick = dismiss;
+  $('account').oncancel = () => { try { localStorage.setItem('who.welcome.seen', '1'); } catch {} };
   function stopLogin() {
     const old = loginAttempt; loginAttempt = null; clearTimeout(loginTimer);
     $('accountGithub').disabled = false; $('accountCancel').hidden = true;
@@ -100,6 +130,8 @@
       loginAttempt = null; $('accountGithub').disabled = false; $('accountCancel').hidden = true;
       session = result.session;
       try { sessionStorage.setItem('who.account.session', session); } catch {}
+      window.WhoTrialOptOut = false;
+      try { sessionStorage.setItem('who.trial.off', '0'); } catch {}
       await enter();
     } catch (error) { if (loginAttempt === attempt) { stopLogin(); fail(error); } else if (session) fail(error); }
   }
@@ -125,21 +157,33 @@
     window.WhoTrial = { enabled: false };
     if (typeof connection === 'function') connection();
     try { sessionStorage.removeItem('who.account.session'); } catch {}
-    store.deactivate(); refresh(); note('已退出账户，回到原来的本地收藏。待同步修改仍保留在本机账户备份中。');
+    store.deactivate(); refresh(); note(''); $('accountReplace').hidden = true; $('accountGuest').hidden = true;
     try { await leaving; } catch {}
   });
-  $('accountSync').onclick = () => { blocked = false; sync(); };
-  $('accountImport').onclick = () => { try { store.importGuest(); blocked = false; sync(); } catch (error) { fail(error); } };
+  function syncedToast() { clearTimeout(toastTimer); $('accountSyncToast').hidden = false; toastTimer = setTimeout(() => { $('accountSyncToast').hidden = true; }, 2400); }
+  $('accountSync').onclick = () => action($('accountSync'), async () => {
+    const ticket = epoch;
+    blocked = false;
+    if (!await sync() || ticket !== epoch || !user) return;
+    clearTimeout(timer);
+    const before = JSON.stringify(store.snapshot());
+    if (store.snapshot().dirty) throw Error('刷新期间收藏发生了变化，本机修改已保留，请再刷新一次。');
+    const remote = await call('library');
+    if (ticket !== epoch || remote.user.id !== user?.id) return;
+    if (before !== JSON.stringify(store.snapshot())) throw Error('刷新期间收藏发生了变化，本机修改已保留，请再刷新一次。');
+    store.replace(remote); $('accountReplace').hidden = true; refresh(); note(''); syncedToast();
+  });
+  $('accountImport').onclick = () => { try { store.importGuest(); $('accountGuest').hidden = true; blocked = false; sync(); } catch (error) { fail(error); } };
+  $('accountGuestSkip').onclick = () => { $('accountGuest').hidden = true; };
   $('accountExport').onclick = () => { try { download('Who-Is-JSON-账户收藏备份.json', JSON.stringify(store.snapshot().payload, null, 2)); } catch (e) { fail(e); } };
-  $('accountBackup').onclick = () => { try { download('Who-Is-JSON-替换前备份.json', JSON.stringify(store.backup(), null, 2)); } catch (e) { fail(e); } };
-  $('accountReload').onclick = () => { $('accountReplace').hidden = false; };
+  $('accountKeepLocal').onclick = () => { $('accountReplace').hidden = true; };
   $('accountReplaceConfirm').onclick = () => action($('accountReplaceConfirm'), async () => {
     if (syncing) throw Error('请等待当前同步结束。');
     blocked = true; clearTimeout(timer);
     const ticket = epoch, before = JSON.stringify(store.snapshot()), remote = await call('library');
     if (ticket !== epoch || remote.user.id !== user?.id) return;
     if (before !== JSON.stringify(store.snapshot())) throw Error('载入期间收藏发生了变化，请导出备份后重试。');
-    store.replace(remote); blocked = false; $('accountReplace').hidden = true; refresh(); note('已载入云端版本，之前的本机版本仍保留在备份中。');
+    store.replace(remote); blocked = false; $('accountReplace').hidden = true; refresh(); note(''); syncedToast();
   });
   window.addEventListener('who-library-change', schedule);
   // Saving in another tab never silently overwrites this tab's remote revision.
@@ -150,6 +194,7 @@
     if (!result.enabled) return note('');
     note('');
     if (session) { try { await enter(); } catch (error) { fail(error); } }
+    else { try { if (!localStorage.getItem('who.welcome.seen')) $('account').showModal(); } catch {} }
   }).catch(fail);
   refresh();
 })();
