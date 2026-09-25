@@ -40,4 +40,4 @@ for p in files:
     if p.suffix in ('.js','.py','.ps1','.md','.txt','.json') and 'node_modules' not in p.parts and 'runtime' not in p.parts:
         text=p.read_text(encoding='utf-8-sig',errors='replace')
         if re.search(r'[A-Za-z]:[/\\]+Users[/\\]+[^/\\\s]+[/\\]',text) or '.codex/attachments' in text:raise ValueError('Personal path in '+str(p))
-print(json.dumps({'files':len(files),'bytes':sum(p.stat().st_size for p in files),'node':'24.19.0','python':'3.12.14'}))
+print(json.dumps({'files':len(files),'bytes':sum(p.stat().st_size for p in files),'node':subprocess.check_output([str(node),'--version'],text=True).strip(),'python':subprocess.check_output([str(py/'python.exe'),'--version'],text=True).strip()}))

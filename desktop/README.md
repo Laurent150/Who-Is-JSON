@@ -2,13 +2,13 @@
 
 核心应用版本：1.1.0。桌面包装版本：1.1.0.0。
 
-安装包使用 NSIS 3.12，按当前用户安装，不要求管理员权限；提供桌面/开始菜单快捷方式、Windows 卸载注册信息和卸载程序。运行文件包含 Node.js 24.19.0、Python 3.12.14 和应用所需依赖。
+安装包使用 NSIS 3.12，按当前用户安装，不要求管理员权限；提供桌面/开始菜单快捷方式、Windows 卸载注册信息和卸载程序。运行文件包含 Node.js 24.19.0、Python 3.12.10 和应用所需依赖。
 
 `WhoIsJSON.exe` 是 .NET Framework 桌面启动器，负责启动本地服务、打开 Edge 应用窗口和提供托盘退出菜单。没有 Edge 时使用默认浏览器。关闭显示窗口不会立刻停止后台服务，用户可从托盘退出。
 
 ## 构建
 
-安装锁定依赖后，从 Node.js 官方取得对应版本 LICENSE，准备 NSIS 3.12、Node.js 24.19.0 和 Python 3.12.14：
+安装锁定依赖后，从 Node.js 官方取得对应版本 LICENSE，准备 NSIS 3.12、Node.js 24.19.0 和 Python 3.12.10：
 
 ```powershell
 ./desktop/build.ps1 -Output .runtime/desktop-release -NodeRuntime (Get-Command node).Source -PythonRuntime (Split-Path (Get-Command python).Source) -NodeLicense ./NODE-LICENSE.txt -MakeNSIS ./nsis-3.12/makensis.exe
