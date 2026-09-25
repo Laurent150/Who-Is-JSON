@@ -5,9 +5,9 @@ function toast(s){$('toast').textContent=s;$('toast').hidden=false;clearTimeout(
 function effectiveConfig(){return window.WhoTrial?.enabled&&!window.WhoTrialOptOut&&!config.key?{provider:'platform',base:'https://api.deepseek.com',model:'deepseek-flash'}:config;}
 async function api(route,data,method='POST',signal){const payload={...data,readingMode};if(data&&Object.hasOwn(data,'config'))payload.config=effectiveConfig();try{const r=await fetch('/api/'+route,{signal:signal||AbortSignal.timeout(130000),method,headers:{'Content-Type':'application/json','X-CodeLingo-Token':window.APP_TOKEN,'X-Who-Session':window.WhoAccountSession?.()||''},...(method==='POST'?{body:JSON.stringify(payload)}:{})});const b=await r.json();if(!r.ok)throw Error(b.error||'操作未完成');return b;}finally{if(payload.config?.provider==='platform')void window.WhoRefreshTrial?.();}}
 function element(tag,text,cls){const el=document.createElement(tag);if(text!==undefined)el.textContent=String(text);if(cls)el.className=cls;return el;}
-function meta(){const n=$('source').value.split('\n').length;$('numbers').textContent=Array.from({length:n},(_,i)=>i+1).join('\n');$('sourceMeta').textContent=($('source').value?n:0)+' 行 · 原代码不会被执行';$('filename').textContent=fileName||'未命名片段';}
+function meta(){const n=$('source').value.split('\n').length;$('numbers').textContent=$('source').value?Array.from({length:n},(_,i)=>i+1).join('\n'):'';$('sourceMeta').textContent=($('source').value?n:0)+' 行 · 原代码不会被执行';$('filename').textContent=fileName||'未命名片段';}
 function invalidate(){resetTalk();studioReset();studioSource=null;analysisAbort?.abort();revision++;document.body.classList.remove('has-report');current=null;selected=null;presentation=null;$('scopeNotice').textContent='代码已变化，请重新生成。';$('results').hidden=true;$('empty').hidden=false;$('resultMode').textContent='等待分析';meta();if(typeof formatSourceChanged==='function')formatSourceChanged();}
-function setCode(code,name){$('examples').value='';$('exampleSource').hidden=true;$('source').value=code;fileName=name||'';invalidate();}
+function setCode(code,name){$('source').value=code;fileName=name||'';invalidate();}
 function setImage(data,name){revision++;imageData=data;$('preview').src=data;$('imageBox').hidden=false;$('ocrNotice').textContent='内置英文与简体中文语言包。识别后请对照图片核对代码。';setCode('',name||'截图.png');toast('图片已导入。点击「识别代码」，核对后再开始讲解。');}
 function settings(){for(const k of ['base','model','key'])$(k).value=config[k]||'';$('settings').showModal();}
 function connected(){const c=effectiveConfig();return !!(c.base&&c.model);}
@@ -90,9 +90,6 @@ function renderSymbols(host,symbols){
  host.append(section);
 }
 
-let exampleList=[];
-api('examples',null,'GET').then(list=>{exampleList=list;for(const [i,x]of list.entries()){const opt=element('option',x.name);opt.value=String(i);$('examples').append(opt);}}).catch(()=>{});
-$('examples').onchange=()=>{if($('examples').value==='')return;const x=exampleList[Number($('examples').value)];if(!x)return;removeImage();setCode(x.code,x.name);$('exampleSource').href=x.source;$('exampleSource').hidden=false;run();};
 function setMode(mode){mode=mode==='learn'?'map':mode;activeMode=mode;document.body.classList.toggle('line-mode',mode==='line'||mode==='map'||mode==='studio');for(const [key,panel,tab]of [['studio','studioPanel','studioTab'],['line','linePanel','lineTab'],['map','mapPanel','mapTab'],['talk','talkPanel','talkTab']]){$(panel).hidden=mode!==key;$(tab).setAttribute('aria-pressed',String(mode===key));}layoutFlowReading();closeStudioToken();}
 
 function renderTalk(){
