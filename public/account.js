@@ -2,6 +2,30 @@
   let session = '', user = null, epoch = 0, syncing = false, timer, blocked = false;
   const store = window.WhoLibraryStore;
   let loginAttempt = null, loginTimer;
+  window.WhoAccountSession = () => session;
+  window.WhoTrial = { enabled: false };
+  async function trialQuota() {
+    const at = epoch;
+    try {
+      const q = await call('trial-quota');
+      if (at !== epoch || !user) return;
+      if (![q.remaining,q.poolRemaining,q.held].every(x => Number.isSafeInteger(x) && x >= 0)) throw Error('额度数据异常');
+      window.WhoTrial = { enabled: q.enabled === true && q.remaining > 0 && q.poolRemaining > 0 };
+      $('accountTrial').textContent = window.WhoTrial.enabled ? '可使用 AI 试用，也可自行配置服务。' : '试用已结束或暂不可用，可配置自己的 AI。';
+    } catch {
+      if (at !== epoch) return;
+      window.WhoTrial = { enabled: false };
+      $('accountTrial').textContent = '平台试用暂不可用，仍可自行配置 AI。';
+    }
+    $('accountUseTrial').disabled = !window.WhoTrial.enabled;
+    if (typeof connection === 'function') connection();
+  }
+  $('accountUseTrial').onclick = () => {
+    window.WhoTrialOptOut = false;
+    if (typeof config !== 'undefined') config = {};
+    if (typeof connection === 'function') connection();
+  };
+  window.WhoRefreshTrial = () => { if (user) return trialQuota(); };
   try { session = sessionStorage.getItem('who.account.session') || ''; } catch {}
   const note = text => { $('accountStatus').textContent = text; $('accountStatus').hidden = !text; };
   async function call(route, data = {}) {
@@ -50,6 +74,7 @@
     if (ticket !== epoch) return;
     store.activate(remote.user.id, remote); user = remote.user; blocked = false;
     refresh(); note(store.snapshot().dirty ? '本机有待同步修改，正在尝试同步。' : '已登录，收藏已从云端载入。'); schedule();
+    void trialQuota();
   }
   async function action(button, work) {
     button.disabled = true;
@@ -97,6 +122,8 @@
   $('accountLogout').onclick = () => action($('accountLogout'), async () => {
     const leaving = call('logout');
     epoch++; clearTimeout(timer); user = null; session = ''; blocked = false; syncing = false;
+    window.WhoTrial = { enabled: false };
+    if (typeof connection === 'function') connection();
     try { sessionStorage.removeItem('who.account.session'); } catch {}
     store.deactivate(); refresh(); note('已退出账户，回到原来的本地收藏。待同步修改仍保留在本机账户备份中。');
     try { await leaving; } catch {}

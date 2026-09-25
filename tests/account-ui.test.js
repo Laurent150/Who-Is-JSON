@@ -10,6 +10,7 @@ function setup(){
   if(route==='github-start')return Response.json({ticket:'ticket',url:'https://example.supabase.co/auth/v1/authorize'});
   if(route==='github-poll')return Response.json({session:'opaque'});
   if(route==='library')return Response.json({user:{id:'a',email:'a@example.com'},revision:0,payload:{knowledge:[],cards:[]}});
+  if(route==='trial-quota')return Response.json({enabled:true,remaining:1000000,held:0,poolRemaining:15000000});
   if(route==='save')return new Promise(resolve=>pendingSave=()=>resolve(Response.json({revision:1})));
   return Response.json({ok:true});
  }});
@@ -24,4 +25,11 @@ test('UI login leaves guest data local and ignores a save finishing after logout
 });
 test('initial cloud status enables login without switching the local library',async()=>{
  const s=setup();await tick();assert.equal(s.node('accountLogin').hidden,false);assert.equal(s.node('accountGithub').disabled,false);assert.match(s.node('libraryLocation').textContent,/本地/);
+});
+test('trial UI shows availability without monetary balance and clears on logout',async()=>{
+ const s=setup();await tick();await s.login();await tick();
+ assert.match(s.node('accountTrial').textContent,/可使用 AI 试用/);
+ assert.doesNotMatch(s.node('accountTrial').textContent,/¥|余额|1000000|15/);
+ assert.equal(s.node('accountUseTrial').disabled,false);
+ await s.node('accountLogout').onclick();assert.equal(s.node('accountSignedIn').hidden,true);
 });

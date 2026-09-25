@@ -31,7 +31,10 @@ async function modelCall(config, messages, options = {}) {
     const timeout = AbortSignal.timeout(options.timeoutMs || 120000);
     const signal = options.signal ? AbortSignal.any([timeout, options.signal]) : timeout;
     try {
-        const response = await fetch(url, {method:'POST', redirect:'error', headers:{'Content-Type':'application/json', ...(config.key ? {Authorization:'Bearer '+config.key} : {})}, body:JSON.stringify(body), signal});
+        const response = typeof config.sponsoredCall === 'function'
+            ? Response.json(await config.sponsoredCall(body))
+            : await fetch(url, {method:'POST', redirect:'error', headers:{'Content-Type':'application/json', ...(config.key ? {Authorization:'Bearer '+config.key} : {})}, body:JSON.stringify(body), signal});
+        if (signal.aborted) throw Error('AI 请求已取消。');
         if (!response.ok) {
             const hints = {401:'密钥无效或未填写，请重新配置密钥。',402:'账户额度不足，请检查服务账户。',403:'服务拒绝访问，请检查账户权限或所在网络。',404:'接口或模型不存在，请检查基础地址与模型名称。',429:'请求过多或额度受限，请稍后重试。'};
             await response.body?.cancel();

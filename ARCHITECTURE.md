@@ -94,3 +94,5 @@ Python 的 `line_reading_python.py` 从 AST 与现有教学模型生成逐句 re
 `cloud-account.js` 仅承载 Supabase GitHub OAuth（PKCE）与收藏 RPC，由已有本机 API 令牌保护；上游访问令牌仅在服务内存中。`public/library-store.js` 为现有两种收藏提供本地/账户存储适配，`public/account.js` 处理登录、退出与版本冲突。数据库迁移启用 RLS，写入 RPC 从 auth.uid() 取所有者并原子比较版本。AI、解析器和源码解释流程不依赖账户服务。详见 docs/CLOUD_ACCOUNTS.md。
 
 GitHub 登录使用单次随机 state 与服务端 PKCE verifier，回调只完成换取身份；原页面携带独立随机 ticket 轮询取得本机会话。过期/取消/重复回调被拒绝，回调页不反射 code 或令牌；浏览器授权窗口与原编辑器分离。
+
+平台试用由 cloud-account.js 将已验证会话转发到 Supabase Edge Function；普通客户端无法选择代付模型或修改额度。函数验证 GitHub 身份，先原子预留、后按用量结算。个人 AI 配置仍可独立使用，密钥不进入发布配置。详见 docs/AI_TRIAL.md。

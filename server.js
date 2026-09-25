@@ -60,6 +60,7 @@ const server = http.createServer(async (req, res) => {
             if (req.method !== 'POST')
                 return json(res, 405, { error: '请求方式不支持' });
             const b = await body(req);
+            if (b.config?.provider === 'platform') b.config = cloudAccount.trialConfig(req);
             if (url.pathname === '/api/prepare') {
                 if(typeof b.code!=='string'||Buffer.byteLength(b.code)>100000)throw Error('请选择不超过 100 KB 的源码。');
                 return json(res, 200, require('./prepare').prepare(String(b.code || '')));

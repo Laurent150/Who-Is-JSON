@@ -30,11 +30,15 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
   const sessions = new Map(), limits = new Map(), flows = new Map();
   async function upstream(route, data, access, method = 'POST') {
     let response;
-    try { response = await fetcher(base + route, { method, signal: AbortSignal.timeout(15000), headers: {
+    try { response = await fetcher(base + route, { method, signal: AbortSignal.timeout(route === '/functions/v1/ai-trial' ? 125000 : 15000), headers: {
       apikey: key, ...(access ? { Authorization: 'Bearer ' + access } : {}), 'Content-Type': 'application/json'
     }, ...(method === 'GET' ? {} : { body: JSON.stringify(data) }) }); }
     catch { throw failure(503, '云端暂时不可用，本地收藏已保留，请稍后重试。'); }
     if (!response.ok) {
+      if (route === '/functions/v1/ai-trial') {
+        let data; try { data = await response.json(); } catch {}
+        throw failure(response.status, typeof data?.error === 'string' ? data.error.slice(0, 200) : '平台试用暂时不可用。');
+      }
       if (response.status === 401 || response.status === 403) throw failure(401, '登录已失效，请重新登录。');
       if (response.status === 429) throw failure(429, '请求过于频繁，请稍后重试。');
       throw failure(502, '云端操作未完成，请检查 GitHub 登录或云服务配置。');
@@ -116,6 +120,7 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
       return { session: id, user: flow.result.user };
     }
     const s = session(req);
+    if (route === 'trial-quota') return upstream('/functions/v1/ai-trial', { action: 'quota' }, s.access);
     if (route === 'logout') {
       sessions.delete(req.headers['x-who-session']);
       // Local session is invalid immediately even if remote sign-out is unavailable.
@@ -140,6 +145,11 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
     }
     throw failure(404, '未找到账户操作。');
   }
-  return { handle, callback };
+  function trialConfig(req) {
+    const s = session(req);
+    return { base: 'https://api.deepseek.com', model: 'deepseek-flash',
+      sponsoredCall: data => upstream('/functions/v1/ai-trial', data, s.access) };
+  }
+  return { handle, callback, trialConfig };
 }
 module.exports = { createCloudAccount, validateLibrary };
