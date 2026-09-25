@@ -42,8 +42,8 @@ jobs:
         run: |
           New-Item -ItemType Directory .runtime -Force | Out-Null
           Invoke-WebRequest https://raw.githubusercontent.com/nodejs/node/v24.19.0/LICENSE -OutFile .runtime/NODE-LICENSE.txt
-          Invoke-WebRequest https://downloads.sourceforge.net/project/nsis/NSIS%203/3.12/nsis-3.12.zip -OutFile .runtime/nsis.zip
-          if ((Get-FileHash .runtime/nsis.zip -Algorithm SHA256).Hash -ne '56581F90DB321581C5381193D796FFFCF2D24B2F8FED2160A6C6A3BAA67F2C4F') { throw 'NSIS hash mismatch' }
+          Invoke-WebRequest https://netactuate.dl.sourceforge.net/project/nsis/NSIS%203/3.12/nsis-3.12.zip -OutFile .runtime/nsis.zip
+          if ((Get-FileHash .runtime/nsis.zip -Algorithm SHA256).Hash -ne '56581F90DB321581C5381193D796FFFCF2D24B2F8FED2160A6C6A3BAA67F2C4F') { throw ('NSIS hash mismatch; received ' + (Get-Item .runtime/nsis.zip).Length + ' bytes') }
           Expand-Archive .runtime/nsis.zip .runtime/nsis
       - name: Build and verify installer
         shell: pwsh
