@@ -328,7 +328,7 @@ html[lang="en"] #empty{padding:32px 28px}html[lang="en"] #empty h2{white-space:p
 
 /* FIMI brand marks retain the previous header slot and sidebar icon size. */
 .header-brand{display:flex;align-items:center;width:8.9em;height:1.3em;flex-shrink:0;color:#29472f;font-weight:650;letter-spacing:.06em}
-.rail .fimi-logo{display:grid;place-items:center;background:transparent;letter-spacing:normal;line-height:normal;flex-shrink:0}.fimi-logo>svg{display:block;width:100%;height:100%}
+.rail .fimi-logo{display:grid;place-items:center;background:transparent;letter-spacing:normal;line-height:normal;flex-shrink:0}.fimi-logo>img{display:block;width:100%;height:100%}
 
 .footer-runtime{margin-left:auto}
 

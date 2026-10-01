@@ -43,13 +43,17 @@ static class DesktopHost {
   var info=new ProcessStartInfo(node,"\""+Path.Combine(app,"server.js")+"\"");info.WorkingDirectory=app;info.UseShellExecute=false;info.CreateNoWindow=true;info.RedirectStandardOutput=true;info.RedirectStandardError=true;
   info.EnvironmentVariables["CODELINGO_PORT"]=Port.ToString();info.EnvironmentVariables["CODELINGO_PYTHON"]=py;info.EnvironmentVariables["WHO_DESKTOP_ID"]=Id;info.EnvironmentVariables["PYTHONNOUSERSITE"]="1";info.EnvironmentVariables.Remove("PYTHONHOME");info.EnvironmentVariables.Remove("PYTHONPATH");
   server=new Process();server.StartInfo=info;server.OutputDataReceived+=(s,e)=>Log(e.Data);server.ErrorDataReceived+=(s,e)=>Log(e.Data);server.Start();server.BeginOutputReadLine();server.BeginErrorReadLine();
-  for(int i=0;i<50;i++){if(IsOurs(Health()))return;if(server.HasExited)throw new Exception("本地服务未能启动。请查看安装目录 data\\desktop.log。");Thread.Sleep(250);}
-  Stop();throw new Exception("启动超时。请重试，或查看安装目录 data\\desktop.log。");
+  for(int i=0;i<50;i++){if(IsOurs(Health()))return;if(server.HasExited)throw new Exception("本地服务未能启动。请Open installation folder data\\desktop.log。");Thread.Sleep(250);}
+  Stop();throw new Exception("启动超时。请重试，或Open installation folder data\\desktop.log。");
  }
  static readonly object LogLock=new object();static void Log(string line){if(line==null)return;try{lock(LogLock){var file=Path.Combine(Data,"desktop.log");if(File.Exists(file)&&new FileInfo(file).Length>2000000)File.WriteAllText(file,"");File.AppendAllText(file,DateTime.Now.ToString("s")+" "+line+Environment.NewLine);}}catch{}}
+ public static Rectangle InitialWindowBounds(Rectangle work){
+  int width=Math.Min(1440,(int)(work.Width*0.9)),height=Math.Min(900,(int)(work.Height*0.9));
+  return new Rectangle(work.Left+(work.Width-width)/2,work.Top+(work.Height-height)/2,width,height);
+ }
  public static void Open(){
   var edge=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),"Microsoft","Edge","Application","msedge.exe");if(!File.Exists(edge))edge=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"Microsoft","Edge","Application","msedge.exe");
-  if(File.Exists(edge)){var info=new ProcessStartInfo(edge,"--app="+Url+"/?v="+Version+"-desktop --no-first-run");info.UseShellExecute=false;Process.Start(info);}else Process.Start(new ProcessStartInfo(Url+"/?v="+Version+"-desktop"){UseShellExecute=true});
+  if(File.Exists(edge)){var bounds=InitialWindowBounds(Screen.FromPoint(Cursor.Position).WorkingArea);var info=new ProcessStartInfo(edge,"--app="+Url+"/?v="+Version+"-desktop --no-first-run --window-size="+bounds.Width+","+bounds.Height+" --window-position="+bounds.Left+","+bounds.Top);info.UseShellExecute=false;Process.Start(info);}else Process.Start(new ProcessStartInfo(Url+"/?v="+Version+"-desktop"){UseShellExecute=true});
  }
  public static void SelfTest(){try{Start();var payload=new Dictionary<string,object>{{"name","desktop-check.py"},{"code","def total(values):\n    result = 0\n    for value in values:\n        result += value\n    return result"}};var r=Json.Deserialize<Dictionary<string,object>>(Request("/api/analyze",Json.Serialize(payload),Token()));if(Convert.ToString(r["language"])!="Python"||Convert.ToString(r["status"])!="ready")throw new Exception("Bundled Python analysis failed");var account=Json.Deserialize<Dictionary<string,object>>(Request("/api/account/status","{}",Token()));if(!Convert.ToBoolean(account["enabled"]))throw new Exception("Bundled cloud configuration missing");File.WriteAllText(Path.Combine(Data,"self-test.json"),Json.Serialize(new {pass=true,version=Version,language=r["language"],cloud=account,health=Health()}));}finally{Stop();}}
  [STAThread] public static int Main(string[] args){
@@ -70,8 +74,8 @@ sealed class DesktopContext:ApplicationContext {
  NotifyIcon tray;Form splash;System.Windows.Forms.Timer timer;
  public DesktopContext(){
   tray=new NotifyIcon();tray.Text="FIMI";tray.Icon=Icon.ExtractAssociatedIcon(Application.ExecutablePath);tray.Visible=true;
-  var menu=new ContextMenuStrip();menu.Items.Add("打开 FIMI",null,(s,e)=>DesktopHost.Open());menu.Items.Add("查看安装目录",null,(s,e)=>Process.Start(new ProcessStartInfo(DesktopHost.Root){UseShellExecute=true}));menu.Items.Add("退出 FIMI",null,(s,e)=>ExitThread());tray.ContextMenuStrip=menu;tray.DoubleClick+=(s,e)=>DesktopHost.Open();
-  splash=new Form{Text="FIMI",Width=390,Height=155,StartPosition=FormStartPosition.CenterScreen,FormBorderStyle=FormBorderStyle.FixedDialog,MaximizeBox=false,MinimizeBox=false,ControlBox=false};splash.Controls.Add(new Label{Text="正在启动本地代码讲解工具…",Dock=DockStyle.Fill,TextAlign=ContentAlignment.MiddleCenter,Font=new Font("Microsoft YaHei UI",11)});splash.Show();
+  var menu=new ContextMenuStrip();menu.Items.Add("Open FIMI",null,(s,e)=>DesktopHost.Open());menu.Items.Add("Open installation folder",null,(s,e)=>Process.Start(new ProcessStartInfo(DesktopHost.Root){UseShellExecute=true}));menu.Items.Add("Quit FIMI",null,(s,e)=>ExitThread());tray.ContextMenuStrip=menu;tray.DoubleClick+=(s,e)=>DesktopHost.Open();
+  splash=new Form{Text="FIMI",Icon=Icon.ExtractAssociatedIcon(Application.ExecutablePath),Width=390,Height=155,StartPosition=FormStartPosition.CenterScreen,FormBorderStyle=FormBorderStyle.FixedDialog,MaximizeBox=false,MinimizeBox=false,ControlBox=false};splash.Controls.Add(new Label{Text="Starting FIMI…",Dock=DockStyle.Fill,TextAlign=ContentAlignment.MiddleCenter,Font=new Font("Microsoft YaHei UI",11)});splash.Show();
   Task.Run(()=>DesktopHost.Start()).ContinueWith(t=>splash.BeginInvoke((Action)(()=>{splash.Hide();if(t.IsFaulted){MessageBox.Show(t.Exception.GetBaseException().Message,"FIMI");ExitThread();return;}DesktopHost.Open();timer=new System.Windows.Forms.Timer{Interval=3000};timer.Tick+=(s,e)=>{if(!DesktopHost.IsOurs(DesktopHost.Health()))ExitThread();};timer.Start();})));
  }
  protected override void ExitThreadCore(){if(timer!=null)timer.Dispose();DesktopHost.Stop();tray.Visible=false;tray.Dispose();splash.Dispose();base.ExitThreadCore();}

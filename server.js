@@ -199,10 +199,12 @@ const server = http.createServer(async (req, res) => {
         routes['/knowledge-library.js']='knowledge-library.js';
         routes['/line-reading.js']='line-reading.js';
         routes['/line-reading-ui.js']='line-reading-ui.js';
+        routes['/favicon.ico']='favicon.ico';
+        routes['/fimi.svg']='fimi.svg';
         const file = routes[url.pathname];
         if (!file)
             return json(res, 404, { error: '未找到' });
-        res.writeHead(200, { 'Content-Type': file.endsWith('.html') ? 'text/html; charset=utf-8' : file.endsWith('.css') ? 'text/css' : 'application/javascript', 'Content-Security-Policy': "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'", 'X-Content-Type-Options': 'nosniff' });
+        res.writeHead(200, { 'Content-Type': file.endsWith('.html') ? 'text/html; charset=utf-8' : file.endsWith('.css') ? 'text/css' : file.endsWith('.ico') ? 'image/x-icon' : file.endsWith('.svg') ? 'image/svg+xml' : 'application/javascript', 'Content-Security-Policy': "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'", 'X-Content-Type-Options': 'nosniff' });
         res.end(fs.readFileSync(path.join(root, file)));
     }
     catch (e) {

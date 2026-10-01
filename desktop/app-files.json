@@ -190,5 +190,7 @@
   "tests/holdout/manifest.json",
   "tests/holdout/node-jsonfile.js",
   "tests/holdout/node-jsonfile.js.LICENSE",
-  "widget.ps1"
+  "widget.ps1",
+  "public/fimi.svg",
+  "public/favicon.ico"
 ]
