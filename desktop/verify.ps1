@@ -42,8 +42,13 @@ if ($signing.signed) {
 }
 $shell = New-Object -ComObject WScript.Shell
 foreach ($where in @('Desktop','StartMenu')) {
-  $shortcut = $shell.CreateShortcut((Join-Path $target "test-shortcuts/$where/FIMI.lnk"))
-  if ($shortcut.TargetPath -ne (Join-Path $target 'WhoIsJSON.exe')) { throw 'Incorrect shortcut target' }
+  $shortcutPath = Join-Path $target "test-shortcuts/$where/FIMI.lnk"
+  if (-not (Test-Path -LiteralPath $shortcutPath -PathType Leaf)) { throw "Missing shortcut: $shortcutPath" }
+  $shortcut = $shell.CreateShortcut($shortcutPath)
+  $expectedTarget = Join-Path $target 'WhoIsJSON.exe'
+  if ($shortcut.TargetPath -ne $expectedTarget) {
+    throw ('Incorrect shortcut target: ' + (@{location=$where;expected=$expectedTarget;actual=$shortcut.TargetPath;actualExists=([bool]$shortcut.TargetPath -and (Test-Path -LiteralPath $shortcut.TargetPath -PathType Leaf))} | ConvertTo-Json -Compress))
+  }
 }
 Run-Checked (Join-Path $target 'WhoIsJSON.exe') '--self-test'
 $test = Get-Content (Join-Path $target 'data/self-test.json') -Raw | ConvertFrom-Json
