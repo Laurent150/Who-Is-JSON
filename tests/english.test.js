@@ -91,6 +91,16 @@ test('browser language defaults survive unavailable storage and Chinese remains 
  assert.equal(ctx.WhoI18n.locale,'en');assert.equal(ctx.WhoI18n.t('工作台'),'Workspace');
  ctx.WhoI18n.set('zh-CN');assert.equal(ctx.WhoI18n.t('工作台'),'工作台');
 });
+test('first use defaults to English even on Chinese systems, while explicit language choices persist',()=>{
+ for(const language of ['zh-CN','zh-TW','en-US'])for(const saved of [null,'invalid','en','zh-CN']){
+  const ctx=vm.createContext({navigator:{language},localStorage:{getItem:()=>saved,setItem(){}},WhoEnglish:{}});
+  vm.runInContext(fs.readFileSync(require.resolve('../public/i18n'),'utf8'),ctx);
+  assert.equal(ctx.WhoI18n.locale,saved==='zh-CN'?'zh-CN':'en');
+ }
+ const ctx=vm.createContext({navigator:{language:'zh-CN'},localStorage:{getItem(){throw Error('blocked');}}});
+ vm.runInContext(fs.readFileSync(require.resolve('../public/i18n'),'utf8'),ctx);
+ assert.equal(ctx.WhoI18n.locale,'en');
+});
 test('switching language cancels stale AI work without changing source or saved explanations',async()=>{
  const nodes=new Map([['scopeNotice',{textContent:'代码已变化，请重新生成。'}],['resultMode',{textContent:'等待分析'}],['analyzeBtn',{textContent:'查看整段结构 →'}]]),calls=[],saved={answer:'Original saved explanation'};
  const ctx=vm.createContext({document:{body:{classList:{contains:()=>false}}},busy:false,WhoEnglish:{'代码已变化，请重新生成。':'The code has changed.','等待分析':'Ready to analyze','查看整段结构 →':'Explore code structure →'},uiText:k=>({'专注讲稿':'Focus mode','代码已变化，请重新生成。':'The code has changed.','等待分析':'Ready to analyze','查看整段结构 →':'Explore code structure →'}[k]||k),WhoI18n:{locale:'zh-CN',normalize:v=>v,set(v){this.locale=v;}},revision:1,analysisAbort:{abort(){calls.push('abort');}},resetTalk(){calls.push('talk');},studioReset(){calls.push('studio');},studioSource:'old',applyLanguageUI(){},formatSourceChanged(){calls.push('repair');},meta(){},connection(){},render(){},Event:class{},window:{dispatchEvent(){}},$:id=>{if(!nodes.has(id))nodes.set(id,{});return nodes.get(id);},current:{mode:'ai',aiOverview:{summary:'旧回答'},blocks:[{code:'const 中文 = 1;',start:1,aiExplanation:{purpose:'旧解释'}}]},analyzedSource:'const 中文 = 1;',saved});

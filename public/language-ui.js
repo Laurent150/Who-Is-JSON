@@ -19,7 +19,7 @@ function registerLanguageUI(){
 }
 function applyLanguageUI(){
  document.documentElement.lang=WhoI18n.locale;
- document.title=WhoI18n.t('FIMI · 从功能读懂代码');
+ document.title='FIMI · Understand code, step by step';
  for(const entry of languageStatic){
   const {node,key,attribute}=entry;
   if(!node.isConnected)continue;

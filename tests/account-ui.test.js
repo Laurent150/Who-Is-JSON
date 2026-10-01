@@ -1,7 +1,8 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const tick=()=>new Promise(r=>setImmediate(r));
 function setup({pollError}={}){
- const nodes=new Map(),data=new Map(),events=new Map(),calls=[],timers=[];let pendingSave,conflict=false,remote={revision:0,payload:{knowledge:[],cards:[]}};
+ // These tests exercise the explicitly selected Chinese UI, not first-run defaults.
+ const nodes=new Map(),data=new Map([['whoisjson.locale','zh-CN']]),events=new Map(),calls=[],timers=[];let pendingSave,conflict=false,remote={revision:0,payload:{knowledge:[],cards:[]}};
  const node=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',value:'',hidden:false,open:false,showModal(){this.open=true},close(){this.open=false}});return nodes.get(id)};
  const storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};
  const context=vm.createContext({Event,AbortSignal,localStorage:storage,sessionStorage:storage,$:node,library(){},download(){},setTimeout:fn=>{timers.push(fn);return timers.length},clearTimeout(){},window:{open:()=>({opener:null,location:{},close(){}}),APP_TOKEN:'local-token',dispatchEvent:e=>events.get(e.type)?.(),addEventListener:(k,v)=>events.set(k,v)},fetch:async(url,options)=>{
