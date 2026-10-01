@@ -58,6 +58,7 @@ jobs:
             .runtime/desktop-release/*Setup.exe
             .runtime/desktop-release/SHA256SUMS.txt
             .runtime/desktop-release/installer-verification.json
+            .runtime/desktop-release/signing-status.json
           if-no-files-found: error
   publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -78,4 +79,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           version=$(node -p 'require("./package.json").version')
-          gh release create "v$version" release-assets/*Setup.exe release-assets/SHA256SUMS.txt --target "$GITHUB_SHA" --title "Who Is JSON v$version · Windows 桌面版" --notes-file "docs/releases/v$version.md" --latest
+          gh release create "v$version" release-assets/*Setup.exe release-assets/SHA256SUMS.txt --target "$GITHUB_SHA" --title "FIMI v$version · Windows 桌面版" --notes-file "docs/releases/v$version.md" --draft

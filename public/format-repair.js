@@ -1,3 +1,4 @@
+var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}/g,(m,n)=>n<values.length?String(values[n]):m));
 let repairSnapshot=null,repairProposal=null,repairController=null,repairUndo=null;
 
 function formatSuspicious(source){
@@ -15,7 +16,7 @@ function updateFormatHint(result){
  const source=$('source').value;
  const parseProblem=!!result&&(result.syntaxErrors||result.status==='invalid');
  $('formatHint').hidden=!source.trim()||!(formatSuspicious(source)||parseProblem||result?.formatChanges?.length);
- $('formatHintText').textContent=parseProblem?'解析发现问题，可核对格式或缺失内容':'可能存在复制格式问题';
+ $('formatHintText').textContent=parseProblem?uiText("解析发现问题，可核对格式或缺失内容"):uiText("可能存在复制格式问题");
 }
 function formatSourceChanged(){
  repairController?.abort();
@@ -44,7 +45,7 @@ function showRepair(proposal){
   const unchanged=id==='cleanOriginal'?unchangedBefore:unchangedAfter;
   lines.forEach((line,i)=>$(id).append(element('span',String(i+1).padStart(3)+'  '+line,'repair-line'+(!unchanged.has(i)?' changed':''))));
  }
- $('cleanChanges').textContent=(proposal.origin==='ai'?'AI 修复建议':'本地格式建议')+'：\n'+(proposal.changes.join('\n')||'未找到可确定的格式修复；请对照原文件，或请求 AI 建议。');
+ $('cleanChanges').textContent=(proposal.origin==='ai'?uiText("AI 修复建议"):uiText("本地格式建议"))+'：\n'+(proposal.changes.join('\n')||uiText("未找到可确定的格式修复；请对照原文件，或请求 AI 建议。"));
  $('repairNotice').textContent=proposal.origin==='ai'?(proposal.notice||''):'';
  $('repairNotice').hidden=!$('repairNotice').textContent;
  $('applyClean').disabled=proposal.code===repairSnapshot.code;
@@ -53,7 +54,7 @@ async function previewCleanup(){
  if(!$('source').value.trim())return;
  repairController?.abort();
  const snapshot={code:$('source').value,name:fileName,revision};repairSnapshot=snapshot;repairProposal=null;
- $('cleanOriginal').textContent=snapshot.code;$('cleanPreview').textContent='';$('cleanChanges').textContent='正在检查复制格式…';$('repairNotice').textContent='';$('applyClean').disabled=true;$('aiRepair').disabled=true;
+ $('cleanOriginal').textContent=snapshot.code;$('cleanPreview').textContent='';$('cleanChanges').textContent=uiText("正在检查复制格式…");$('repairNotice').textContent='';$('applyClean').disabled=true;$('aiRepair').disabled=true;
  if(!$('cleanup').open)$('cleanup').showModal();
  try {const result=await api('prepare',{code:snapshot.code});if(validRepair(snapshot))showRepair(result);}
  catch(e){if(validRepair(snapshot))$('cleanChanges').textContent=e.message;}
@@ -64,14 +65,14 @@ $('aiRepair').onclick=async()=>{
  const snapshot=repairSnapshot;if(!snapshot||!validRepair(snapshot))return;
  if(!connected()){settings();return;}
  const usedConfig=config,controller=new AbortController();repairController?.abort();repairController=controller;
- $('aiRepair').disabled=true;$('applyClean').disabled=true;$('cancelRepair').hidden=false;$('cleanChanges').textContent='AI 正在生成修复建议…';
+ $('aiRepair').disabled=true;$('applyClean').disabled=true;$('cancelRepair').hidden=false;$('cleanChanges').textContent=uiText("AI 正在生成修复建议…");
  try {
   const result=await api('repair',{code:snapshot.code,name:snapshot.name,config:usedConfig},'POST',AbortSignal.any([controller.signal,AbortSignal.timeout(130000)]));
   if(validRepair(snapshot)&&repairController===controller&&!controller.signal.aborted&&config===usedConfig)showRepair(result);
- }catch(e){if(validRepair(snapshot)&&repairController===controller)$('cleanChanges').textContent=controller.signal.aborted?'已停止。原文未修改。':e.name==='TimeoutError'?'等待超时，请重试。原文未修改。':e.message;}
+ }catch(e){if(validRepair(snapshot)&&repairController===controller)$('cleanChanges').textContent=controller.signal.aborted?uiText("已停止。原文未修改。"):e.name==='TimeoutError'?uiText("等待超时，请重试。原文未修改。"):e.message;}
  finally {
   if(repairController===controller){repairController=null;$('aiRepair').disabled=false;$('cancelRepair').hidden=true;
-   if(validRepair(snapshot)){$('applyClean').disabled=!repairProposal||repairProposal.code===snapshot.code;if(config!==usedConfig)$('cleanChanges').textContent='AI 配置已变化，请重新请求建议。';}
+   if(validRepair(snapshot)){$('applyClean').disabled=!repairProposal||repairProposal.code===snapshot.code;if(config!==usedConfig)$('cleanChanges').textContent=uiText("AI 配置已变化，请重新请求建议。");}
   }
  }
 };
@@ -82,10 +83,10 @@ $('applyClean').onclick=()=>{
  if(!snapshot||!proposal||!validRepair(snapshot)||repairController)return;
  const undo={before:snapshot.code,after:proposal.code,name:snapshot.name};
  repairSnapshot=null;repairProposal=null;$('cleanup').close();setCode(undo.after,undo.name);
- repairUndo=undo;$('repairUndo').hidden=false;toast('已应用修复。请核对后重新分析，也可以撤销。');
+ repairUndo=undo;$('repairUndo').hidden=false;toast(uiText("已应用修复。请核对后重新分析，也可以撤销。"));
 };
 $('undoRepair').onclick=()=>{
  const undo=repairUndo;if(!undo||$('source').value!==undo.after||fileName!==undo.name)return;
- repairUndo=null;setCode(undo.before,undo.name);toast('已恢复修复前的原文。');
+ repairUndo=null;setCode(undo.before,undo.name);toast(uiText("已恢复修复前的原文。"));
 };
 updateFormatHint();

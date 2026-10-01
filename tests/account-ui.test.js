@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const tick=()=>new Promise(r=>setImmediate(r));
-function setup(){
+function setup({pollError}={}){
  const nodes=new Map(),data=new Map(),events=new Map(),calls=[],timers=[];let pendingSave,conflict=false,remote={revision:0,payload:{knowledge:[],cards:[]}};
  const node=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',value:'',hidden:false,open:false,showModal(){this.open=true},close(){this.open=false}});return nodes.get(id)};
  const storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};
@@ -8,15 +8,24 @@ function setup(){
   const route=url.split('/').at(-1);calls.push({route,options});
   if(route==='status')return Response.json({enabled:true});
   if(route==='github-start')return Response.json({ticket:'ticket',url:'https://example.supabase.co/auth/v1/authorize'});
-  if(route==='github-poll')return Response.json({session:'opaque'});
+  if(route==='github-poll')return pollError ? Response.json({error:pollError},{status:503}) : Response.json({session:'opaque'});
   if(route==='library')return Response.json({user:{id:'a',email:'a@example.com'},...remote});
   if(route==='trial-quota')return Response.json({enabled:true,remaining:1000000,held:0,poolRemaining:15000000});
   if(route==='save')return new Promise(resolve=>pendingSave=()=>{if(conflict)return resolve(Response.json({error:'收藏版本冲突'},{status:409}));const saved=JSON.parse(options.body);remote={revision:saved.revision+1,payload:saved.payload};resolve(Response.json({revision:remote.revision}));});
   return Response.json({ok:true});
  }});
- for(const file of ['library-store','account'])vm.runInContext(fs.readFileSync(require.resolve('../public/'+file+'.js'),'utf8'),context);
- return {nodes,node,data,calls,timers,store:context.window.WhoLibraryStore,conflict:()=>conflict=true,finish:()=>pendingSave(),login:async()=>{await node('accountGithub').onclick();}};
+ for(const file of ['locale-en','i18n','library-store','account'])vm.runInContext(fs.readFileSync(require.resolve('../public/'+file+'.js'),'utf8'),context);
+ return {context,nodes,node,data,calls,timers,store:context.window.WhoLibraryStore,conflict:()=>conflict=true,finish:()=>pendingSave(),login:async()=>{await node('accountGithub').onclick();}};
 }
+
+test('login network failures keep their cause and translate when the dialog language changes',async()=>{
+ const message='云端暂时不可用，本地收藏已保留，请稍后重试。',s=setup({pollError:message});await tick();
+ assert.equal(s.node('accountStatus').hidden,true);
+ await s.login();assert.equal(s.node('accountStatus').textContent,message);assert.equal(s.node('accountGithub').disabled,false);
+ s.context.WhoI18n.set('en');s.context.window.dispatchEvent(new Event('who-language-change'));
+ assert.match(s.node('accountStatus').textContent,/cloud service is temporarily unavailable/);assert.doesNotMatch(s.node('accountStatus').textContent,/expired|[\u4e00-\u9fff]/);
+ s.context.WhoI18n.set('zh-CN');s.context.window.dispatchEvent(new Event('who-language-change'));assert.equal(s.node('accountStatus').textContent,message);
+});
 test('UI login leaves guest data local and ignores a save finishing after logout',async()=>{
  const s=setup();await tick();s.data.set('codelingo.cards','[{"id":1,"title":"guest","code":"x"}]');await s.login();assert.equal(s.calls.filter(x=>x.route==='save').length,0);
  s.store.setItem('codelingo.cards','[{"id":2,"title":"account","code":"y"}]');s.node('accountSync').onclick();await tick();assert.equal(s.calls.at(-1).route,'save');

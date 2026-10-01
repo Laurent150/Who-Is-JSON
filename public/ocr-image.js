@@ -1,7 +1,8 @@
+var uiText = (text,...values)=>globalThis.WhoI18n?globalThis.WhoI18n.t(text,...values):text.replace(/\{(\d+)\}/g,(m,n)=>n<values.length?String(values[n]):m);
 // Improve small screenshot legibility without changing its geometry or inventing characters.
 async function prepareOcrImage(source){
     const img=new Image();img.src=source;await img.decode();
-    if(img.naturalWidth*img.naturalHeight>16000000)throw Error('截图太大，请只保留要识别的代码区域。');
+    if(img.naturalWidth*img.naturalHeight>16000000)throw Error(uiText("截图太大，请只保留要识别的代码区域。"));
     const scale=Math.min(3,2400/Math.max(img.naturalWidth,img.naturalHeight));
     const canvas=document.createElement('canvas');canvas.width=Math.round(img.naturalWidth*scale);canvas.height=Math.round(img.naturalHeight*scale);
     const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);

@@ -1,4 +1,6 @@
-# Who Is JSON
+# FIMI
+
+FIMI 1.2.0 is a release candidate with Chinese and English UI and explanations. Who Is JSON 1.1.0 remains the published download. The legacy usage guide below describes 1.1.0; for current behavior and unsigned-installer limitations, see [1.2.0 release notes](docs/releases/v1.2.0.md) and [Windows installation](docs/WINDOWS_INSTALL.md). Japanese and Korean UI are not included.
 
 Use **解释风格** (Explanation style) in the header to switch between **零基础友好** (Beginner-friendly, the default) and **标准** (Standard). The browser remembers your choice. Beginner-friendly AI explanations focus on the immediate action in one or two short sentences, adding a small example only when useful. Local reference details can be expanded. Switching clears current AI explanations and the talk draft without changing source code or saved cards; generating again is an explicit action. Style constraints do not guarantee model accuracy.
 

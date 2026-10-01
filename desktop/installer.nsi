@@ -1,26 +1,32 @@
 Unicode true
+!ifndef APP_VERSION
+  !error "APP_VERSION is required"
+!endif
+!ifdef SIGN_SCRIPT
+  !uninstfinalize 'powershell.exe -NoProfile -File "${SIGN_SCRIPT}" -Path "%1"' = 0
+!endif
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
 !include "FileFunc.nsh"
 !include "x64.nsh"
-Name "Who Is JSON"
+Name "FIMI"
 OutFile "${SETUP_OUT}"
 InstallDir "$LOCALAPPDATA\Programs\WhoIsJSON"
 InstallDirRegKey HKCU "Software\WhoIsJSON" "InstallDir"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
 SetCompressorDictSize 32
-VIProductVersion "1.1.0.0"
-VIAddVersionKey /LANG=2052 "ProductName" "Who Is JSON"
-VIAddVersionKey /LANG=2052 "FileDescription" "Who Is JSON 离线安装包"
-VIAddVersionKey /LANG=2052 "FileVersion" "1.1.0.0"
-VIAddVersionKey /LANG=2052 "LegalCopyright" "Who Is JSON contributors"
+VIProductVersion "${APP_VERSION}.0"
+VIAddVersionKey /LANG=2052 "ProductName" "FIMI"
+VIAddVersionKey /LANG=2052 "FileDescription" "FIMI 离线安装包"
+VIAddVersionKey /LANG=2052 "FileVersion" "${APP_VERSION}.0"
+VIAddVersionKey /LANG=2052 "LegalCopyright" "FIMI contributors"
 !define MUI_ICON "${PAYLOAD}\who.ico"
 !define MUI_UNICON "${PAYLOAD}\who.ico"
-!define MUI_WELCOMEPAGE_TITLE "安装 Who Is JSON"
+!define MUI_WELCOMEPAGE_TITLE "安装 FIMI"
 !define MUI_WELCOMEPAGE_TEXT "从源码、流程和例子学习编程。$\r$\n$\r$\n安装包自带本地解析环境，无须另装 Node.js 或 Python。$\r$\n$\r$\n适用于 Windows 10 / 11 64 位。使用 Edge 打开独立窗口；未安装 Edge 时使用默认浏览器。"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\WhoIsJSON.exe"
-!define MUI_FINISHPAGE_RUN_TEXT "启动 Who Is JSON"
+!define MUI_FINISHPAGE_RUN_TEXT "启动 FIMI"
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "${PAYLOAD}\LICENSE.txt"
 !insertmacro MUI_PAGE_COMPONENTS
@@ -62,12 +68,12 @@ Section "程序与离线运行环境（必选）" SecMain
     FileWrite $0 "test"
     FileClose $0
   ${Else}
-    StrCpy $MenuDir "$SMPROGRAMS\Who Is JSON"
+    StrCpy $MenuDir "$SMPROGRAMS\FIMI"
     StrCpy $DesktopDir "$DESKTOP"
     WriteRegStr HKCU "Software\WhoIsJSON" "InstallDir" "$INSTDIR"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "DisplayName" "Who Is JSON"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "DisplayVersion" "1.1.0.0"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "Publisher" "Who Is JSON contributors"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "DisplayName" "FIMI"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "DisplayVersion" "${APP_VERSION}.0"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "Publisher" "FIMI contributors"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "InstallLocation" "$INSTDIR"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "DisplayIcon" "$INSTDIR\WhoIsJSON.exe"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "UninstallString" '$\"$INSTDIR\Uninstall.exe$\"'
@@ -75,13 +81,22 @@ Section "程序与离线运行环境（必选）" SecMain
     WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "NoModify" 1
     WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON" "NoRepair" 1
   ${EndIf}
+  ${If} $TestMode != "yes"
+    Delete "$DESKTOP\Who Is JSON.lnk"
+    Delete "$SMPROGRAMS\Who Is JSON\Who Is JSON.lnk"
+    Delete "$SMPROGRAMS\Who Is JSON\卸载 Who Is JSON.lnk"
+    RMDir "$SMPROGRAMS\Who Is JSON"
+  ${EndIf}
+  Delete "$MenuDir\Who Is JSON.lnk"
+  Delete "$MenuDir\卸载 Who Is JSON.lnk"
+  Delete "$DesktopDir\Who Is JSON.lnk"
   CreateDirectory "$MenuDir"
-  CreateShortcut "$MenuDir\Who Is JSON.lnk" "$INSTDIR\WhoIsJSON.exe" "" "$INSTDIR\who.ico"
-  CreateShortcut "$MenuDir\卸载 Who Is JSON.lnk" "$INSTDIR\Uninstall.exe"
+  CreateShortcut "$MenuDir\FIMI.lnk" "$INSTDIR\WhoIsJSON.exe" "" "$INSTDIR\who.ico"
+  CreateShortcut "$MenuDir\卸载 FIMI.lnk" "$INSTDIR\Uninstall.exe"
 SectionEnd
 Section "桌面快捷方式" SecDesktop
   CreateDirectory "$DesktopDir"
-  CreateShortcut "$DesktopDir\Who Is JSON.lnk" "$INSTDIR\WhoIsJSON.exe" "" "$INSTDIR\who.ico"
+  CreateShortcut "$DesktopDir\FIMI.lnk" "$INSTDIR\WhoIsJSON.exe" "" "$INSTDIR\who.ico"
 SectionEnd
 Function un.onInit
   SetShellVarContext current
@@ -93,19 +108,19 @@ Section "Uninstall"
   ExecWait '$\"$INSTDIR\WhoIsJSON.exe$\" --stop'
   Sleep 3500
   IfFileExists "$INSTDIR\test-install.marker" 0 normal_uninstall
-    Delete "$INSTDIR\test-shortcuts\Desktop\Who Is JSON.lnk"
-    Delete "$INSTDIR\test-shortcuts\StartMenu\Who Is JSON.lnk"
-    Delete "$INSTDIR\test-shortcuts\StartMenu\卸载 Who Is JSON.lnk"
+    Delete "$INSTDIR\test-shortcuts\Desktop\FIMI.lnk"
+    Delete "$INSTDIR\test-shortcuts\StartMenu\FIMI.lnk"
+    Delete "$INSTDIR\test-shortcuts\StartMenu\卸载 FIMI.lnk"
     RMDir "$INSTDIR\test-shortcuts\Desktop"
     RMDir "$INSTDIR\test-shortcuts\StartMenu"
     RMDir "$INSTDIR\test-shortcuts"
     Delete "$INSTDIR\test-install.marker"
     Goto remove_payload
   normal_uninstall:
-    Delete "$DESKTOP\Who Is JSON.lnk"
-    Delete "$SMPROGRAMS\Who Is JSON\Who Is JSON.lnk"
-    Delete "$SMPROGRAMS\Who Is JSON\卸载 Who Is JSON.lnk"
-    RMDir "$SMPROGRAMS\Who Is JSON"
+    Delete "$DESKTOP\FIMI.lnk"
+    Delete "$SMPROGRAMS\FIMI\FIMI.lnk"
+    Delete "$SMPROGRAMS\FIMI\卸载 FIMI.lnk"
+    RMDir "$SMPROGRAMS\FIMI"
     DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON"
     DeleteRegKey HKCU "Software\WhoIsJSON"
   remove_payload:

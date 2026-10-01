@@ -1,3 +1,4 @@
+var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}/g,(m,n)=>n<values.length?String(values[n]):m));
 (() => {
   let session = '', user = null, epoch = 0, syncing = false, timer, blocked = false;
   const store = window.WhoLibraryStore;
@@ -6,10 +7,10 @@
   function trialActive() { return typeof effectiveConfig === 'function' ? effectiveConfig().provider === 'platform' : window.WhoTrial.enabled && !window.WhoTrialOptOut; }
   function trialView() {
     const active = trialActive();
-    $('accountUseTrial').textContent = active ? '取消 AI 试用' : '使用 AI 试用';
+    $('accountUseTrial').textContent = active ? uiText("取消 AI 试用") : uiText("使用 AI 试用");
     $('accountUseTrial').disabled = !active && !window.WhoTrial.enabled;
-    if (active) $('accountTrial').textContent = '正在使用 DeepSeek AI 试用';
-    else if (window.WhoTrial.enabled) $('accountTrial').textContent = '可使用 AI 试用，也可自行配置服务。';
+    if (active) $('accountTrial').textContent = uiText("正在使用 DeepSeek AI 试用");
+    else if (window.WhoTrial.enabled) $('accountTrial').textContent = uiText("可使用 AI 试用，也可自行配置服务。");
   }
   function setTrial(on) {
     window.WhoTrialOptOut = !on;
@@ -28,13 +29,13 @@
     try {
       const q = await call('trial-quota');
       if (at !== epoch || !user) return;
-      if (![q.remaining,q.poolRemaining,q.held].every(x => Number.isSafeInteger(x) && x >= 0)) throw Error('额度数据异常');
+      if (![q.remaining,q.poolRemaining,q.held].every(x => Number.isSafeInteger(x) && x >= 0)) throw Error(uiText("额度数据异常"));
       window.WhoTrial = { enabled: q.enabled === true && q.remaining > 0 && q.poolRemaining > 0 };
-      $('accountTrial').textContent = window.WhoTrial.enabled ? '可使用 AI 试用，也可自行配置服务。' : '试用已结束或暂不可用，可配置自己的 AI。';
+      $('accountTrial').textContent = window.WhoTrial.enabled ? uiText("可使用 AI 试用，也可自行配置服务。") : uiText("试用已结束或暂不可用，可配置自己的 AI。");
     } catch {
       if (at !== epoch) return;
       window.WhoTrial = { enabled: false };
-      $('accountTrial').textContent = '平台试用暂不可用，仍可自行配置 AI。';
+      $('accountTrial').textContent = uiText("平台试用暂不可用，仍可自行配置 AI。");
     }
     trialView();
     if (typeof connection === 'function') connection();
@@ -44,26 +45,31 @@
   };
   window.WhoRefreshTrial = () => { if (user) return trialQuota(); };
   try { session = sessionStorage.getItem('who.account.session') || ''; } catch {}
-  const note = text => { $('accountStatus').textContent = text; $('accountStatus').hidden = !text; };
+  let notice = '';
+  const note = text => {
+    notice = text ? Object.keys(globalThis.WhoEnglish || {}).find(key => globalThis.WhoEnglish[key] === text) || text : '';
+    $('accountStatus').textContent = uiText(notice); $('accountStatus').hidden = !notice;
+  };
   async function call(route, data = {}) {
     const response = await fetch('/api/account/' + route, { method: 'POST', headers: {
       'Content-Type': 'application/json', 'X-CodeLingo-Token': window.APP_TOKEN, 'X-Who-Session': session
     }, body: JSON.stringify(data), signal: AbortSignal.timeout(20000) });
     const body = await response.json();
-    if (!response.ok) { const e = Error(body.error || '账户操作未完成。'); e.status = response.status; throw e; }
+    if (!response.ok) { const e = Error(body.error || uiText("账户操作未完成。")); e.status = response.status; throw e; }
     return body;
   }
   function refresh() {
     $('accountSignedIn').hidden = !user; $('accountLogin').hidden = !!user;
     $('accountIdentity').textContent = user?.name || user?.email || '';
-    $('accountBtn').title = user ? '账户：' + (user.name || user.email) : '登录账户';
-    $('libraryLocation').textContent = user ? '账户收藏：' + (user.name || user.email) + '。修改会同步到云端，包括收藏关联的源码。' : '本地收藏，仅保存在当前浏览器。登录后可使用独立的账户收藏库。';
+    $('accountBtn').title = user ? uiText("账户：") + (user.name || user.email) : uiText("登录账户");
+    $('libraryLocation').textContent = user ? uiText("账户收藏：") + (user.name || user.email) + uiText("。修改会同步到云端，包括收藏关联的源码。") : uiText("本地收藏，仅保存在当前浏览器。登录后可使用独立的账户收藏库。");
     if ($('library').open) library();
+    if (typeof refreshExplanationSaves === 'function') refreshExplanationSaves();
   }
   function fail(error) {
     blocked = true;
-    note(error.name === 'TimeoutError' ? '同步超时，本机修改已保留，可以重试。' : error.message);
-    if (error.status === 401) note(user ? '登录已过期。本机修改已保留，请退出后重新登录。' : 'GitHub 登录未完成或已过期，请重新登录。');
+    note(error.name === 'TimeoutError' ? uiText("同步超时，本机修改已保留，可以重试。") : error.message);
+    if (error.status === 401 && user) note(uiText("登录已过期。本机修改已保留，请退出后重新登录。"));
   }
   function sync() {
     if (syncing) return syncWork;
@@ -124,7 +130,7 @@
       const result = await call('github-poll', { ticket: attempt.ticket });
       if (loginAttempt !== attempt) return;
       if (result.pending) {
-        if (Date.now() >= attempt.expires) throw Error('登录等待已超时，请重试。');
+        if (Date.now() >= attempt.expires) throw Error(uiText("登录等待已超时，请重试。"));
         loginTimer = setTimeout(() => pollLogin(attempt), 2000); return;
       }
       loginAttempt = null; $('accountGithub').disabled = false; $('accountCancel').hidden = true;
@@ -138,7 +144,7 @@
   $('accountGithub').onclick = async () => {
     // Open synchronously with the user's click; keep the editor and in-memory AI configuration intact.
     const popup = window.open('about:blank', '_blank');
-    if (!popup) return note('请允许打开登录窗口，然后重试。');
+    if (!popup) return note(uiText("请允许打开登录窗口，然后重试。"));
     popup.opener = null;
     const attempt = { expires: Date.now() + 600000 }; loginAttempt = attempt;
     $('accountGithub').disabled = true; $('accountCancel').hidden = false;
@@ -146,11 +152,11 @@
       const result = await call('github-start');
       if (loginAttempt !== attempt) { call('github-cancel', { ticket: result.ticket }).catch(() => {}); popup.close(); return; }
       attempt.ticket = result.ticket; popup.location.href = result.url;
-      note('请在新窗口完成 GitHub 登录，完成后回到这里。');
+      note(uiText("请在新窗口完成 GitHub 登录，完成后回到这里。"));
       await pollLogin(attempt);
     } catch (error) { popup.close(); if (loginAttempt === attempt) { stopLogin(); fail(error); } }
   };
-  $('accountCancel').onclick = () => { stopLogin(); note('已取消登录，可以继续使用本地收藏。'); };
+  $('accountCancel').onclick = () => { stopLogin(); note(uiText("已取消登录，可以继续使用本地收藏。")); };
   $('accountLogout').onclick = () => action($('accountLogout'), async () => {
     const leaving = call('logout');
     epoch++; clearTimeout(timer); user = null; session = ''; blocked = false; syncing = false;
@@ -167,30 +173,31 @@
     if (!await sync() || ticket !== epoch || !user) return;
     clearTimeout(timer);
     const before = JSON.stringify(store.snapshot());
-    if (store.snapshot().dirty) throw Error('刷新期间收藏发生了变化，本机修改已保留，请再刷新一次。');
+    if (store.snapshot().dirty) throw Error(uiText("刷新期间收藏发生了变化，本机修改已保留，请再刷新一次。"));
     const remote = await call('library');
     if (ticket !== epoch || remote.user.id !== user?.id) return;
-    if (before !== JSON.stringify(store.snapshot())) throw Error('刷新期间收藏发生了变化，本机修改已保留，请再刷新一次。');
+    if (before !== JSON.stringify(store.snapshot())) throw Error(uiText("刷新期间收藏发生了变化，本机修改已保留，请再刷新一次。"));
     store.replace(remote); $('accountReplace').hidden = true; refresh(); note(''); syncedToast();
   });
   $('accountImport').onclick = () => { try { store.importGuest(); $('accountGuest').hidden = true; blocked = false; sync(); } catch (error) { fail(error); } };
   $('accountGuestSkip').onclick = () => { $('accountGuest').hidden = true; };
-  $('accountExport').onclick = () => { try { download('Who-Is-JSON-账户收藏备份.json', JSON.stringify(store.snapshot().payload, null, 2)); } catch (e) { fail(e); } };
+  $('accountExport').onclick = () => { try { download(uiText("Who-Is-JSON-账户收藏备份.json"), JSON.stringify(store.snapshot().payload, null, 2)); } catch (e) { fail(e); } };
   $('accountKeepLocal').onclick = () => { $('accountReplace').hidden = true; };
   $('accountReplaceConfirm').onclick = () => action($('accountReplaceConfirm'), async () => {
-    if (syncing) throw Error('请等待当前同步结束。');
+    if (syncing) throw Error(uiText("请等待当前同步结束。"));
     blocked = true; clearTimeout(timer);
     const ticket = epoch, before = JSON.stringify(store.snapshot()), remote = await call('library');
     if (ticket !== epoch || remote.user.id !== user?.id) return;
-    if (before !== JSON.stringify(store.snapshot())) throw Error('载入期间收藏发生了变化，请导出备份后重试。');
+    if (before !== JSON.stringify(store.snapshot())) throw Error(uiText("载入期间收藏发生了变化，请导出备份后重试。"));
     store.replace(remote); blocked = false; $('accountReplace').hidden = true; refresh(); note(''); syncedToast();
   });
   window.addEventListener('who-library-change', schedule);
+  window.addEventListener('who-language-change', () => { trialView(); refresh(); note(notice); });
   // Saving in another tab never silently overwrites this tab's remote revision.
   window.addEventListener('storage', e => { if (user && e.key === 'whoisjson.account-library.v1.' + user.id) refresh(); });
   call('status').then(async result => {
     $('accountGithub').disabled = !result.enabled;
-    $('accountGithub').title = result.enabled ? '' : '云服务尚未启用';
+    $('accountGithub').title = result.enabled ? '' : uiText("云服务尚未启用");
     if (!result.enabled) return note('');
     note('');
     if (session) { try { await enter(); } catch (error) { fail(error); } }

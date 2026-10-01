@@ -1,3 +1,4 @@
+var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}/g,(m,n)=>n<values.length?String(values[n]):m));
 let readingMode='beginner';
 try{if(localStorage.getItem('whoisjson.readingMode')==='standard')readingMode='standard';}catch{}
 function beginnerMode(){return readingMode==='beginner';}
@@ -7,7 +8,7 @@ function applyReadingMode(){
 }
 function changeReadingMode(value){
  const next=value==='standard'?'standard':'beginner';if(next===readingMode)return;
- readingMode=next;try{localStorage.setItem('whoisjson.readingMode',next);}catch{toast('当前选择可用，但浏览器未能保存偏好。');}
+ readingMode=next;try{localStorage.setItem('whoisjson.readingMode',next);}catch{toast(uiText("当前选择可用，但浏览器未能保存偏好。"));}
  applyReadingMode();revision++;analysisAbort?.abort();resetTalk();studioReset();studioSource=null;
  $('aiProgress').hidden=true;$('answer').hidden=true;
  if(current){
@@ -15,7 +16,17 @@ function changeReadingMode(value){
   current={...local,mode:'local',blocks:current.blocks.map(({aiExplanation,...block})=>block)};
   render();
  }
- toast('已切换为'+(beginnerMode()?'零基础友好':'标准')+'。再次点击即可按新模式解释。');
+ toast(uiText("已切换为")+(beginnerMode()?uiText("零基础友好"):uiText("标准"))+uiText("。再次点击即可按新模式解释。"));
 }
 $('readingMode').onchange=e=>changeReadingMode(e.target.value);
 applyReadingMode();
+
+function appendAITerms(host,text,seen){
+ if(!beginnerMode()||!globalThis.WhoAIGlossary)return;
+ const terms=WhoAIGlossary.forText(text,current?.language,globalThis.WhoI18n?.locale).filter(term=>!seen?.has(term.name));
+ if(seen)for(const term of terms)seen.add(term.name);
+ if(!terms.length)return;
+ const notes=element('span',undefined,'ai-term-notes');notes.append(element('strong',globalThis.WhoI18n?.locale==='en'?'Terms used here':'这里的术语'));
+ for(const term of terms)notes.append(element('span',term.name+' — '+term.meaning));
+ host.append(notes);
+}

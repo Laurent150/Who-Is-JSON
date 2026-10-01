@@ -33,6 +33,6 @@
   questions.push({question:'这段代码已经验证能正常运行了吗？',answer:'这里进行了结构读取和解释，没有执行程序。要确认运行结果，需要项目依赖、调用方式和实际测试。',index:null});
   return {title:`${name} · 讲解稿`,sections,questions,name,diagnostics:result.warnings||[],note:`${result.partialRecovery?"部分可读：只讲解独立解析通过的结构；其他部分未纳入，跨片段依赖未验证。":""}${label} · ${coverage==='full'?`完整覆盖已识别的 ${chosen.length} 个主要功能/结构`:`重点提纲：${chosen.length} / ${candidates.length} 个主要功能/结构`} · ${duration==='30'?'简洁表达':duration==='300'?'详细展开':'标准说明'}。${coverage==='full'?'完整覆盖优先，不保证符合所选时长。':''}${result.mode==='ai'?'依据 AI 分析整理，需核对。':'本地规则只描述可识别操作，尚不能代替完整业务解读。'}`};
  }
- function markdown(p){return `# ${p.title}\n\n${p.note}\n\n${(p.diagnostics||[]).length?"解析提示："+p.diagnostics.join("；")+"\n\n":""}`+p.sections.map(s=>`## ${s.title}\n\n${s.text}\n\n${s.start?`源码：第 ${s.start}—${s.end} 行 · `:''}${s.evidence}`).join('\n\n')+'\n\n## 可能被追问\n\n'+p.questions.map(q=>`### ${q.question}\n\n${q.answer}`).join('\n\n');}
+ function markdown(p){const en=globalThis.WhoI18n?.locale==='en';return `# ${p.title}\n\n${p.note}\n\n${(p.diagnostics||[]).length?(en?'Parsing notes: ':'解析提示：')+p.diagnostics.join(en?'; ':'；')+'\n\n':''}`+p.sections.map(s=>`## ${s.title}\n\n${s.text}\n\n${s.start?(en?`Source: lines ${s.start}–${s.end} · `:`源码：第 ${s.start}—${s.end} 行 · `):''}${s.evidence}`).join('\n\n')+(p.questions.length?'\n\n## '+(en?'Follow-up questions':'可能被追问')+'\n\n'+p.questions.map(q=>`### ${q.question}\n\n${q.answer}`).join('\n\n'):'');}
  return {build,markdown};
 });

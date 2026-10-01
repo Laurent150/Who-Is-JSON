@@ -3,10 +3,21 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  const reservation=http.createServer();await new Promise(r=>reservation.listen(0,'127.0.0.1',r));const port=reservation.address().port;await new Promise(r=>reservation.close(r));const base='http://127.0.0.1:'+port;let token='',calls=[];
  const mock=http.createServer(async(req,res)=>{let data='';for await(const c of req)data+=c;const b=JSON.parse(data);calls.push(b);let content;
  if(b.model==='bad-json')content='not json';else if(b.model==='bad-lines')content=JSON.stringify({blocks:[{start:99,end:100,title:'bad'}]});
+ else if(b.messages[0].content.startsWith('Build a compact source-contract ledger')){const source=JSON.parse(b.messages[1].content).source;content=JSON.stringify({units:[{name:'f',anchor:source,accepts:'x',returns:'x',timing:'synchronous',paths:[{when:'called',does:'return x',completion:'x',failure:'none shown',anchor:source}],unknowns:[]}]});}
+ else if(b.messages[0].content.startsWith('Write the final code walkthrough')||b.messages[0].content.startsWith('你负责最终讲解稿'))content=JSON.stringify({title:'Return',sections:[{title:'Result',text:b.messages[0].content.startsWith('Write the final')?'Return the supplied value.':'这个函数把传入的值原样交回。'}],questions:[]});
+ else if(/REVIEW OUTPUT CONTRACT|本次复核输出约定（仅在复核时/.test(b.messages[0].content))content=JSON.stringify({corrections:[]});
+ else if(b.messages[0].content.includes('Write all explanations in natural English')){
+  const prompt=b.messages[0].content,input=JSON.parse(b.messages[1].content);
+  if(prompt.startsWith('Explain the purpose'))content=JSON.stringify({summary:'Return the supplied value.',blocks:[{index:0,purpose:'Return the supplied value.'}]});
+  else if(prompt.startsWith('Explain the supplied graph'))content=JSON.stringify({summary:'Return the value.',nodes:input.graph.nodes.map(n=>({id:n.id,title:'Return the value',explanation:'Pass the value back to the caller.'}))});
+  else if(prompt.startsWith('Write a code walkthrough'))content=JSON.stringify({title:'Returning a value',sections:[{title:'Result',text:'The function returns the supplied value.'}],questions:[]});
+  else if(prompt.startsWith('Explain the selected token'))content=JSON.stringify({kind:'definition',answer:'x is the value supplied to f.'});
+  else content='The function returns the value supplied as x.';
+ }
  else if(b.messages[0].content.includes('definition 或 lesson'))content=JSON.stringify({kind:'definition',answer:'x 是传入函数的参数名。'});
  else if(b.messages[0].content.includes('只判断源码'))content=JSON.stringify({language:'JavaScript',confidence:'high'});
  else if(b.messages[0].content.includes('复制格式修复建议'))content=JSON.stringify({code:'def f():\n    return 1',changes:['为函数体补上缩进'],uncertainty:'假设 return 属于该函数，请核对。'});
- else if(b.messages[0].content.includes('中文代码解释稿'))content=JSON.stringify({title:'输入怎样返回',sections:[{title:'先看结果',text:'这个函数把传入的值原样交回。'}],questions:[]});
+ else if(b.messages[0].content.includes('中文讲解稿'))content=JSON.stringify({title:'输入怎样返回',sections:[{title:'先看结果',text:'这个函数把传入的值原样交回。'}],questions:[]});
  else if(b.messages[0].content.includes('给定 graph')){const g=JSON.parse(b.messages[1].content).graph;content=JSON.stringify({summary:'按步骤处理输入。',nodes:g.nodes.map(n=>({id:n.id,title:'交回输入',explanation:'把输入交回调用者。'}))});}
  else if(Array.isArray(b.messages[1].content))content='const count = 2;';
  else if(b.messages[0].content.includes('只返回 JSON'))content=JSON.stringify({language:'JavaScript',summary:'简单测试功能',purpose:'测试服务生成，非真实模型评估。',warnings:[],blocks:[{index:0,kind:'function',title:'f',start:1,end:1,purpose:'把收到的值交回去。',inputs:'x',output:'x',symbols:[]}]});else content='这是模拟服务的追问答复。';
@@ -58,11 +69,22 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
    assert.match(calls.at(-1).messages[0].content,mode==='beginner'?/当前为零基础友好模式/:/当前为标准模式/);
   }
  }
- const teaching=['整份代码的用途','给定 graph','中文代码解释稿','面向零基础者','definition 或 lesson'];
+ for(const mode of ['beginner','standard']){
+  const common={code:'function f(x){return x}',name:'x.js',locale:'en',config:{base:mockBase,model:'good'},readingMode:mode};
+  for(const [route,extra]of [['analyze',{ai:true}],['flow',{start:1}],['talk',{}],['ask',{question:'Explain this line',selection:{start:1,end:1}}],['ask',{question:'Explain x',knowledge:true,token:{line:1,startColumn:11,endColumn:12}}]]){
+   const response=await post(route,{...common,...extra});assert.equal(response.status,200,JSON.stringify(response.body));
+   const request=calls.at(-1);assert.match(request.messages[0].content,mode==='beginner'?/BEGINNER MODE/:/STANDARD MODE/);
+   assert.equal(JSON.parse(request.messages[1].content).source,common.code);
+   if(route==='talk')assert.doesNotMatch(response.body.note,/[\u4e00-\u9fff]/);
+   if(route==='ask')assert.match(response.body.answer,/value/);
+  }
+ }
+ r=await post('repair',{code:'def f():\nreturn 1',name:'x.py',locale:'en',config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.match(calls.at(-1).messages[0].content,/Write changes and uncertainty in natural English/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).source,'def f():\nreturn 1');
+ const teaching=['整份代码的用途','给定 graph','你负责最终讲解稿','面向零基础者','definition 或 lesson'];
  for(const marker of teaching){
   const requests=calls.filter(c=>c.messages[0].content.includes(marker));
   assert.ok(requests.length,'missing explanation route: '+marker);
-  for(const request of requests)assert.match(request.messages[0].content,/async 声明使函数每次调用返回 Promise/);
+  for(const request of requests)assert.match(request.messages[0].content,marker==='你负责最终讲解稿'?/Promise/:/async 声明使函数每次调用返回 Promise/);
  }
  for(const request of calls.filter(c=>/只判断源码|复制格式修复建议|只转录图片/.test(c.messages[0].content)))assert.ok(!request.messages[0].content.includes('async 声明使函数每次调用返回 Promise'));
  }finally{child.kill();await new Promise(r=>mock.close(r));}
