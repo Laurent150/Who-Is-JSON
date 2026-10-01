@@ -21,9 +21,14 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
   const base = (env.WHO_SUPABASE_URL || '').replace(/\/$/, '');
   const key = env.WHO_SUPABASE_PUBLISHABLE_KEY || '';
   const enabled = !!(base && key);
+  const emailEnabled = enabled && env.WHO_EMAIL_LOGIN_ENABLED === '1';
   if (base) {
     const url = new URL(base);
-    if (url.protocol !== 'https:' || !/^[a-z0-9-]+\.supabase\.co$/.test(url.hostname) || url.pathname !== '/' || url.search || url.hash || url.username || url.password || url.port) throw Error('云服务必须是有效的 HTTPS Supabase 项目地址。');
+    const provider = /^[a-z0-9-]+\.supabase\.co$/.test(url.hostname);
+    // Only the release/operator environment can opt into a managed custom origin.
+    // Never accept a forwarding destination from an API request or the AI settings.
+    const custom = env.WHO_CLOUD_ALLOW_CUSTOM_ORIGIN === '1' && /^[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(url.hostname);
+    if (url.protocol !== 'https:' || !(provider || custom) || url.pathname !== '/' || url.search || url.hash || url.username || url.password || url.port) throw Error('云服务必须是有效的 HTTPS Supabase 项目地址。');
   }
   let legacyRole;
   try { legacyRole = JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString()).role; } catch {}
@@ -31,7 +36,7 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
   const sessions = new Map(), limits = new Map(), flows = new Map(), trialQueues = new Map();
   async function upstream(route, data, access, method = 'POST') {
     let response;
-    try { response = await fetcher(base + route, { method, signal: AbortSignal.timeout(route === '/functions/v1/ai-trial' ? 125000 : 15000), headers: {
+    try { response = await fetcher(base + route, { method, redirect: 'error', signal: AbortSignal.timeout(route === '/functions/v1/ai-trial' ? 125000 : 15000), headers: {
       apikey: key, ...(access ? { Authorization: 'Bearer ' + access } : {}), 'Content-Type': 'application/json'
     }, ...(method === 'GET' ? {} : { body: JSON.stringify(data) }) }); }
     catch { throw failure(503, '云端暂时不可用，本地收藏已保留，请稍后重试。'); }
@@ -46,6 +51,8 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
       }
       if (response.status === 401 || response.status === 403) throw failure(401, '登录已失效，请重新登录。');
       if (response.status === 429) throw failure(429, '请求过于频繁，请稍后重试。');
+      if (route === '/auth/v1/verify' && [400,422].includes(response.status)) throw failure(400, '验证码无效或已过期，请重新获取。');
+      if (route === '/auth/v1/otp') throw failure(502, '邮件未能发送，请稍后重试或使用其他登录方式。');
       throw failure(502, '云端操作未完成，请检查 GitHub 登录或云服务配置。');
     }
     if (response.status === 204) return null;
@@ -60,6 +67,14 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
   }
   function pruneFlows() {
     for (const [id,flow] of flows) if (flow.expires <= now()) flows.delete(id);
+  }
+  function localSession(result) {
+    for (const [id,s] of sessions) if (s.expires <= now()) sessions.delete(id);
+    if (sessions.size >= 100) throw failure(429, '本机登录会话过多，请稍后再试。');
+    if (result.expires <= now()) throw failure(401, '登录已过期，请重新登录。');
+    const id = crypto.randomBytes(32).toString('hex');
+    sessions.set(id, result);
+    return { session: id, user: result.user };
   }
   async function callback(params) {
     pruneFlows();
@@ -89,10 +104,45 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
     return s;
   }
   async function handle(req, route, data = {}) {
-    if (route === 'status') return { enabled };
+    if (route === 'status') return { enabled, ...(emailEnabled ? { emailEnabled: true } : {}) };
     if (!enabled) throw failure(503, '云端账户尚未配置，仍可使用本地收藏。');
     if (!data || typeof data !== 'object' || Array.isArray(data)) throw failure(400, '账户请求格式不正确。');
     pruneFlows();
+    if (route === 'email-start') {
+      if (!emailEnabled) throw failure(503, '邮箱登录尚未启用，请使用其他登录方式。');
+      const email = typeof data.email === 'string' ? data.email.trim().toLowerCase() : '';
+      if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw failure(400, '请输入有效的邮箱地址。');
+      rate('email-all', 20, 600000);
+      rate('email:' + email, 1, 60000);
+      await upstream('/auth/v1/otp', { email, create_user: true });
+      const ticket = crypto.randomBytes(32).toString('hex');
+      flows.set(ticket, { kind: 'email', email, status: 'pending', attempts: 0, expires: now() + 600000 });
+      return { ticket };
+    }
+    if (route === 'email-verify' || route === 'email-cancel') {
+      if (!emailEnabled) throw failure(503, '邮箱登录尚未启用，请使用其他登录方式。');
+      const flow = flows.get(data.ticket);
+      if (!flow || flow.kind !== 'email') throw failure(400, '登录请求已过期，请回到应用重新登录。');
+      if (route === 'email-cancel') { flows.delete(data.ticket); return { ok: true }; }
+      if (flow.status !== 'pending') throw failure(409, '正在验证，请稍候。');
+      if (typeof data.code !== 'string' || !/^\d{6,10}$/.test(data.code)) throw failure(400, '请输入邮件中的数字验证码。');
+      flow.status = 'exchanging'; flow.attempts++;
+      try {
+        const result = await upstream('/auth/v1/verify', { email: flow.email, token: data.code, type: 'email' });
+        if (!result?.access_token || !Number.isFinite(result.expires_in) || result.expires_in <= 0) throw failure(502, '云端未返回有效会话。');
+        const user = await upstream('/auth/v1/user', null, result.access_token, 'GET');
+        if (typeof user?.id !== 'string' || !user.email_confirmed_at || user.email?.toLowerCase() !== flow.email || !user.identities?.some(x => x.provider === 'email')) throw failure(401, '未能确认邮箱身份。');
+        if (flows.get(data.ticket) !== flow || flow.expires <= now()) throw failure(400, '登录请求已过期，请回到应用重新登录。');
+        flows.delete(data.ticket);
+        return localSession({ access: result.access_token, user: { id: user.id, name: user.email, email: user.email, trialEligible: user.identities.some(x => x.provider === 'github') }, expires: now() + Math.min(result.expires_in,3600) * 1000 });
+      } catch (error) {
+        // Only a definite invalid code may be retried. A lost network response may
+        // already have consumed the code; do not silently replay it.
+        if (error.status === 400 && flow.attempts < 5) flow.status = 'pending';
+        else flows.delete(data.ticket);
+        throw error;
+      }
+    }
     if (route === 'github-start') {
       rate('login-all', 20, 600000);
       const port = String(env.CODELINGO_PORT || 43127);
@@ -112,20 +162,15 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
     }
     if (route === 'github-poll' || route === 'github-cancel') {
       const flow = flows.get(data.ticket);
-      if (!flow) throw failure(401, '登录请求已过期，请重新登录。');
+      if (!flow || flow.kind === 'email') throw failure(401, '登录请求已过期，请重新登录。');
       if (route === 'github-cancel') { flows.delete(data.ticket); return { ok: true }; }
       if (flow.status === 'failed') { flows.delete(data.ticket); throw failure(flow.errorStatus, flow.error); }
       if (flow.status !== 'complete') return { pending: true };
       flows.delete(data.ticket);
-      for (const [id,s] of sessions) if (s.expires <= now()) sessions.delete(id);
-      if (sessions.size >= 100) throw failure(429, '本机登录会话过多，请稍后再试。');
-      if (flow.result.expires <= now()) throw failure(401, '登录已过期，请重新登录。');
-      const id = crypto.randomBytes(32).toString('hex');
-      sessions.set(id, flow.result);
-      return { session: id, user: flow.result.user };
+      return localSession(flow.result);
     }
     const s = session(req);
-    if (route === 'trial-quota') return upstream('/functions/v1/ai-trial', { action: 'quota' }, s.access);
+    if (route === 'trial-quota') return s.user.trialEligible === false ? { enabled:false, remaining:0, held:0, poolRemaining:0 } : upstream('/functions/v1/ai-trial', { action: 'quota' }, s.access);
     if (route === 'logout') {
       sessions.delete(req.headers['x-who-session']);
       // Local session is invalid immediately even if remote sign-out is unavailable.
@@ -152,6 +197,7 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
   }
   function trialConfig(req) {
     const s = session(req);
+    if (s.user.trialEligible === false) throw failure(403, '邮箱账户可同步收藏，请在 AI 设置中连接自己的服务。');
     return { base: 'https://api.deepseek.com', model: 'deepseek-flash',
       sponsoredCall: (data, { signal } = {}) => {
         for (const [id, q] of trialQueues) if (!q.pending && q.next <= now()) trialQueues.delete(id);

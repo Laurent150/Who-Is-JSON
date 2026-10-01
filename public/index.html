@@ -19,13 +19,19 @@
 <div class="account-welcome-mark" aria-hidden="true">✦</div>
 <h3>登录后，直接用 AI 读代码</h3>
 <p>使用 GitHub 登录，领取 DeepSeek 赠送额度。<br>无需填写密钥，登录后自动接入。</p>
+<section id="accountEmailLogin" hidden>
+<label for="accountEmailAddress">邮箱地址</label><input id="accountEmailAddress" type="email" autocomplete="email" maxlength="254">
+<button id="accountEmailSend">发送登录验证码</button>
+<div id="accountEmailVerify" hidden><label for="accountEmailCode">邮箱验证码</label><input id="accountEmailCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10"><button id="accountEmailConfirm">验证并登录</button></div>
+<p class="account-hint">邮箱登录支持收藏同步；平台赠送额度目前需 GitHub 身份。也可连接自己的 AI 服务。</p>
+</section>
 <button id="accountGithub" class="primary github-login" disabled><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg><span>使用 GitHub 登录</span></button>
 <button id="accountCancel" hidden>取消登录</button>
 <button id="accountSkip" class="quiet">先用本地模式</button>
 <p class="account-hint">赠送试用受可用额度限制，也可自行配置 AI。<br>登录不会自动上传本地收藏。</p>
 </div>
 <div id="accountSignedIn" hidden>
-<p class="account-identity">已登录 GitHub 账号：<strong id="accountIdentity"></strong></p>
+<p class="account-identity">已登录账户：<strong id="accountIdentity"></strong></p>
 <section class="account-trial"><p id="accountTrial">正在检查 AI 试用状态…</p><button id="accountUseTrial" disabled>使用 AI 试用</button></section>
 <div class="account-actions"><button id="accountSync">刷新云端收藏</button><button id="accountLogout">退出登录</button></div>
 <p class="account-hint">收藏及关联源码自动同步到当前账户。</p>
