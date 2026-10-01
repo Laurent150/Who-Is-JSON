@@ -11,6 +11,7 @@ var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}
     $('accountUseTrial').disabled = !active && !window.WhoTrial.enabled;
     if (active) $('accountTrial').textContent = uiText("正在使用 DeepSeek AI 试用");
     else if (window.WhoTrial.enabled) $('accountTrial').textContent = uiText("可使用 AI 试用，也可自行配置服务。");
+    else if (user?.trialEligible === false) $('accountTrial').textContent = uiText("邮箱账户可同步收藏，请在 AI 设置中连接自己的服务。");
   }
   function setTrial(on) {
     window.WhoTrialOptOut = !on;
@@ -114,11 +115,54 @@ var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}
     try { await work(); } catch (error) { fail(error); }
     finally { button.disabled = false; }
   }
-  const dismiss = () => { try { localStorage.setItem('who.welcome.seen', '1'); } catch {} $('account').close(); };
+  const dismiss = () => { stopEmail(); try { localStorage.setItem('who.welcome.seen', '1'); } catch {} $('account').close(); };
   $('accountBtn').onclick = () => { trialView(); $('account').showModal(); };
   $('accountClose').onclick = dismiss;
   $('accountSkip').onclick = dismiss;
-  $('account').oncancel = () => { try { localStorage.setItem('who.welcome.seen', '1'); } catch {} };
+  $('account').oncancel = () => { stopEmail(); try { localStorage.setItem('who.welcome.seen', '1'); } catch {} };
+  let emailAttempt = null;
+  function stopEmail() {
+    const old = emailAttempt; emailAttempt = null;
+    $('accountEmailCode').value = ''; $('accountEmailVerify').hidden = true;
+    $('accountEmailAddress').disabled = false;
+    if (old?.ticket) call('email-cancel', { ticket:old.ticket }).catch(() => {});
+  }
+  async function acceptLogin(result) {
+    session = result.session;
+    try { sessionStorage.setItem('who.account.session', session); } catch {}
+    window.WhoTrialOptOut = false;
+    try { sessionStorage.setItem('who.trial.off', '0'); } catch {}
+    await enter();
+  }
+  $('accountEmailSend').onclick = () => action($('accountEmailSend'), async () => {
+    stopLogin(); stopEmail();
+    const email = $('accountEmailAddress').value.trim();
+    const attempt = {}; emailAttempt = attempt;
+    $('accountEmailAddress').disabled = true;
+    try {
+      const result = await call('email-start', { email });
+      if (emailAttempt !== attempt) { call('email-cancel', { ticket:result.ticket }).catch(() => {}); return; }
+      attempt.ticket = result.ticket;
+      $('accountEmailVerify').hidden = false;
+      note(uiText('验证码已发送，请在此输入；未收到可在一分钟后重试。'));
+    } catch (error) { if (emailAttempt === attempt) { stopEmail(); throw error; } }
+  });
+  $('accountEmailConfirm').onclick = () => action($('accountEmailConfirm'), async () => {
+    const attempt = emailAttempt;
+    if (!attempt?.ticket) return;
+    const code = $('accountEmailCode').value.trim(); $('accountEmailCode').value = '';
+    try {
+      const result = await call('email-verify', { ticket:attempt.ticket, code });
+      if (emailAttempt !== attempt) {
+        fetch('/api/account/logout', { method:'POST', headers:{'Content-Type':'application/json','X-CodeLingo-Token':window.APP_TOKEN,'X-Who-Session':result.session}, body:'{}' }).catch(() => {});
+        return;
+      }
+      stopEmail(); await acceptLogin(result);
+    } catch (error) {
+      if (emailAttempt === attempt) { if (error.status !== 400) stopEmail(); throw error; }
+      if (session) throw error;
+    }
+  });
   function stopLogin() {
     const old = loginAttempt; loginAttempt = null; clearTimeout(loginTimer);
     $('accountGithub').disabled = false; $('accountCancel').hidden = true;
@@ -134,14 +178,11 @@ var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}
         loginTimer = setTimeout(() => pollLogin(attempt), 2000); return;
       }
       loginAttempt = null; $('accountGithub').disabled = false; $('accountCancel').hidden = true;
-      session = result.session;
-      try { sessionStorage.setItem('who.account.session', session); } catch {}
-      window.WhoTrialOptOut = false;
-      try { sessionStorage.setItem('who.trial.off', '0'); } catch {}
-      await enter();
+      await acceptLogin(result);
     } catch (error) { if (loginAttempt === attempt) { stopLogin(); fail(error); } else if (session) fail(error); }
   }
   $('accountGithub').onclick = async () => {
+    stopEmail();
     // Open synchronously with the user's click; keep the editor and in-memory AI configuration intact.
     const popup = window.open('about:blank', '_blank');
     if (!popup) return note(uiText("请允许打开登录窗口，然后重试。"));
@@ -196,6 +237,7 @@ var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}
   // Saving in another tab never silently overwrites this tab's remote revision.
   window.addEventListener('storage', e => { if (user && e.key === 'whoisjson.account-library.v1.' + user.id) refresh(); });
   call('status').then(async result => {
+    $('accountEmailLogin').hidden = !result.emailEnabled;
     $('accountGithub').disabled = !result.enabled;
     $('accountGithub').title = result.enabled ? '' : uiText("云服务尚未启用");
     if (!result.enabled) return note('');

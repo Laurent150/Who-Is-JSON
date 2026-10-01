@@ -10,6 +10,7 @@
   "ai-explanation-rules.js",
   "ai-flow.js",
   "ai-grounding-checks.js",
+  "ai-input-prompts.js",
   "ai-knowledge.js",
   "ai-language.js",
   "ai-reading-style.js",

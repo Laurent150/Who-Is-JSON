@@ -4,6 +4,22 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),vm=requir
 const {requestOptions,explainOverview}=require('../ai-client');
 const flow=require('../ai-flow'),talk=require('../ai-talk'),knowledge=require('../ai-knowledge');
 const config={base:'https://example.org/v1',model:'test'};
+
+test('input assistance follows selected language without translating the supplied source',async()=>{
+ const source='// 原注释\nconst 名称 = "原文字串";';
+ for(const locale of ['en','zh-CN']){
+  let captured;
+  await require('../ai-language').identify(source,'unknown.txt',null,{language:'未确定',status:'unsupported',blocks:[]},config,{locale},async(c,m,o)=>{captured={m,o};return '{"language":"unknown","confidence":"low"}';});
+  assert.equal(captured.o.locale,locale);
+  assert.equal(JSON.parse(captured.m[1].content).source,source);
+  const ocr=require('../ai-input-prompts').transcription(locale);
+  if(locale==='en'){
+   assert.doesNotMatch(captured.m[0].content,/[\u4e00-\u9fff]/);
+   assert.doesNotMatch(ocr.system+ocr.user,/[\u4e00-\u9fff]/);
+   assert.match(ocr.system,/never translate/);
+  }else{assert.match(captured.m[0].content,/只判断源码/);assert.match(ocr.system,/不翻译源码/);}
+ }
+});
 test('experimental source-contract failures have an English UI message',()=>{
  const ctx=vm.createContext({});
  vm.runInContext(fs.readFileSync(require.resolve('../public/locale-en'),'utf8'),ctx);
