@@ -40,14 +40,14 @@ if ($signing.signed) {
     if ($sig.Status -ne 'Valid' -or -not $sig.TimeStamperCertificate) { throw 'Installed signature invalid' }
   }
 }
-$shell = New-Object -ComObject WScript.Shell
+if (-not ('FimiShortcutTarget' -as [type])) { Add-Type -Path (Join-Path $PSScriptRoot 'ShortcutTarget.cs') }
 foreach ($where in @('Desktop','StartMenu')) {
   $shortcutPath = Join-Path $target "test-shortcuts/$where/FIMI.lnk"
   if (-not (Test-Path -LiteralPath $shortcutPath -PathType Leaf)) { throw "Missing shortcut: $shortcutPath" }
-  $shortcut = $shell.CreateShortcut($shortcutPath)
+  $actualTarget = [FimiShortcutTarget]::Read($shortcutPath)
   $expectedTarget = Join-Path $target 'WhoIsJSON.exe'
-  if ($shortcut.TargetPath -ne $expectedTarget) {
-    throw ('Incorrect shortcut target: ' + (@{location=$where;expected=$expectedTarget;actual=$shortcut.TargetPath;actualExists=([bool]$shortcut.TargetPath -and (Test-Path -LiteralPath $shortcut.TargetPath -PathType Leaf))} | ConvertTo-Json -Compress))
+  if ($actualTarget -ne $expectedTarget) {
+    throw ('Incorrect shortcut target: ' + (@{location=$where;expected=$expectedTarget;actual=$actualTarget;actualExists=([bool]$actualTarget -and (Test-Path -LiteralPath $actualTarget -PathType Leaf))} | ConvertTo-Json -Compress))
   }
 }
 Run-Checked (Join-Path $target 'WhoIsJSON.exe') '--self-test'
