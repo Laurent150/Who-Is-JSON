@@ -1,3 +1,4 @@
+var uiText = (text,...values)=>globalThis.WhoI18n?globalThis.WhoI18n.t(text,...values):text.replace(/\{(\d+)\}/g,(m,n)=>n<values.length?String(values[n]):m);
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.WhoGitignoreSyntax=api;})(this,function(){
     function trimEnd(value){
         while(value.endsWith(' ')){let n=0;for(let i=value.length-2;i>=0&&value[i]==='\\';i--)n++;if(n%2)break;value=value.slice(0,-1);}
@@ -31,13 +32,13 @@
         for(const t of tokens(code)){
             if(t.kind!=='symbol')continue;
             const start=code.slice(0,t.start).split('\n').length,startColumn=t.start-(code.lastIndexOf('\n',t.start-1)+1),r=read(code)[start-1];
-            const plain=t.text==='!'?(startColumn===0?'行首的 ! 表示例外：把匹配项从忽略范围中取回；上级目录不能仍被忽略。':'这里的 ! 是名称的一部分，只有行首未转义的 ! 才表示例外。')
-                :t.text==='*'?'匹配零个或多个字符，但不跨过 /。被忽略的目录里面的内容也会被排除。'
-                :t.text==='**'?'在 **/、/** 或 /**/ 这样的目录位置可跨多层目录；其他位置按普通星号处理。'
-                :t.text==='?'?'匹配一个字符，但不能是目录分隔符 /。'
-                :t.text==='/'?(startColumn===r.text.length-1?'行末的 / 表示只匹配目录。':'分隔路径中的目录；开头或中间有 / 时，通常相对于这份 .gitignore 所在目录匹配。')
-                :t.text.startsWith('\\')?'反斜杠让后面的字符按字面匹配，例如 \\! 匹配名称中的 !，不表示例外。'
-                :t.text.startsWith('[')?'方括号表示从指定字符或范围中匹配一个字符，例如 [0-9] 匹配一位数字；不是列表。':'';
+            const plain=t.text==='!'?(startColumn===0?uiText("行首的 ! 表示例外：把匹配项从忽略范围中取回；上级目录不能仍被忽略。"):uiText("这里的 ! 是名称的一部分，只有行首未转义的 ! 才表示例外。"))
+                :t.text==='*'?uiText("匹配零个或多个字符，但不跨过 /。被忽略的目录里面的内容也会被排除。")
+                :t.text==='**'?uiText("在 **/、/** 或 /**/ 这样的目录位置可跨多层目录；其他位置按普通星号处理。")
+                :t.text==='?'?uiText("匹配一个字符，但不能是目录分隔符 /。")
+                :t.text==='/'?(startColumn===r.text.length-1?uiText("行末的 / 表示只匹配目录。"):uiText("分隔路径中的目录；开头或中间有 / 时，通常相对于这份 .gitignore 所在目录匹配。"))
+                :t.text.startsWith('\\')?uiText("反斜杠让后面的字符按字面匹配，例如 \\! 匹配名称中的 !，不表示例外。")
+                :t.text.startsWith('[')?uiText("方括号表示从指定字符或范围中匹配一个字符，例如 [0-9] 匹配一位数字；不是列表。"):'';
             if(plain&&!seen.has(t.text+'\0'+plain)){seen.add(t.text+'\0'+plain);parts.push({text:t.text,plain,start,end:start,startColumn,endColumn:startColumn+t.text.length,offset:t.start});}
         }
         return {parts,unknown:[],unknownTokens:[],supported:true};

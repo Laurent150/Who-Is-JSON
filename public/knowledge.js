@@ -1,3 +1,4 @@
+var uiText = (text,...values)=>globalThis.WhoI18n?globalThis.WhoI18n.t(text,...values):text.replace(/\{(\d+)\}/g,(m,n)=>n<values.length?String(values[n]):m);
 (function (root, factory) { const api = factory(); if (typeof module === 'object' && module.exports)
     module.exports = api;
 else
@@ -11,6 +12,8 @@ else
     (typeof require === "function" ? require("./knowledge/json") : globalThis.WhoJsonCards)(card);
     (typeof require === "function" ? require("./knowledge/dockerfile") : globalThis.WhoDockerfileCards)(card);
     (typeof require === "function" ? require("./knowledge/gitignore") : globalThis.WhoGitignoreCards)(card);
+    // Preserve the original cards; locale selection is a read-only projection.
+    for(const id of Object.keys(cards)){const original=cards[id];Object.defineProperty(cards,id,{enumerable:true,get:()=>globalThis.WhoLocalizeCard?globalThis.WhoLocalizeCard(original):original});}
     function select(records, start, end) { const seen = new Set(); return (records || []).filter(r => cards[r.id] && r.start >= start && r.end <= end).sort((a, b) => (a.end - a.start) - (b.end - b.start)).filter(r => { if (seen.has(r.id))
         return false; seen.add(r.id); return true; }).map(r => ({ ...r, card: cards[r.id] })); }
     function merge(saved, card, source) { const list = JSON.parse(JSON.stringify(saved)), old = list.find(x => x.id === card.id); if (old) {
@@ -19,7 +22,7 @@ else
             old.sources.push(source);
         return list;
     } list.unshift({ id: card.id, card, sources: [source], savedAt: new Date().toISOString() }); return list; }
-    function markdown(item) { const c = item.card; const fence = s => '`'.repeat(Math.max(3, ...(s.match(/`+/g) || []).map(x => x.length + 1))); const code = s => fence(s) + '\n' + s + '\n' + fence(s); return '# ' + c.title + '\n\n' + c.plain + '\n\n## 名称与写法\n\n' + c.naming + '\n\n## 换个场景试试\n\n' + code(c.example) + '\n\n' + (c.walkthrough || []).map((x,i)=>(i+1)+'. '+x).join('\n') + (c.transfer ? '\n\n'+c.transfer : '') + (c.exercise ? '\n\n少写这一步：'+c.exercise : '') + '\n\n预期：' + c.result + '\n\n注意：' + c.pitfall + '\n\n## 关联源码\n\n' + item.sources.map(s => s.file + ' · 第 ' + s.start + '—' + s.end + ' 行\n\n' + s.context + '\n\n' + code(s.code)).join('\n\n'); }
+    function markdown(item) { const c = item.card; const fence = s => '`'.repeat(Math.max(3, ...(s.match(/`+/g) || []).map(x => x.length + 1))); const code = s => fence(s) + '\n' + s + '\n' + fence(s); return '# ' + c.title + '\n\n' + c.plain + uiText("\n\n## 名称与写法\n\n") + c.naming + uiText("\n\n## 换个场景试试\n\n") + code(c.example) + '\n\n' + (c.walkthrough || []).map((x,i)=>(i+1)+'. '+x).join('\n') + (c.transfer ? '\n\n'+c.transfer : '') + (c.exercise ? uiText("\n\n少写这一步：")+c.exercise : '') + uiText("\n\n预期：") + c.result + uiText("\n\n注意：") + c.pitfall + uiText("\n\n## 关联源码\n\n") + item.sources.map(s => s.file + uiText(" · 第 ") + s.start + '—' + s.end + uiText(" 行\n\n") + s.context + '\n\n' + code(s.code)).join('\n\n'); }
     function contains(a, b) { return (a.start < b.start || a.start === b.start && (a.startColumn ?? 0) <= (b.startColumn ?? 0)) && (a.end > b.end || a.end === b.end && (a.endColumn ?? Infinity) >= (b.endColumn ?? Infinity)); }
     function overlaps(a, b) { const before = (x, y) => x.end < y.start || x.end === y.start && (x.endColumn ?? Infinity) <= (y.startColumn ?? 0); return !before(a, b) && !before(b, a); }
     function coverage(records, range) {

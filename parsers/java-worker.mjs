@@ -10,7 +10,7 @@ function conditionPhrase(n){const b=first(n,'binaryExpression'),ops=b?.children.
 function span(n){const p=n.location||n;return {start:p.startLine,end:p.endLine,startColumn:p.startColumn-1,endColumn:p.endColumn};}
 function lesson(id,n,context,why){return {id:'java.'+id,...span(n),context,why};}
 function learning(root){const out=[];
- const types={classDeclaration:'class',methodDeclaration:'method',constructorDeclaration:'new',localVariableDeclaration:'variable',fieldDeclaration:'variable',formalParameter:'variable',ifStatement:'condition',basicForStatement:'loop',enhancedForStatement:'loop',whileStatement:'loop',doStatement:'loop',returnStatement:'return',arrayCreationExpression:'array',arrayInitializer:'array',tryStatement:'exception',classInstanceCreationExpression:'new',methodModifier:'modifier',classModifier:'modifier',variableModifier:'modifier'};
+ const types={classDeclaration:'class',interfaceDeclaration:'class',interfaceMethodDeclaration:'method',methodDeclaration:'method',constructorDeclaration:'new',localVariableDeclaration:'variable',fieldDeclaration:'variable',formalParameter:'variable',ifStatement:'condition',basicForStatement:'loop',enhancedForStatement:'loop',whileStatement:'loop',doStatement:'loop',returnStatement:'return',arrayCreationExpression:'array',arrayInitializer:'array',tryStatement:'exception',classInstanceCreationExpression:'new',methodModifier:'modifier',classModifier:'modifier',variableModifier:'modifier'};
  const gaps={typeParameters:'泛型类型的约束',typeArguments:'泛型参数的具体含义',lambdaExpression:'匿名功能与捕获变量',switchStatement:'多分支跳转路径',tryStatement:'异常及 finally 的执行路径',synchronizedStatement:'并发访问的协调',annotation:'注解的实际作用',importDeclaration:'引入类型的具体实现',throws:'错误向外传播的约定'};
  for(const n of all(root)){
   if(types[n.name])out.push(lesson(types[n.name],n,'此处使用了“'+({class:'类',method:'方法',new:'创建或初始化对象',variable:'声明数据',condition:'条件选路',loop:'重复处理',return:'交回结果',array:'数组',exception:'处理异常',modifier:'访问与归属修饰'}[types[n.name]])+'”的写法。','卡片介绍这处语法的用法；具体数据含义仍要结合调用处。'));
@@ -42,14 +42,14 @@ function seqList(items,depth){const out=[];for(let n of items){n=unwrap(n);if(++
 try{
  let tree,fragment=false;try{tree=lexAndParse(code).cst;}catch(original){const attempt=lexAndParse(code,'classBodyDeclaration');if(attempt.cst.location.endOffset!==attempt.tokens.at(-1)?.endOffset)throw original;tree=attempt.cst;fragment=true;}const blocks=[];
  for(const n of all(tree)){
-  if(!['classDeclaration','methodDeclaration','constructorDeclaration','importDeclaration'].includes(n.name))continue;
-  const method=n.name==='methodDeclaration',constructor=n.name==='constructorDeclaration',callable=method||constructor;
+  if(!['classDeclaration','interfaceDeclaration','interfaceMethodDeclaration','methodDeclaration','constructorDeclaration','importDeclaration'].includes(n.name))continue;
+  const method=['methodDeclaration','interfaceMethodDeclaration'].includes(n.name),constructor=n.name==='constructorDeclaration',callable=method||constructor;
   const declaration=first(n,method?'methodDeclarator':constructor?'constructorDeclarator':'typeIdentifier');
   const name=method?declaration?.children.Identifier?.[0]?.image:constructor?short(first(declaration,'simpleTypeName')):short(declaration);
   const body=method?first(n,'methodBody'):constructor?first(n,'constructorBody'):null;
   const header=method?first(n,'methodHeader'):declaration;
   const params=first(header,'formalParameterList');budget=0;
-  const flow=callable?sequence(body):[];
+  const flow=callable&&body&&!body.children.Semicolon?sequence(body):[];
   blocks.push({kind:callable?'function':n.name==='importDeclaration'?'import':'class',title:name||short(n),...span(n),reusable:callable,constructorMethod:constructor,code:code.split("\n").slice(span(n).start-1,span(n).end).join("\n"),purpose:callable?'这是一个可调用的'+(constructor?'构造方法':'方法')+'。'+(params?'调用时需要提供 '+short(params)+'。':'没有列出输入参数。')+'下面按顺序展示内部处理；方法名本身不足以确认业务目的。':'把相关类型或工具组织到当前文件中。',inputs:short(params)||'没有列出输入参数。',output:method?'声明交回的类型：'+short(first(header,'result')):'构造方法初始化新对象。',usage:'先查看参数与类型，再结合所在类调用此方法。没有编译或执行这份项目。',concept:'Java 的方法通常放在类中；类组织数据与操作。',dependencies:'被引入的类及调用的方法需要项目上下文。',symbols:name?[{name,origin:'作者起的名称',meaning:callable?'调用此功能时使用的名称。':'作者声明的类型名。',rename:'修改时需检查调用处、接口约定与文件名；构造方法须与类名一致。'}]:[],learning:learning(n),controlFlow:flow});
  }
  process.stdout.write(JSON.stringify({language:'Java',parser:'java-parser 3.0.1 · Java 语法树',mode:'local',status:'ready',summary:'已读取 Java 的类、方法及内部结构。',purpose:'先看方法目录，再沿图查看处理过程。',warnings:[...(fragment?['本次读取的是单个类成员片段，所在类和导入信息需补全。']:[]),'Java 当前提供语法与常见流程解释；未进行编译、类型检查或项目运行。泛型、外部调用与复杂转移会列为缺口。'],blocks}));

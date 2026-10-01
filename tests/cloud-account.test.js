@@ -54,11 +54,19 @@ test('PKCE binds each callback to a single flow; wrong, expired and cancelled st
 });
 test('login rate limits and fixed redirects prevent abuse; upstream failures are sanitized',async()=>{
  const s=setup();await assert.rejects(s.account.handle({headers:{host:'evil.test'}},'github-start'),{status:400});
- s.setMode('offline');await assert.rejects(s.login(),e=>e.status===401&&!e.message.includes('private'));
+ s.setMode('offline');await assert.rejects(s.login(),e=>e.status===503&&!e.message.includes('private'));
  s.setMode('rejected');await assert.rejects(s.login(),{status:401});
  const fresh=setup();for(let i=0;i<20;i++)await fresh.account.handle(fresh.req,'github-start');await assert.rejects(fresh.account.handle(fresh.req,'github-start'),{status:429});
 });
 test('malformed and oversized favorites are rejected before upload',()=>{
  for(const p of [null,{}, {knowledge:[],cards:[{}]}, {knowledge:[{}],cards:[]}, {knowledge:[],cards:Array(61).fill({id:1,title:'x',code:'x'})}, {knowledge:[],cards:[{id:1,title:'x',code:'x'.repeat(2000000)}]}])assert.throws(()=>validateLibrary(p));
  assert.deepEqual(validateLibrary({...empty(),extra:'discarded'}),empty());
+});
+
+test('failed callback distinguishes network failure from expired state without leaking upstream details',async()=>{
+ const s=setup(),flow=await s.account.handle(s.req,'github-start');
+ const params=new URL(new URL(flow.url).searchParams.get('redirect_to')).searchParams;params.set('code','private-auth-code');s.setMode('offline');
+ assert.deepEqual(await s.account.callback(params),{ok:false,status:503});
+ await assert.rejects(s.account.handle(s.req,'github-poll',{ticket:flow.ticket}),e=>e.status===503&&!e.message.includes('private'));
+ await assert.rejects(s.account.callback(params),{status:400});
 });

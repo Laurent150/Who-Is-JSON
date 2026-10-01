@@ -1,4 +1,5 @@
 const crypto = require('node:crypto');
+const { setTimeout: delay } = require('node:timers/promises');
 
 const emptyLibrary = () => ({ knowledge: [], cards: [] });
 function failure(status, message) { const e = new Error(message); e.status = status; return e; }
@@ -16,7 +17,7 @@ function validateLibrary(value) {
   return { knowledge: value.knowledge, cards: value.cards };
 }
 
-function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now } = {}) {
+function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now, pause = (ms, signal) => delay(ms, undefined, { signal }) } = {}) {
   const base = (env.WHO_SUPABASE_URL || '').replace(/\/$/, '');
   const key = env.WHO_SUPABASE_PUBLISHABLE_KEY || '';
   const enabled = !!(base && key);
@@ -27,7 +28,7 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
   let legacyRole;
   try { legacyRole = JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString()).role; } catch {}
   if (key.startsWith('sb_secret_') || legacyRole === 'service_role') throw Error('账户服务只能使用 publishable / anon key，不能使用管理员密钥。');
-  const sessions = new Map(), limits = new Map(), flows = new Map();
+  const sessions = new Map(), limits = new Map(), flows = new Map(), trialQueues = new Map();
   async function upstream(route, data, access, method = 'POST') {
     let response;
     try { response = await fetcher(base + route, { method, signal: AbortSignal.timeout(route === '/functions/v1/ai-trial' ? 125000 : 15000), headers: {
@@ -37,7 +38,11 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
     if (!response.ok) {
       if (route === '/functions/v1/ai-trial') {
         let data; try { data = await response.json(); } catch {}
-        throw failure(response.status, typeof data?.error === 'string' ? data.error.slice(0, 200) : '平台试用暂时不可用。');
+        const message = typeof data?.error === 'string' ? data.error.slice(0, 200) : '平台试用暂时不可用。';
+        const error = failure(response.status, message);
+        // This exact response is emitted before reservation/model dispatch.
+        error.trialRateLimited = response.status === 429 && message === '请稍后再试。';
+        throw error;
       }
       if (response.status === 401 || response.status === 403) throw failure(401, '登录已失效，请重新登录。');
       if (response.status === 429) throw failure(429, '请求过于频繁，请稍后重试。');
@@ -73,9 +78,9 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
       const name = identity.identity_data?.user_name || identity.identity_data?.preferred_username || user.email || 'GitHub 用户';
       flow.result = { access: result.access_token, user: { id: user.id, name: String(name), email: user.email || '' }, expires: now() + Math.min(result.expires_in, 3600) * 1000 };
       flow.status = 'complete';
-    } catch (error) { flow.status = 'failed'; flow.error = error.message; }
+    } catch (error) { flow.status = 'failed'; flow.error = error.message; flow.errorStatus = error.status || 502; }
     finally { delete flow.verifier; }
-    return { ok: flow.status === 'complete' };
+    return { ok: flow.status === 'complete', status: flow.errorStatus || 200 };
   }
   function session(req) {
     for (const [id,s] of sessions) if (s.expires <= now()) sessions.delete(id);
@@ -109,7 +114,7 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
       const flow = flows.get(data.ticket);
       if (!flow) throw failure(401, '登录请求已过期，请重新登录。');
       if (route === 'github-cancel') { flows.delete(data.ticket); return { ok: true }; }
-      if (flow.status === 'failed') { flows.delete(data.ticket); throw failure(401, flow.error); }
+      if (flow.status === 'failed') { flows.delete(data.ticket); throw failure(flow.errorStatus, flow.error); }
       if (flow.status !== 'complete') return { pending: true };
       flows.delete(data.ticket);
       for (const [id,s] of sessions) if (s.expires <= now()) sessions.delete(id);
@@ -148,7 +153,33 @@ function createCloudAccount({ env = process.env, fetcher = fetch, now = Date.now
   function trialConfig(req) {
     const s = session(req);
     return { base: 'https://api.deepseek.com', model: 'deepseek-flash',
-      sponsoredCall: data => upstream('/functions/v1/ai-trial', data, s.access) };
+      sponsoredCall: (data, { signal } = {}) => {
+        for (const [id, q] of trialQueues) if (!q.pending && q.next <= now()) trialQueues.delete(id);
+        let queue = trialQueues.get(s.user.id);
+        if (!queue) { queue = { tail: Promise.resolve(), pending: 0, next: 0 }; trialQueues.set(s.user.id, queue); }
+        queue.pending++;
+        const work = queue.tail.then(async () => {
+          for (let attempt = 0; attempt < 2; attempt++) {
+            signal?.throwIfAborted();
+            const remaining = queue.next - now();
+            if (remaining > 0) await pause(remaining, signal);
+            signal?.throwIfAborted();
+            if (sessions.get(req.headers['x-who-session']) !== s || s.expires <= now()) throw failure(401, '登录已过期，请重新登录。');
+            queue.next = now() + 5100;
+            try {
+              // After dispatch, wait for settlement even if the page cancels.
+              // Aborting locally does not cancel an already billable cloud call.
+              return await upstream('/functions/v1/ai-trial', data, s.access);
+            } catch (error) {
+              if (!error.trialRateLimited) throw error;
+              if (attempt) throw failure(429, 'AI 试用请求较频繁，请稍等几秒后重试。');
+              queue.next = now() + 5100;
+            }
+          }
+        });
+        queue.tail = work.catch(() => {}).finally(() => { queue.pending--; });
+        return work;
+      } };
   }
   return { handle, callback, trialConfig };
 }

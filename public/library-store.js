@@ -1,3 +1,4 @@
+var uiText = (text,...values)=>globalThis.WhoI18n?globalThis.WhoI18n.t(text,...values):text.replace(/\{(\d+)\}/g,(m,n)=>n<values.length?String(values[n]):m);
 (function(root) {
   const fields = { 'whoisjson.knowledge.v1': 'knowledge', 'codelingo.cards': 'cards' };
   let owner = null;
@@ -5,7 +6,7 @@
   function read(id = owner) {
     const raw = localStorage.getItem(key(id));
     const data = raw && JSON.parse(raw);
-    if (!data || !Array.isArray(data.payload?.knowledge) || !Array.isArray(data.payload?.cards) || !Number.isSafeInteger(data.revision) || data.revision < 0 || !Number.isSafeInteger(data.sequence)) throw Error('账户收藏暂时无法读取，原数据已保留。');
+    if (!data || !Array.isArray(data.payload?.knowledge) || !Array.isArray(data.payload?.cards) || !Number.isSafeInteger(data.revision) || data.revision < 0 || !Number.isSafeInteger(data.sequence)) throw Error(uiText("账户收藏暂时无法读取，原数据已保留。"));
     return data;
   }
   function write(data, id = owner) { localStorage.setItem(key(id), JSON.stringify(data)); }
@@ -37,14 +38,14 @@
     },
     backup() {
       const raw = localStorage.getItem(key(owner) + '.backup');
-      if (!raw) throw Error('还没有替换前的备份。');
+      if (!raw) throw Error(uiText("还没有替换前的备份。"));
       return JSON.parse(raw).payload;
     },
     importGuest() {
       const data = read();
       for (const [name,field] of Object.entries(fields)) {
         const guest = JSON.parse(localStorage.getItem(name) || '[]');
-        if (!Array.isArray(guest)) throw Error('本地收藏格式不正确，未上传。');
+        if (!Array.isArray(guest)) throw Error(uiText("本地收藏格式不正确，未上传。"));
         const combined = new Map(guest.map(x => [String(x.id), x]));
         for (const item of data.payload[field]) combined.set(String(item.id), item);
         data.payload[field] = [...combined.values()];

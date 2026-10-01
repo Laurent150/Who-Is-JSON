@@ -130,6 +130,6 @@ function javascript(code,name,language){
   blocks=blocks.filter(b=>safe.some(s=>b.start>=s.start&&b.end<=s.end));
   warnings.unshift(`只解释独立解析通过的 ${blocks.filter(b=>b.kind==='function'&&b.reusable).length} 个具名功能及其他完整结构；它们仍可能依赖出错部分。`);
  }
- const functions=blocks.filter(b=>b.kind==='function');return {...result(language,'TypeScript 语法解析',functions.length?`这里有 ${functions.length} 个可调用功能，以及它们的判断、重复处理或类型约定。`:`这份 ${language} 代码包含 ${blocks.length} 个可查看的结构。`,'先点开一个功能，看输入会经过哪些处理，再查看名字由谁提供。仅分析当前文件；没有执行，也没有完成跨文件类型检查。',blocks,warnings,warnings.length?'partial':'ready'),syntaxErrors:source.parseDiagnostics.length>0,partialRecovery:source.parseDiagnostics.length>0&&blocks.length>0,unexplained};
+ const functions=blocks.filter(b=>b.kind==='function');return {...result(language,'TypeScript 语法解析',functions.length?`这里有 ${functions.length} 个可调用功能，以及它们的判断、重复处理或类型约定。`:`这份 ${language} 代码包含 ${blocks.length} 个可查看的结构。`,'先点开一个功能，看输入会经过哪些处理，再查看名字由谁提供。仅分析当前文件；没有执行，也没有完成跨文件类型检查。',blocks,warnings,warnings.length?'partial':'ready'),framework:{links:require('./javascript-links').functionLinks(source,checker,blocks)},syntaxErrors:source.parseDiagnostics.length>0,partialRecovery:source.parseDiagnostics.length>0&&blocks.length>0,unexplained};
 }
 module.exports={javascript};
