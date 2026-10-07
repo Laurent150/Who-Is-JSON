@@ -28,7 +28,7 @@ $payload = Join-Path $build 'payload'
 $assemblyInfo = Join-Path $build 'AssemblyVersion.cs'
 [IO.File]::WriteAllText($assemblyInfo, "[assembly: System.Reflection.AssemblyVersion(`"$version.0`")]", [Text.UTF8Encoding]::new($false))
 $compiler = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-& $compiler /nologo /target:winexe /platform:x64 /codepage:65001 /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll "/win32icon:$(Join-Path $payload who.ico)" "/out:$(Join-Path $payload WhoIsJSON.exe)" (Join-Path $PSScriptRoot 'Launcher.cs') $assemblyInfo
+& $compiler /nologo /target:winexe /platform:x64 /codepage:65001 /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll "/win32icon:$(Join-Path $payload fimi.ico)" "/out:$(Join-Path $payload WhoIsJSON.exe)" (Join-Path $PSScriptRoot 'Launcher.cs') $assemblyInfo
 if ($LASTEXITCODE -ne 0) { throw 'Launcher compilation failed' }
 if ($SigningThumbprint) { & (Join-Path $PSScriptRoot 'sign.ps1') -Path (Join-Path $payload 'WhoIsJSON.exe') }
 & (Join-Path $PythonRuntime 'python.exe') (Join-Path $PSScriptRoot 'inventory.py') $payload

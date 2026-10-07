@@ -6,24 +6,49 @@ function requestOptions(config, messages, options = {}) {
     try { url = new URL(config.base.replace(/\/$/, '') + '/chat/completions'); }
     catch { throw Error('服务地址格式不正确'); }
     if (url.protocol !== 'https:' && !(url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))) throw Error('远程模型服务需使用 HTTPS；本机服务可使用 HTTP。');
-    const preparedMessages=options.explanation ? messages.map(m=>m.role==='system'&&typeof m.content==='string'?{...m,content:options.locale==='en'?require('./ai-english').prompt(options.task,options.readingMode):m.content+(options.task==='talk'?'':'\n'+require('./ai-explanation-rules')+'\n'+require('./ai-reading-style').prompt(options.readingMode))}:m) : messages;
+    const readingStyle=options.task==='knowledge'&&options.readingMode==='beginner'
+        ? require('./ai-reading-style').tokenPrompt(options.locale)
+        : require('./ai-reading-style').prompt(options.readingMode);
+    const preparedMessages=options.explanation ? messages.map(m=>m.role==='system'&&typeof m.content==='string'?{...m,content:options.locale==='en'?require('./ai-english').prompt(options.task,options.readingMode):m.content+(options.task==='talk'?'':'\n'+require('./ai-explanation-rules')+'\n'+readingStyle)}:{...m}) : messages.map(m=>({...m}));
     if(options.explanation)for(const message of preparedMessages)if(message.role==='system'&&typeof message.content==='string')message.content+='\n'+require('./ai-grounding-checks')[options.task==='talk'&&['beginner','nontechnical',undefined].includes(options.audience)?'walkthrough':'instruction'](options.locale);
     if(options.explanation&&options.task==='talk')for(const message of preparedMessages)if(message.role==='system'&&typeof message.content==='string')message.content+='\n'+require('./ai-talk-policy').draft(options.locale,options.readingMode,options.audience,options.detail,options.coverage);
+    if(options.explanation)for(const message of preparedMessages)if(message.role==='system'&&typeof message.content==='string')message.content+='\n'+require('./ai-logic-policy').instruction(options.locale);
+    // E and method 4 already explain the fallible syntax context in their instructions.
+    // Do not silently append the older drafting rules to the measured prompt.
+    const integratedComposition=options.usagePhase==='composition'&&['E','M4','M2','CR2'].includes(options.compositionPrompt)&&!options.explanation;
+    if(options.reviewFoundation&&!integratedComposition)for(const message of preparedMessages)if(message.role==='system'&&typeof message.content==='string'&&!message.content.includes('FIMI_REVIEW_CONTEXT_V1'))message.content+='\n'+require('./ai-review-context').instruction(options.locale);
     const body = {model:config.model, messages:preparedMessages, stream:false, max_tokens:options.maxTokens || 1800};
     // Provider-specific options must not leak to other compatible services.
     if (url.hostname === 'api.deepseek.com') {
         const comparison=options.evaluationModelComparison===true&&process.env.WHO_TALK_EVAL_TRACE==='1'&&process.env.WHO_CLOUD_DISABLED==='1'&&config.model==='deepseek-v4-pro';
-        const reviewing = options.reviewReasoning && (config.model === 'deepseek-flash'||comparison) && typeof config.sponsoredCall !== 'function';
+        const reviewing = options.reviewReasoning && (config.model === 'deepseek-flash'||comparison)
+            && (typeof config.sponsoredCall !== 'function'||config.reviewThinking===true);
         body.thinking = {type:reviewing?'enabled':'disabled'};
-        if(reviewing){body.reasoning_effort=options.usagePhase==='contracts'?'low':'high';body.max_tokens=options.usagePhase==='contracts'?16384:options.task==='talk'?24576:16384;}
-        if (options.json) body.response_format = {type:'json_object'};
+        if(reviewing){const contracts=['contracts','contract-repair'].includes(options.usagePhase);body.reasoning_effort=contracts?'low':'high';body.max_tokens=contracts?16384:options.task==='talk'?24576:16384;}
+        if (options.json) {
+            body.response_format = {type:'json_object'};
+            // DeepSeek requires an explicit JSON instruction in a system/user
+            // message. A schema example alone is insufficient and can return 400.
+            if(!preparedMessages.some(m=>['system','user'].includes(m.role)&&typeof m.content==='string'&&/json/i.test(m.content))){
+                const system=preparedMessages.find(m=>m.role==='system'&&typeof m.content==='string');
+                if(system)system.content+='\nReturn only valid JSON.';
+                else preparedMessages.unshift({role:'system',content:'Return only valid JSON.'});
+            }
+        }
     }
-    return {url, body};
+    // Keep the measured prompts intact. The review audience has a larger safety
+    // ceiling for reasoning AND visible output, rather than a target prose length.
+    const requestProfile=options.task==='talk'&&options.audience==='review'
+        &&url.hostname==='api.deepseek.com'&&config.model==='deepseek-flash'
+        &&(typeof config.sponsoredCall!=='function'||config.reviewThinking===true)
+        ? 'code-review-64k-v1' : undefined;
+    if(requestProfile)body.max_tokens=65536;
+    return {url, body, requestProfile, timeoutMs:options.timeoutMs||(requestProfile?420000:120000)};
 }
 
 function networkMessage(error) {
     const code = error.cause?.code || error.code;
-    if (error.name === 'TimeoutError' || ['UND_ERR_CONNECT_TIMEOUT','UND_ERR_HEADERS_TIMEOUT','ETIMEDOUT'].includes(code)) return 'AI 服务响应超时。可以先阅读本地流程，稍后重试或缩小选中范围。';
+    if (error.name === 'TimeoutError' || ['UND_ERR_CONNECT_TIMEOUT','UND_ERR_HEADERS_TIMEOUT','UND_ERR_BODY_TIMEOUT','ETIMEDOUT'].includes(code)) return 'AI 服务响应超时。可以先阅读本地流程，稍后重试或缩小选中范围。';
     if (['EACCES','EPERM'].includes(code)) return '应用进程没有访问 AI 服务的网络权限。请从正常终端启动应用，并检查防火墙或运行环境限制。';
     if (['ENOTFOUND','EAI_AGAIN'].includes(code)) return '无法解析 AI 服务地址，请检查地址、DNS 和代理连接。';
     if (['ECONNREFUSED','ECONNRESET','UND_ERR_SOCKET'].includes(code)) return '与 AI 服务的连接被拒绝或中断，请检查服务和代理连接。';
@@ -33,13 +58,17 @@ function networkMessage(error) {
 
 async function rawModelCall(config, messages, options = {}) {
     if(options.signal?.aborted)throw Error('AI 请求已取消。');
-    const {url, body} = requestOptions(config, messages, options);
-    const timeout = AbortSignal.timeout(options.timeoutMs || 120000);
+    const {url, body, requestProfile, timeoutMs} = requestOptions(config, messages, options);
+    // Explicit evaluation callback only; never include keys, headers or hidden reasoning.
+    options.onModelRequest?.(structuredClone(body),options.usagePhase||'single');
+    const timeout = AbortSignal.timeout(timeoutMs);
     const signal = options.signal ? AbortSignal.any([timeout, options.signal]) : timeout;
+    const started=Date.now();let stage=typeof config.sponsoredCall==='function'?'gateway-request':'provider-request',providerStatus;
     try {
         const response = typeof config.sponsoredCall === 'function'
-            ? Response.json(await config.sponsoredCall(body, { signal }))
+            ? Response.json(await config.sponsoredCall(body, { signal, requestProfile }))
             : await fetch(url, {method:'POST', redirect:'error', headers:{'Content-Type':'application/json', ...(config.key ? {Authorization:'Bearer '+config.key} : {})}, body:JSON.stringify(body), signal});
+        stage=typeof config.sponsoredCall==='function'?'gateway-response':'provider-response';providerStatus=response.status;
         if (signal.aborted) throw Error('AI 请求已取消。');
         if (!response.ok) {
             const hints = {401:'密钥无效或未填写，请重新配置密钥。',402:'账户额度不足，请检查服务账户。',403:'服务拒绝访问，请检查账户权限或所在网络。',404:'接口或模型不存在，请检查基础地址与模型名称。',429:'请求过多或额度受限，请稍后重试。'};
@@ -48,49 +77,119 @@ async function rawModelCall(config, messages, options = {}) {
         }
         let data;
         try { data = await response.json(); }
-        catch(error) { if(signal.aborted)throw error;throw Error('AI 服务返回的不是完整 JSON，请检查接口或稍后重试。'); }
+        catch(error) {
+            if(signal.aborted)throw error;
+            // JSON decoding and a broken response stream require different feedback.
+            // Keep the original one-request policy; do not replay a possibly billed call.
+            const failure=Error(error.name==='SyntaxError'
+                ? 'AI 服务返回的不是完整 JSON，请检查接口或稍后重试。'
+                : networkMessage(error));
+            throw require('./ai-diagnostics').attach(failure,{...error.diagnostics,
+                stage:typeof config.sponsoredCall==='function'?'gateway-response':'provider-response',
+                providerStatus:response.status,transportCode:error.cause?.code||error.code});
+        }
         if(typeof options.onUsage==='function')options.onUsage(require('./ai-usage').record(data?.usage,options.usagePhase||'single'));
         if(typeof options.onProviderModel==='function'&&typeof data?.model==='string')options.onProviderModel(data.model.slice(0,120));
         const choice = data?.choices?.[0];
         if(typeof options.onModelText==='function'&&typeof choice?.message?.content==='string')options.onModelText(choice.message.content,options.usagePhase||'single');
-        if (choice?.finish_reason === 'length' && !options.reviewDraft) throw Error('AI 解释超过本次长度限制。请选择较小范围后重试。');
+        if (choice?.finish_reason === 'length' && !options.reviewDraft) {
+            if(['contracts','contract-repair'].includes(options.usagePhase))throw Object.assign(
+                Error('AI 源码分析达到本次输出上限，未能完成；本次未生成讲解稿。'),{code:'AI_CONTRACT_LENGTH'});
+            if(requestProfile)throw Object.assign(Error('代码评审达到单次输出保护上限，内容未完整生成；请保留本次错误信息后再重试。'),{code:'AI_REVIEW_LENGTH'});
+            throw Error('AI 解释超过本次长度限制。请选择较小范围后重试。');
+        }
         if (typeof choice?.message?.content !== 'string' || !choice.message.content.trim()) throw Error('AI 服务没有返回可用的文本解释，请检查模型兼容性。');
         return choice.message.content;
     } catch(error) {
-        if(options.signal?.aborted)throw new Error('AI 请求已取消。');
-        if(signal.aborted || error.message === 'fetch failed' || error.cause)throw Error(networkMessage(signal.aborted ? {name:'TimeoutError'} : error));
-        throw error;
+        let failure = error;
+        if(options.signal?.aborted)failure = new Error('AI 请求已取消。');
+        else if(signal.aborted || error.message === 'fetch failed' || error.cause)failure = Error(networkMessage(signal.aborted ? {name:'TimeoutError'} : error));
+        throw require('./ai-diagnostics').attach(failure, {stage,providerStatus,
+            ...(typeof config.sponsoredCall!=='function'?{elapsedMs:Date.now()-started}:{}),
+            transportCode:error.cause?.code||error.code,...error.diagnostics, aiPhase:options.usagePhase || 'single'});
     }
 }
 
 async function modelCall(config, messages, options = {}) {
+    const point=require('./ai-point'),selection=point.route(messages,options);
+    if(selection)return point.run(rawModelCall,config,selection,options);
+    if(options.explanation||options.reviewFoundation){
+        const foundation=require('./ai-review-context');
+        options={...options,reviewFoundation:options.reviewFoundation||await foundation.create(messages,options)};
+        messages=foundation.attach(messages,options.reviewFoundation);
+    }
     if (!options.explanation) return rawModelCall(config, messages, options);
     const prepared = requestOptions(config, messages, options).body.messages;
-    // Draft directly; independently check source facts and audience fit with
-    // reasoning on the supported personal provider. Trial policy stays unchanged.
-    const draft = await rawModelCall(config, messages, {...options, usagePhase:'draft', reviewDraft:true, reviewReasoning:false});
+    let draft = await rawModelCall(config, messages, {...options, usagePhase:'draft', reviewDraft:true, reviewReasoning:false});
+    if(options.task==='talk'&&options.json)draft=require('./ai-talk-format').normalize(draft,options.onProtocolRepair);
+    return reviewModelResponse(config,prepared,draft,options);
+}
+
+// Also used after contract-led composition: the completed manuscript must be
+// checked against original source, independently of the composition call.
+async function reviewModelResponse(config, prepared, draft, options = {}) {
+    // Evaluation-only switches are never read from public request bodies. An
+    // unvalidated experiment must not silently become the shipping default.
+    const experiment=options.evaluationReview;
+    if(experiment && (process.env.WHO_TALK_EVAL_TRACE!=='1'||process.env.WHO_CLOUD_DISABLED!=='1'||!['legacy','local-edits-v1'].includes(experiment.editor)||!['on','off'].includes(experiment.audit)))throw Error('Invalid review evaluation configuration.');
+    const foundation=require('./ai-review-context');
+    options={...options,reviewFoundation:options.reviewFoundation||await foundation.create(prepared,options)};
+    prepared=foundation.attach(prepared,options.reviewFoundation);
     const review = options.task==='talk'?require('./ai-talk-policy').review(options.locale,options.readingMode,options.audience,options.detail,options.coverage):require('./ai-review').instruction(options.locale, options.readingMode);
     const patches=require('./ai-review-patches');
     const structured=options.json?patches.parseDraft(draft):null;
     // Beginner walkthroughs never show follow-up questions. Normalize before
     // review so the reviewer need not request a forbidden structural edit.
     if(structured && options.task==='talk' && options.readingMode==='beginner')structured.questions=[];
+    const original=structured?JSON.stringify(structured):draft;
+    const finish=candidate=>{
+        // All walkthrough audiences deliver the existing review's output after
+        // local validation. The paid gate remains available to offline studies;
+        // explanation tasks retain their existing policy.
+        const reviewedTalk=options.task==='talk'&&['beginner','nontechnical','peer','review',undefined].includes(options.audience);
+        if(experiment?.audit==='off'||reviewedTalk&&experiment?.audit!=='on'){
+            // Keep source, prose catalogue and display-limit validation even
+            // when delivering without the paid model gate.
+            require('./ai-final-audit').build(prepared,candidate,original,options);
+            return candidate;
+        }
+        return require('./ai-final-audit').run(rawModelCall,config,prepared,candidate,original,options);
+    };
+    if(experiment?.editor==='local-edits-v1'){
+        if(options.json&&!structured)throw Object.assign(Error('AI 复核格式不完整，请重试。'),{code:'AI_REVIEW_PROTOCOL'});
+        const local=require('./ai-review-local-edits'),document=structured||{answer:draft};
+        const input=local.build(prepared,document,options);
+        const messages=[{role:'system',content:local.instruction(options)},{role:'user',content:JSON.stringify(input)}];
+        const callOptions={...options,explanation:false,json:true,usagePhase:'review',reviewDraft:false,reviewReasoning:true};
+        let candidate;
+        try{candidate=local.apply(document,await rawModelCall(config,messages,callOptions),input.source);}
+        catch(error){
+            if(error.code!=='AI_REVIEW_PROTOCOL')throw error;
+            // The evaluator may stop before this bounded retry when its
+            // separately authorized shared repair budget has been exhausted.
+            const repair=options.locale==='en'?'The previous edits failed mechanical validation. Recheck the unchanged fields and source. Return the required edits JSON with exact unique quotes, valid field IDs and source excerpts. Do not return an empty list just to avoid this error.':'上次修改未通过程序校验。重新核对未改动的字段和源码，按edits约定返回准确且唯一的原文引用、有效字段编号及源码引用，不为规避报错而返回空修改。';
+            candidate=local.apply(document,await rawModelCall(config,[...messages,{role:'user',content:repair}],{...callOptions,usagePhase:'repair'}),input.source);
+        }
+        return finish(structured?candidate:JSON.parse(candidate).answer);
+    }
+    const loopChecks=patches.loopHints(structured||{answer:draft},prepared,options);
     // A structured review has its own contract. Repeating the entire drafting
     // prompt competes with that contract and anchors the reviewer to the draft.
     const reviewStyle=options.task==='talk'?'':options.locale==='en'
         ? options.readingMode==='beginner'?'BEGINNER MODE: define unfamiliar terms in place; preserve deciding conditions.':'STANDARD MODE: concise, precise explanations.'
         : options.readingMode==='beginner'?'当前为零基础友好模式：就地解释陌生术语，保留决定结果的条件。':'当前为标准模式：简洁准确地解释。';
     const reviewLanguage=options.locale==='en'?'Write all explanations in natural English. Keep source identifiers unchanged.':'所有说明使用自然中文，源码标识符保持原文。';
-    const reviewSystem=[reviewStyle,reviewLanguage,require('./ai-grounding-checks')[options.task==='talk'&&['beginner','nontechnical',undefined].includes(options.audience)?'walkthrough':'instruction'](options.locale),review,structured?patches.instruction(options.locale)+patches.allowedPaths(structured)+patches.readabilityHints(structured,options):''].join('\n');
+    const expression=require('./ai-expression-review').instruction(options,true);
+    const reviewSystem=[reviewStyle,reviewLanguage,require('./ai-grounding-checks')[options.task==='talk'&&['beginner','nontechnical',undefined].includes(options.audience)?'walkthrough':'instruction'](options.locale),require('./ai-logic-policy').instruction(options.locale),review,loopChecks,expression,structured?patches.instruction(options.locale)+patches.allowedPaths(structured)+patches.claimHints(structured,options)+patches.returnHints(structured,prepared,options)+patches.readabilityHints(structured,options):''].join('\n');
     const reviewMessages=[
-        ...prepared.map(m => m.role === 'system' ? {...m, content:structured?reviewSystem:m.content+'\n'+review} : m),
+        ...prepared.map(m => m.role === 'system' ? {...m, content:structured?reviewSystem:m.content+'\n'+review+'\n'+loopChecks+'\n'+expression} : m),
         {role:'assistant',content:structured?JSON.stringify(structured):draft},
-        {role:'user',content:(options.task==='talk'?require('./ai-talk-audience').reviewTask(options.locale,options.audience):'')+(options.locale==='en'?'Review the draft against the source above. Derive the condition and its body action from source before judging the draft. Return only the corrected final response in the required format.':'请对照上面的源码复核草稿，先根据源码确定条件和分支中的实际动作，再检查草稿。只返回符合原格式要求的最终解释。')+(options.readingMode==='beginner'&&['knowledge','ask',undefined].includes(options.task)?(options.locale==='en'?' This is a beginner selection: use one or two natural sentences; define necessary terms immediately or replace them with ordinary words. Do not add an unrequested example.':' 这是零基础点读：用一两句自然语言，必要术语就地解释或替换为日常说法，不追加未请求的例子。'):'')},
+        {role:'user',content:(options.task==='talk'?require('./ai-talk-audience').reviewTask(options.locale,options.audience):'')+(options.locale==='en'?'Review the draft against the source above. Derive the condition and its body action from source before judging the draft. Apply the task-specific expression contract. Return only the corrected final response in the required format.':'请对照上面的源码复核草稿，先根据源码确定条件和分支中的实际动作，再检查草稿，按本场景的表达要求修正。只返回符合原格式要求的最终解释。')},
     ];
     const reviewOptions={...options, explanation:false, usagePhase:'review', reviewDraft:false, reviewReasoning:true};
     const reviewed=await rawModelCall(config,reviewMessages,reviewOptions);
-    if(!structured)return reviewed;
-    try{return patches.apply(structured,reviewed);}
+    let candidate=reviewed;
+    if(structured)try{candidate=patches.apply(structured,reviewed);}
     catch(error){
         if(error.code!=='AI_REVIEW_PROTOCOL')throw error;
         // One bounded protocol repair: re-review the same source and draft.
@@ -99,8 +198,9 @@ async function modelCall(config, messages, options = {}) {
             ? 'The previous review could not be applied because its JSON, field references or anchors were invalid. Review the original source and draft again. Copy field AND anchor from the SAME catalog entry and return only {"corrections":[{"field":"catalog ID","anchor":"exact catalog anchor","value":"complete corrected string"}]}. Match the section/node context before editing. Do not guess references or return an empty list merely to avoid the format error. Do not output the full draft.'
             : '上次复核因JSON格式、字段引用或原文校验无效而未应用。重新核对源码与草稿，确认章节/节点上下文，从同一条字段记录复制field和anchor，只返回{"corrections":[{"field":"字段编号","anchor":"原样复制的anchor","value":"完整修正文字"}]}。不猜引用，不为避免格式错误而返回空修改，不输出整篇草稿。';
         const repaired=await rawModelCall(config,[...reviewMessages,{role:'user',content:repair}],{...reviewOptions,usagePhase:'repair'});
-        return patches.apply(structured,repaired);
+        candidate=patches.apply(structured,repaired);
     }
+    return finish(candidate);
 }
 
 function mergeOverview(result, text) {
@@ -144,4 +244,4 @@ function selectedSource(source, selection) {
     if(!Number.isInteger(selection.start)||!Number.isInteger(selection.end)||selection.start<1||selection.end<selection.start||selection.end>lines.length)throw Error('选中源码范围无效，请重新选择。');
     return {start:selection.start,end:selection.end,code:lines.slice(selection.start-1,selection.end).join('\n')};
 }
-module.exports={overviewBlocks,selectedSource,modelCall,explainOverview,mergeOverview,requestOptions,networkMessage};
+module.exports={overviewBlocks,selectedSource,modelCall,reviewModelResponse,explainOverview,mergeOverview,requestOptions,networkMessage};

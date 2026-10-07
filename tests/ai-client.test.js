@@ -20,6 +20,21 @@ test('DeepSeek uses bounded non-thinking output without changing other providers
  assert.equal(requestOptions({base:'https://example.org/v1',model:'test'},[]).body.thinking,undefined);
  assert.throws(()=>requestOptions({base:'http://example.org',model:'test'},[]),/HTTPS/);
 });
+
+test('DeepSeek JSON transport adds the required format instruction without mutating prompts or adding requests',()=>{
+ const config={base:'https://api.deepseek.com',model:'deepseek-flash'};
+ for(const messages of [[{role:'system',content:'Return {"answer":"text"} only.'},{role:'user',content:'Explain x.'}],[{role:'user',content:'Explain x.'}],[]]){
+  const original=structuredClone(messages),body=requestOptions(config,messages,{json:true}).body;
+  assert.equal(body.response_format.type,'json_object');
+  assert.ok(body.messages.some(m=>['system','user'].includes(m.role)&&/json/i.test(m.content)));
+  assert.deepEqual(messages,original);
+ }
+ const explicit=[{role:'system',content:'Return JSON only.'}];
+ assert.deepEqual(requestOptions(config,explicit,{json:true}).body.messages,explicit);
+ const ordinary=[{role:'system',content:'Explain briefly.'}];
+ assert.deepEqual(requestOptions(config,ordinary).body.messages,ordinary);
+ assert.deepEqual(requestOptions({...config,base:'https://example.org'},ordinary,{json:true}).body.messages,ordinary);
+});
 test('AI descriptions cannot replace parser positions, flow or reading units',()=>{
  const result={status:'ready',reading:[{start:2,text:'local'}],blocks:[{title:'f',start:1,end:3,controlFlow:[{start:2,end:2}],guide:{purpose:'local'}}]};
  const merged=mergeOverview(result,JSON.stringify({summary:'将数值加一。',blocks:[{index:0,start:999,controlFlow:[],purpose:'把输入加一后交回。',terms:[{name:'返回',meaning:'交回给调用者'}]},{index:99,purpose:'invented'}]}));

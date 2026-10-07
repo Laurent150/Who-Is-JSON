@@ -1,4 +1,5 @@
 var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}/g,(m,n)=>n<values.length?String(values[n]):m));
+var uiError = globalThis.WhoI18n?.error || (error=>uiText(error?.message || String(error || '请求未完成。')));
 // AI reading workspace. Parser ranges anchor every node and clickable token.
 let studioSource=null,studioConfig=null,studioVersion=0,studioRequest=0,studioTokenRequest=0;
 let studioCache=new Map(),studioAnswers=new Map(),studioControllers=new Set(),studioSelected=null,studioAnchor=1,studioTokenAnchor=null;
@@ -13,7 +14,7 @@ function studioIdentity(){
 }
 async function studioApi(route,data){
  const c=new AbortController();studioControllers.add(c);
- const signal=AbortSignal.any([c.signal,AbortSignal.timeout(250000)]);
+ const signal=AbortSignal.any([c.signal,AbortSignal.timeout(510000)]);
  try{const result=await api(route,{code:analyzedSource,name:fileName,config,...(current.languageIdentification?.status==='verified'?{languageHint:current.languageIdentification.language}:{}),...data},'POST',signal);signal.throwIfAborted();return result;}
  catch(error){
   if(c.signal.aborted)throw new Error(uiText("已停止生成，源码未修改，可以重试。"));
@@ -37,10 +38,17 @@ function renderStudio(){
  $('studioExplain').replaceChildren(element('p',uiText("点击左侧流程步骤，或在中间选择一行代码。"),'studio-empty'));
  $('studioRange').textContent=uiText("等你选择");
 }
+function studioBlockTitle(block){
+ // Localize generated labels by structural role, never source-defined names.
+ if(block.role==='script-entry')return uiText('文件入口');
+ if(current?.language==='Python'&&block.kind==='module'&&block.title==='文件中的说明')return uiText('文件中的说明');
+ if(current?.language==='Gitignore'&&block.kind==='config'&&block.title==='忽略与例外规则')return uiText('忽略与例外规则');
+ return block.title;
+}
 function studioFunction(block,path){
  const details=element('details',undefined,'studio-function');details.dataset.function=block.title;
  const type=block.role==='script-entry'?uiText("文件入口"):({function:uiText("函数"),class:uiText("类"),module:uiText("文件"),loop:uiText("循环"),condition:uiText("条件判断"),error:uiText("异常处理")})[block.kind]||uiText("代码结构");
- const summary=element('summary');summary.dataset.expandLabel=uiText('展开流程');summary.dataset.collapseLabel=uiText('收起流程');summary.append(element('span',type,'studio-function-type'),element('strong',block.role==='script-entry'?uiText("从这里开始"):block.title),element('small',uiText("第 ")+(block.start+sourceOffset)+'—'+(block.end+sourceOffset)+uiText(" 行 · 点击定位源码")));details.append(summary);
+ const summary=element('summary');summary.dataset.expandLabel=uiText('展开流程');summary.dataset.collapseLabel=uiText('收起流程');summary.append(element('span',type,'studio-function-type'),element('strong',block.role==='script-entry'?uiText("从这里开始"):studioBlockTitle(block)),element('small',uiText("第 ")+(block.start+sourceOffset)+'—'+(block.end+sourceOffset)+uiText(" 行 · 点击定位源码")));details.append(summary);
  summary.addEventListener('click',()=>{
   studioOpenFunction(block);
  });
@@ -55,7 +63,7 @@ function studioFunction(block,path){
   // The same parser scaffold is used by the server. Offline nodes contain positions,
   // not invented input/output or semantic summaries.
   try{const local=WhoFlowModel.scaffold(current,block.start,globalThis.WhoI18n?.locale);body.append(studioSequence(local.nodes,[...path,block.start]));}
-  catch(error){body.append(element('p',uiText(error.message),'studio-note'));}
+  catch(error){body.append(element('p',uiError(error),'studio-note'));}
   generate.onclick=async()=>{
    if(loading)return;
    if(!connected()){settings();return;}
@@ -68,7 +76,7 @@ function studioFunction(block,path){
     if(version!==studioVersion)return;
     body.replaceChildren(element('span',uiText("AI 语义说明 · 源码位置已校验"),'studio-provenance'),studioSequence(graph.nodes,[...path,block.start]));loaded=true;
     if((selectionRequest===studioRequest||$('studioExplain').querySelector('.studio-generate')?.disabled)&&studioSelectionKind==='function'&&studioSelected?.start===block.start&&studioSelected?.end===block.end)studioShowFunction(block,graph);
-   }catch(e){if(version===studioVersion){generate.disabled=false;body.append(element('p',uiText(e.message),'studio-error'));if((selectionRequest===studioRequest||$('studioExplain').querySelector('.studio-generate')?.disabled)&&studioSelectionKind==='function'&&studioSelected?.start===block.start&&studioSelected?.end===block.end){studioShowFunction(block,null);$('studioExplain').append(element('p',uiText(e.message),'studio-error'));}}}
+   }catch(e){if(version===studioVersion){generate.disabled=false;body.append(element('p',uiError(e),'studio-error'));if((selectionRequest===studioRequest||$('studioExplain').querySelector('.studio-generate')?.disabled)&&studioSelectionKind==='function'&&studioSelected?.start===block.start&&studioSelected?.end===block.end){studioShowFunction(block,null);$('studioExplain').append(element('p',uiError(e),'studio-error'));}}}
    finally{clearInterval(timer);loading=false;if(!loaded){generate.disabled=false;generate.textContent=uiText("重试生成 AI 流程");}}
   };
   if(connected()||studioCache.has(block.start))generate.click();
@@ -88,7 +96,8 @@ function studioOpenFunction(block){
  studioShowFunction(block,studioCache.get(block.start));
 }
 function studioShowFunction(block,graph){
- const content=$('studioExplain');content.replaceChildren(element('h3',block.title));
+ const title=studioBlockTitle(block);
+ const content=$('studioExplain');content.replaceChildren(element('h3',title));
  if(!graph){
   content.append(element('p',uiText("输入、输出和步骤总结将在生成 AI 流程后显示。"),'studio-empty'));
   const generate=element('button',connected()?uiText("生成这个函数的 AI 流程"):uiText("配置 AI 后生成流程"),'studio-generate');
@@ -99,7 +108,7 @@ function studioShowFunction(block,graph){
     const items=WhoStructure.modules(current);$('studioFlow').replaceChildren(...items.map(item=>studioFunction(item.block,[])));
     const owner=[...$('studioFlow').children].find(d=>d.dataset.function===block.title);if(owner)owner.open=true;
     if(id===studioRequest)studioShowFunction(block,result);
-   }catch(error){if(version===studioVersion&&id===studioRequest){generate.disabled=false;generate.textContent=uiText("重试生成 AI 流程");content.append(element('p',uiText(error.message),'studio-error'));}}
+   }catch(error){if(version===studioVersion&&id===studioRequest){generate.disabled=false;generate.textContent=uiText("重试生成 AI 流程");content.append(element('p',uiError(error),'studio-error'));}}
   };if(studioPendingFlows.has(block.start)){generate.disabled=true;generate.textContent=uiText("正在理解这个函数…");}content.append(generate);return;
  }
  content.append(element('span',uiText("AI 解释 · 请对照源码核对"),'studio-provenance'),element('p',graph.summary));
@@ -110,7 +119,7 @@ function studioShowFunction(block,graph){
  content.append(io);
  if(!graph.input||!graph.output){const retry=element('button',uiText("重试生成 AI 流程"));retry.onclick=()=>{studioCache.delete(block.start);studioShowFunction(block,null);content.querySelector('.studio-generate')?.click();};content.append(retry);}
  const answer=[graph.summary,graph.input&&uiText("输入")+'：'+graph.input,graph.output&&uiText("输出")+'：'+graph.output].filter(Boolean).join('\n\n');
- appendAITerms(content,answer);appendExplanationSave(content,answer,explanationSource({start:block.start,end:block.end}),block.title);
+ appendAITerms(content,answer);appendExplanationSave(content,answer,explanationSource({start:block.start,end:block.end}),title);
  studioAppendFollowups(content,{start:block.start,end:block.end});
 }
 function studioAppendFollowups(host,selection){
@@ -128,7 +137,7 @@ async function studioFollowup(question,selection){
  const response=element('div',undefined,'studio-followup-answer');response.append(element('p',uiText("AI 正在解释选中的原文…")));content.append(response);
  try{const result=await studioApi('ask',{selection,question});if(version!==studioVersion||id!==studioRequest)return;
   response.replaceChildren(element('p',result.answer));appendAITerms(response,result.answer);appendExplanationSave(response,result.answer,explanationSource(selection));
- }catch(error){if(version===studioVersion&&id===studioRequest)response.replaceChildren(element('p',uiText(error.message),'studio-error'));}
+ }catch(error){if(version===studioVersion&&id===studioRequest)response.replaceChildren(element('p',uiError(error),'studio-error'));}
 }
 function studioNodeEnd(node){return Math.max(node.end,...node.branches.flatMap(b=>b.nodes.map(studioNodeEnd)));}
 function studioRevealLine(line){
@@ -208,9 +217,9 @@ async function studioExplainSelection(){
  if(studioSelectionKind==='function'){const block=current.blocks.find(b=>b.start===studioSelected.start&&b.end===studioSelected.end);if(block){studioShowFunction(block,studioCache.get(block.start));$('studioExplain').querySelector('.studio-generate')?.click();return;}}
  const selection={...studioSelected};studioIdentity();studioSelected=selection;const version=studioVersion,id=++studioRequest,key='line:'+selection.start+':'+selection.end;
  $('studioExplain').replaceChildren(element('p',uiText("AI 正在解释选中的原文…"),'studio-empty'));
- try{let answer=studioAnswers.get(key);if(!answer){answer=(await studioApi('ask',{selection,question:beginnerMode()?uiText("请只用一两句解释 selectedSource 在做什么。像朋友指着这一行回答；没有必要就不要举例，不补充下一步或术语背景。"):uiText("请只解释 selectedSource：先说这一步做什么，再用很小的假设输入说明数据变化，最后说明下一步。术语就地用日常中文解释，不猜作者动机。")})).answer;if(version!==studioVersion)return;studioAnswers.set(key,answer);}
+ try{let answer=studioAnswers.get(key);if(!answer){answer=(await studioApi('ask',{selection,question:beginnerMode()?beginnerSelectionQuestion():uiText("请只解释 selectedSource：先说这一步做什么，再用很小的假设输入说明数据变化，最后说明下一步。术语就地用日常中文解释，不猜作者动机。")})).answer;if(version!==studioVersion)return;studioAnswers.set(key,answer);}
   if(version===studioVersion&&id===studioRequest){$('studioExplain').replaceChildren(element('span',uiText("AI 解释 · 请对照源码核对"),'studio-provenance'),element('p',answer));appendAITerms($('studioExplain'),answer);appendExplanationSave($('studioExplain'),answer,explanationSource(selection));appendBuiltinReference($('studioExplain'),selection);studioAppendFollowups($('studioExplain'),selection);}
- }catch(e){if(version===studioVersion&&id===studioRequest)$('studioExplain').replaceChildren(element('p',uiText(e.message),'studio-error'));}
+ }catch(e){if(version===studioVersion&&id===studioRequest)$('studioExplain').replaceChildren(element('p',uiError(e),'studio-error'));}
 }
 function closeStudioToken(){studioTokenRequest++;studioActiveToken?.classList.remove('selected-token');studioActiveToken=null;const p=$('studioTokenPopup');if(p)p.hidden=true;}
 async function openStudioToken(anchor,token){
@@ -225,7 +234,7 @@ async function openStudioToken(anchor,token){
    $('studioTokenText').textContent=response.answer;appendAITerms($('studioTokenText'),response.answer);
    appendExplanationSave($('studioTokenLesson'),response.answer,explanationSource({start:token.line,end:token.line},{startColumn:token.startColumn,endColumn:token.endColumn}),token.text);appendBuiltinReference($('studioTokenLesson'),{start:token.line,end:token.line},token);
   }
- }catch(e){if(id===studioTokenRequest&&version===studioVersion)$('studioTokenText').textContent=uiText(e.message);}
+ }catch(e){if(id===studioTokenRequest&&version===studioVersion)$('studioTokenText').textContent=uiError(e);}
 }
 $('studioTokenClose').onclick=()=>{closeStudioToken();studioTokenAnchor?.focus({preventScroll:true});};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('studioTokenPopup').hidden){closeStudioToken();studioTokenAnchor?.focus({preventScroll:true});}});

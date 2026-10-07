@@ -31,13 +31,15 @@ test('default is beginner; switching preserves source and local ranges but clear
 test('unavailable preference storage does not break switching',()=>{
  const app=page(null,true);app.change('standard');assert.equal(app.ctx.document.body.dataset.readingMode,'standard');
 });
-test('beginner line requests do not force examples and next steps',async()=>{
- for(const beginner of [true,false]){
+test('bilingual beginner line requests use method 3 without conflicting sentence limits',async()=>{
+ for(const locale of ['zh-CN','en'])for(const beginner of [true,false]){
   let question;const nodes=new Map();
   const ctx=vm.createContext({AbortController,AbortSignal,Error,current:{},config:{},analyzedSource:'return number * 2;',fileName:'test.js',beginnerMode:()=>beginner,connected:()=>true,element:()=>({}),document:{addEventListener(){}},window:{addEventListener(){}},$:id=>{if(!nodes.has(id))nodes.set(id,{addEventListener(){},replaceChildren(){}});return nodes.get(id);},api:async(route,data)=>{question=data.question;return {answer:'result'};}});
+  const profile=page(beginner?'beginner':'standard');profile.ctx.WhoI18n={locale};
+  ctx.beginnerSelectionQuestion=legacy=>vm.runInContext('beginnerSelectionQuestion('+JSON.stringify(legacy)+')',profile.ctx);
   vm.runInContext(fs.readFileSync(require.resolve('../public/studio.js'),'utf8'),ctx);
   await vm.runInContext('studioIdentity=()=>false;studioSelected={start:1,end:1};studioExplainSelection()',ctx);
-  assert.match(question,beginner?/只用一两句/:/最后说明下一步/);
+  assert.match(question,beginner?(locale==='zh-CN'?/没有编程背景的成年人/:/adult with no programming background/):/最后说明下一步/);
   if(beginner)assert.doesNotMatch(question,/再用很小的假设输入/);
  }
 });

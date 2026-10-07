@@ -21,8 +21,8 @@ VIAddVersionKey /LANG=2052 "ProductName" "FIMI"
 VIAddVersionKey /LANG=2052 "FileDescription" "FIMI 离线安装包"
 VIAddVersionKey /LANG=2052 "FileVersion" "${APP_VERSION}.0"
 VIAddVersionKey /LANG=2052 "LegalCopyright" "FIMI contributors"
-!define MUI_ICON "${PAYLOAD}\who.ico"
-!define MUI_UNICON "${PAYLOAD}\who.ico"
+!define MUI_ICON "${PAYLOAD}\fimi.ico"
+!define MUI_UNICON "${PAYLOAD}\fimi.ico"
 !define MUI_WELCOMEPAGE_TITLE "安装 FIMI"
 !define MUI_WELCOMEPAGE_TEXT "从源码、流程和例子学习编程。$\r$\n$\r$\n安装包自带本地解析环境，无须另装 Node.js 或 Python。$\r$\n$\r$\n适用于 Windows 10 / 11 64 位。使用 Edge 打开独立窗口；未安装 Edge 时使用默认浏览器。"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\WhoIsJSON.exe"
@@ -91,13 +91,17 @@ Section "程序与离线运行环境（必选）" SecMain
   Delete "$MenuDir\卸载 Who Is JSON.lnk"
   Delete "$DesktopDir\Who Is JSON.lnk"
   CreateDirectory "$MenuDir"
-  CreateShortcut "$MenuDir\FIMI.lnk" "$INSTDIR\WhoIsJSON.exe" "" "$INSTDIR\who.ico"
+  CreateShortcut "$MenuDir\FIMI.lnk" "$INSTDIR\WhoIsJSON.exe" "" "$INSTDIR\fimi.ico"
   CreateShortcut "$MenuDir\卸载 FIMI.lnk" "$INSTDIR\Uninstall.exe"
 SectionEnd
 Section "桌面快捷方式" SecDesktop
   CreateDirectory "$DesktopDir"
-  CreateShortcut "$DesktopDir\FIMI.lnk" "$INSTDIR\WhoIsJSON.exe" "" "$INSTDIR\who.ico"
+  CreateShortcut "$DesktopDir\FIMI.lnk" "$INSTDIR\WhoIsJSON.exe" "" "$INSTDIR\fimi.ico"
 SectionEnd
+Function .onInstSuccess
+  ; Refresh shortcut artwork after upgrading from the old J icon.
+  System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
+FunctionEnd
 Function un.onInit
   SetShellVarContext current
   IfFileExists "$INSTDIR\desktop-install.marker" +3 0

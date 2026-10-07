@@ -1,4 +1,5 @@
 var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}/g,(m,n)=>n<values.length?String(values[n]):m));
+var uiError = globalThis.WhoI18n?.error || (error=>uiText(error?.message || String(error || '请求未完成。')));
 let repairSnapshot=null,repairProposal=null,repairController=null,repairUndo=null;
 
 function formatSuspicious(source){
@@ -57,7 +58,7 @@ async function previewCleanup(){
  $('cleanOriginal').textContent=snapshot.code;$('cleanPreview').textContent='';$('cleanChanges').textContent=uiText("正在检查复制格式…");$('repairNotice').textContent='';$('applyClean').disabled=true;$('aiRepair').disabled=true;
  if(!$('cleanup').open)$('cleanup').showModal();
  try {const result=await api('prepare',{code:snapshot.code});if(validRepair(snapshot))showRepair(result);}
- catch(e){if(validRepair(snapshot))$('cleanChanges').textContent=e.message;}
+ catch(e){if(validRepair(snapshot))$('cleanChanges').textContent=uiError(e);}
  finally {if(validRepair(snapshot))$('aiRepair').disabled=false;}
 }
 $('cleanBtn').onclick=previewCleanup;
@@ -69,7 +70,7 @@ $('aiRepair').onclick=async()=>{
  try {
   const result=await api('repair',{code:snapshot.code,name:snapshot.name,config:usedConfig},'POST',AbortSignal.any([controller.signal,AbortSignal.timeout(130000)]));
   if(validRepair(snapshot)&&repairController===controller&&!controller.signal.aborted&&config===usedConfig)showRepair(result);
- }catch(e){if(validRepair(snapshot)&&repairController===controller)$('cleanChanges').textContent=controller.signal.aborted?uiText("已停止。原文未修改。"):e.name==='TimeoutError'?uiText("等待超时，请重试。原文未修改。"):e.message;}
+ }catch(e){if(validRepair(snapshot)&&repairController===controller)$('cleanChanges').textContent=controller.signal.aborted?uiText("已停止。原文未修改。"):e.name==='TimeoutError'?uiText("等待超时，请重试。原文未修改。"):uiError(e);}
  finally {
   if(repairController===controller){repairController=null;$('aiRepair').disabled=false;$('cancelRepair').hidden=true;
    if(validRepair(snapshot)){$('applyClean').disabled=!repairProposal||repairProposal.code===snapshot.code;if(config!==usedConfig)$('cleanChanges').textContent=uiText("AI 配置已变化，请重新请求建议。");}

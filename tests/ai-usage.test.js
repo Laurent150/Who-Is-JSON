@@ -3,6 +3,7 @@ process.env.WHO_TALK_PIPELINE='direct';
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {record,summary}=require('../ai-usage');
 const {generateTalk,settings}=require('../ai-talk');
+const {mockFinalAudit}=require('./final-audit-mock.cjs');
 test('usage counts reasoning as part of output and preserves unavailable counters',()=>{
  const a=record({prompt_tokens:100,completion_tokens:60,total_tokens:160,completion_tokens_details:{reasoning_tokens:40},prompt_cache_hit_tokens:50,secret:'not retained'},'draft');
  const b=record({prompt_tokens:200,completion_tokens:80,total_tokens:280,completion_tokens_details:{reasoning_tokens:70},prompt_cache_hit_tokens:100},'review');
@@ -13,7 +14,7 @@ test('usage counts reasoning as part of output and preserves unavailable counter
 test('talk usage records draft, failed protocol review and repair without leaking content',async()=>{
  let calls=0;const observed=[];
  const draft={title:'Sample',sections:[{title:'Result',text:'Original prose.'}],questions:[]};
- const config={base:'https://example.org',model:'test',sponsoredCall:async()=>({usage:{prompt_tokens:10,completion_tokens:5,total_tokens:15},choices:[{message:{content:++calls===1?JSON.stringify(draft):calls===2?'bad JSON':'{"corrections":[]}'}}]})};
+ const config={base:'https://example.org',model:'test',sponsoredCall:async body=>mockFinalAudit(body,{prompt_tokens:10,completion_tokens:5,total_tokens:15})||({usage:{prompt_tokens:10,completion_tokens:5,total_tokens:15},choices:[{message:{content:++calls===1?JSON.stringify(draft):calls===2?'bad JSON':'{"corrections":[]}'}}]})};
  const result=await generateTalk('function f(){}','sample.js',{audience:'nontechnical'},config,{onUsage:u=>observed.push(u)});
  assert.equal(result.usage.totalTokens,45);assert.deepEqual(result.usage.calls.map(c=>c.phase),['draft','review','repair']);assert.deepEqual(observed,result.usage.calls);assert.equal(result.sections[0].text,'Original prose.');assert.match(result.note,/入门理解/);
  assert.doesNotMatch(JSON.stringify(result.usage),/Original prose|function f|secret/);

@@ -1,5 +1,128 @@
 # 验证记录
 
+## 2026-10-07 新零基础单词提示融合
+
+最终516项自动测试全部通过，19份发布样本无失败。初轮一项HTTP测试桩依赖旧英文开头而误回中文，已更新识别且保留语言断言。当前43193本地服务重启加载构建`635fdd1e489d3495`，健康检查确认；内存登录需重新建立。未打包安装器或部署云端。
+
+依据用户附文替换零基础单词初稿/复核的写作配置，增加每卡至多一个新术语、标题去重、作用和关系先于名称、默认不用类比及普通成人语言要求。中文长度目标由60调整为60—80中文字，英文为自然表达、通常55词以内。去除与新原则冲突的“只有理解当前内容必需时才教术语”限制，允许顺带建立一个值得记住的基础概念，但不强制教学。源码准确性、JSON明确要求及传输保护保留，未恢复终审，也未加重试或截断。async、裸return、定义与执行及None的边界要求避免照搬一般例子导致失真。
+
+四种语言/档位链路测试继续检查JSON模式必需指令、两次请求上限、来源/选区和复核后的正文；零基础补验新术语与标题规则。标准模式中英文初稿/复核与改前保存全文逐字比较相同。发布样本19份通过；日志与改前快照位于忽略目录`.browser-artifacts/beginner-hover-v2-20261007/`。没有新增付费请求；模拟回归不代表真实模型输出已满足教学质量目标。
+
+
+## 2026-10-07 标准点读取消终审及JSON协议遗漏修复
+
+用户实测后本地记录显示点读draft收到DeepSeek HTTP400，92ms，settlement=pending。发现上一版短卡片只有结构示例，缺少DeepSeek JSON模式要求在system/user消息出现的JSON词；这是已确认的协议遗漏及本次400的高度可疑原因，但网关未保留上游错误正文，不能宣称已拿到具体拒绝原因或确认零计费。修正双语初稿/复核提示，增加DeepSeek JSON请求预检补足格式指令；不变更其他供应商、已有合法提示或重试策略。
+
+按用户明确要求取消标准词语点读终审，中英文两档均保持初稿与复核两次调用。保留精确选区、复核协议、空结果、显示长度和取消保护，不交付复核失败的初稿。516项自动测试、19份发布样本通过；新增测试覆盖缺少JSON词、有/无system、空消息、输入不可变、非JSON及其他供应商不受影响，并通过实际点读请求捕获检查两阶段JSON契约。所有模型测试为模拟，不是付费服务质量验证。改前快照、失败元数据及只读额度核查SQL保存在忽略目录`.browser-artifacts/token-no-audit-20261007/`。本次无新增付费请求、无余额修改；历史预留仍需云端核实费用后结算。
+
+
+## 2026-10-07 单词点读短卡片
+
+最终515项自动测试及19份发布样本全部通过。当前本地43193服务已重启加载构建`a2c39819008a3b96`，健康检查确认新构建；内存登录需要重新建立。没有重建安装包或部署云端，也没有新增真实模型质量测试。
+
+按用户提供的两档提示融合上下文与准确性规则，新建双语短卡片提示，替代词语点读的四步展开。中文零基础/标准以60/50中文字为目标，英文45/35词，均为1—3句单段，必要条件优先于字数。复核允许压缩过长卡片，一次改完整p1；不机械截断，不因超目标字数自动重试或拒绝。行读、段读的两份方法3提示与改前SHA-256一致；讲解稿及其他模式提示没有改动。
+
+自动验证覆盖四种语言/档位请求、初稿与复核实际提示、选区和源码保留、多段初稿改为一段、错字段拒绝、取消、截断、标准点读原有终审拒绝。测试使用模拟模型，不代表真实DeepSeek输出已达到长度或可读性目标；本次付费请求0。首次全量的2个失败来自HTTP模拟服务和语法上下文测试对旧提示的识别，更新协议匹配和阶段上下文预期，原源码与失败保护断言保留。19份发布样本通过，工程与回归日志位于忽略目录`.browser-artifacts/token-hover-20261007/`；未执行用户源码。
+
+
+## 2026-10-07 代码评审融合成稿＋原版复核整合
+
+用户查看两份初稿的原版／融合复核对照后，要求保留原版复核并更新选定成稿。代码评审成稿默认由E改为CR2；中文system prompt与已测融合版逐字相同，SHA-256为`456ed3fe5600c6273e4c1aa067dfdb1e6aa4d54ffc89b71e3a62c7af2b0517d2`。英文按同一要求独立撰写，涵盖证据、条件、影响、风险类别、建议、测试与结论，不机械翻译中文句式。非技术M4、同事M2以及点读方法3保持不变。新增模块进入桌面文件清单，未重新打包安装器。
+
+原版复核规则及字段协议保持字节不变，不引入本轮融合复核。代码评审正常链路与已选流程对齐为源码分析、成稿、原版复核三次调用，之后本地校验交付，不追加模型终审；明确离线审查场景仍保留终审测试。65536单次输出保护上限及已有有界格式修复继续保留，不放开无限重试。
+
+508项自动测试与19份发布样本检查通过。中英文24组设置验证同样阶段、源码与设置保留、成稿提示原样派发、原版复核请求不受成稿切换影响，以及无效/空复核和格式错误处理。首次全量有3项旧测试仍期待代码评审终审，更新阶段预期后508项全部通过；没有删除其正文、格式或纠错断言。两份真实保存初稿与原版复核响应经正式生成入口离线回放，请求及最终全文与实验记录相同。9个复核、其他成稿及点读模块与整合前字节一致。本次新增付费请求0，未执行样本源码；工程检查不证明英文实测质量或原版复核漏检消失。
+
+源码构建`5535b70e81437e4f`。改前快照、完整日志与回放结果保存在忽略目录`.browser-artifacts/code-review-integration-20261007/`。CloudBase大额度仍需已部署网关支持，不用源码整合冒充云端部署或安装包发布。
+
+随后更新本地产品预览服务，健康检查确认运行构建`5535b70e81437e4f`，浏览器打开正常。重启清除原内存会话，需要使用时重新登录／连接。没有改动UI，本次浏览器仅检查页面加载；没有进行新一轮付费生成或云端试用验收。
+
+## 2026-10-07 代码评审专属64K输出额度
+
+官方DeepSeek Flash的代码评审讲解稿单次总输出保护上限提高到65536，包含思考与正文；覆盖源码分析、成稿及现有复核/格式纠正/终审阶段。源码分析补传已经校验的受众设置，修复原先无法按受众选择额度的问题。非技术、同事交流、点读和其他供应商配置不扩大；提示、low/high思考强度、成稿版本及调用次数不变。本地单次上限420秒，代码评审浏览器整条链路上限4200秒，保留主动取消。更高上限不是目标篇幅，也不是精确统计得出的异常阈值。
+
+CloudBase新增显式能力`code-review-64k-v1`，代码评审提供方360秒、网关客户端400秒。新桌面在首次大额度请求前进行免费能力核对；旧或未启用的云端在预留/模型调用前阻止不兼容请求。部署方必须先验证实际HTTP入口支持400秒以上响应，再启用`FIMI_CODE_REVIEW_LONG_REQUESTS=1`，默认关闭。试用仍按最大可能费用预留、按已核验的实际用量结算；没有补余额或自动重试。详见云端部署文档，不能把Node超时设置当作托管网关支持长请求的证据。
+
+首次全量检查暴露一项诊断兼容问题：本地总耗时不应冒充缺失的云端阶段耗时。已保留云端原有诊断，仅个人直连补记本地耗时及白名单传输错误码，之后503项自动测试和19份发布样本全部通过，构建`b4a4ac11c32fed08`。新增6项检查覆盖多阶段/双语额度、真实编排传参、截断停止、云端预留结算、能力检查、浏览器总期限和主动取消；真实本地HTTP中断测试也验证安全错误码记录。
+
+本轮新增付费请求0；尚未用原失败JavaScript验证64K的真实交付率。旧实验结果和冻结输入未改写，尚未重启现有产品进程、重建安装包或部署云端。测试证据及拟重测原请求保存在`.browser-artifacts/code-review-budget-20261007/`。不能据工程回归宣称连接中断或模型截断已被彻底消除。
+
+## 2026-10-07 响应读取错误分类与源码分析截断提示
+
+代码评审融合实验累计使用4/5次请求，只交付Python一稿；JavaScript在源码分析阶段以`finish_reason=length`截断（16383输出token，其中15261为思考），未请求成稿。首次Python响应读取失败缺少底层原因，不能认定具体网络根因。所有输入、请求与失败保留于本地实验记录；生产修复前保存148文件快照，未改写原冻结清单。融合提示仍属实验版本，没有取代产品代码评审默认版本。
+
+修复个人API将所有响应读取异常误报为JSON错误的问题：区分语法解析与读取/传输错误，保留安全的阶段和HTTP状态。源码分析达到输出上限时给出对应阶段的中英文提示并停止后续派发。新增3项测试覆盖本地HTTP响应中断、解析/超时/合法空白响应、分析截断不触发额外付费修复。497项自动测试、19份发布样本通过，源码构建`16abc01b7cdcb04e`。诊断与改前快照位于`.browser-artifacts/ai-response-investigation-20261007/`。
+
+未修改模型、提示、输出额度、超时、计费或自动重试策略。这证明错误分类和停止行为，不证明已经消除真实连接中断或分析输出截断。未重启43193产品服务、构建安装包或部署云端；运行服务仍为上一版本。没有为此次离线检查新增模型调用。
+
+## 2026-10-07 同事交流方法2接入
+
+中文成稿提示与已选实验版本逐字一致（SHA-256：`0e657ba52fc927491a595d3a9c2a8e67c68ce15fafe01612973a677eab26cddd`）。英文按相同职责和表达要求独立撰写。中英文、两种阅读模式、三种详略与两种范围均通过完整模拟链路：保留原始源码、分析材料和设置，正常调用分析、成稿、现有复核三阶段，本地校验后交付。明确的离线终审入口及代码评审受众保持原策略。旧B/E可显式回退；页面不能覆盖受控开关。
+
+494项自动测试、19份发布样本检查通过。同一源码、分析材料和初稿在切换成稿前后产生完全相同的现有复核请求；现有复核提示模块、字段应用规则和非技术方法4与改前快照一致。验证了格式修复、复核失败及空正文不会跳过检查。桌面打包文件清单已补新模块；没有构建安装包或部署云端。
+
+本地产品服务已使用新默认策略重启，运行构建`ebce456f9f1fd293`。启动前模拟验证中英文M4/M2各一次，未调用付费模型。本次新增付费请求为0；英文同事交流成稿尚未真实模型实测，工程测试不证明实际质量与中文相同。未修改UI，未新增浏览器视觉验收。诊断和运行核对保存在`.browser-artifacts/peer-method2-integration-20261007/`。
+
+初次回归中3项旧测试仍要求同事交流调用终审，已按当前取消策略更新阶段预期，保留代码评审和显式离线终审覆盖；没有删去原测试的源码、协议或纠错断言。之后完整回归通过。
+
+## 2026-10-05 非技术讲解稿方法4双语接入
+
+按所有者要求，为已选定的中文方法4补齐独立撰写的自然英文成稿提示，并设为入门理解／非技术受众的源码默认版本。12组中文阅读模式、详略和范围组合的完整提示及输入与原方法4实验逐项一致，标准完整稿提示SHA-256为`371b23954d93638e373e69049ef04ce622717deb0ecace4893740373d034b277`。英文保留相同的整体理解、读者问题推进、先含义后必要名称、条件与后果相邻、短自然段、源码依据及格式要求；不用中文句式硬译，不为控制长度删除条件或强制删掉有用名称。
+
+24组双语设置通过模拟模型验证：源码原文、完整设置和事实笔记保留，成稿提示原样派发，现有复核的修改与段落原样交付，两种语言均正常3次调用、low/high/high及16384/24576/24576输出额度相同。个人调用与当前CloudBase网关策略参数兼容；这不等于重新验证线上网关计费。已有有限格式修复、复核失败及空正文拦截继续生效，默认终审保持关闭。中文源码名称可出现在英文稿及字段定位中，不按“包含汉字”误判为翻译失败。同事和评审受众保持E，显式E/B回退可用且不会重新开启入门稿终审；公开请求不能选择内部版本。
+
+489项自动测试、19份发布样本通过，源码构建`22d255c659257e55`。源码分析、格式处理、复核规则和点读提示模块均与改前快照字节一致；新增模块已列入桌面打包清单。未改UI，本次未新增浏览器交互验收。零新增付费请求，未进行英文方法4真实模型实测或外部母语读者评价，不据模拟测试宣称中英文实际可读性等同。没有重启已有产品进程、构建安装包或部署云端。证据、完整双语提示、改前快照位于`.browser-artifacts/talk-method4-bilingual-20261005/`。
+
+## 2026-10-04 取消入门讲解稿默认 AI 终审
+
+依据所有者在终审收益与耗时对照后的决定，入门理解／非技术受众讲解稿在现有复核完成并通过本地校验后直接交付，中英文及两种阅读模式均适用。正常链路由约定、成稿、复核、终审4次变为约定、成稿、复核3次；三类已有协议纠正各最多一次，总计最多6次。复核失败、空正文、不完整结构、取消和服务失败仍停止交付。其他受众和解释任务保持既有策略；受控离线评估仍可显式调用原终审。
+
+47项定向回归、485项全量自动测试和19份发布样本检查通过，源码构建`3110f49ef9d8bca1`。覆盖中英文、受众和阅读模式路由、复核修改原样交付、用量记录、已有有界修复，以及公开设置不能启用离线终审。旧终审拒绝、局部恢复和最多9次调用的检查改为显式离线场景继续保留。本轮使用本地模拟模型，没有新增付费调用；这些检查证明链路策略生效，不代表重新完成真实生成质量或耗时测试。
+
+仅修改终审默认策略，未调整成稿和复核提示；方法4仍是已选定的实验候选，产品默认成稿仍为E，需另行整合。没有重启现有产品服务、重建安装器或更新云端。本地证据与修改前快照保存在`.browser-artifacts/disable-beginner-talk-audit-20261004/`。
+
+## 2026-10-04 零基础词语点读可读性（源码调整，真实效果待验证）
+
+所有者提供Python `except` 点读截图：解释混用“捕获、抛出”、未说明含义的变量名及斜杠串列，构成零基础理解障碍。尚无该次草稿、复核及终审原始响应，不能确定哪一阶段引入措辞。检查发现初稿使用通用约80字建议，后续检查使用另一份表达要求；本次为中英文零基础knowledge任务使用同一份局部表达约定，替换通用短解释风格。要求先说明具体含义，再提供源码名称；answer单独可读，必要条件保留且用日常语言表达，不为字数挤压概念，不把事实核对清单抄成解释。没有新增模型调用、格式字段或硬性拒绝规则。
+
+修改前后20组提示对照仅中英文零基础词语两组发生变化，其余18组保持一致；新增4项模拟链路检查覆盖三阶段约定、源码及词语定位、修订字段、调用次数和终审拒绝。首次全量469项中466项通过，3项出现解析器不可用或解析超时；不改源码和测试断言，降低并发单独重跑相关3个测试文件，70项全部通过。19份发布样本通过。模拟模型不证明真实可读性提高；本轮未调用付费模型、未修改UI、未重启43193现有服务或重建安装包，当前页面不包含本次服务端调整。保留截图问题及改动前文件，后续需小范围真实对照可读性与交付成功率，不据此扩大为整套提示优化。
+
+## 2026-10-04 账户试用状态刷新
+
+所有者在成功生成会议室稿后又发起AI操作，并反馈该操作失败或停止；账户仍显示57%可用额度及“上一笔调用仍在处理或待核对”。真实云端请求及预留状态尚未直接查到，不能据截图认定余额耗尽、结算成功或挂起原因。核对前端发现，重新打开账户仅渲染旧额度；已改为登录状态下重新查询额度，并丢弃过期查询响应，避免较早的预留/错误覆盖较新状态。没有清除云端预留、调整结算或发起模型重试。
+
+28项相关自动检查通过，已有CloudBase浏览器检查增加中英文重新打开账户后恢复已结算状态的场景并通过；真实仍有预留时继续禁用。当前43193服务已确认返回更新后的静态脚本，用户需刷新页面加载；本次没有重启成功，系统拒绝进程终止，登录会话未因这次操作清除。账户刷新修复不等于已解决真实挂账。已备只读请求查询并通过4项本地SQL检查，后续根据云端预留及请求编号核对。
+
+## 2026-10-04 试用失败诊断补充（云端已部署，真实故障待复现）
+
+所有者手动测试会议室预约样本时，讲解稿在约140多秒后返回“AI调用未完成，预留额度待核对”。之后账户界面仍显示余额和可用试用。旧实现未保留足够错误信息，因此无法据总耗时确定是某次模型超时、连接/响应异常、用量验证还是结算失败；不把这次失败记为已修复。
+
+本次只补操作诊断：云端按阶段区分错误，记录请求UUID、耗时、HTTP状态及结算状态；本地白名单保留这些信息并补充约定/成稿/复核/终审阶段，API响应及日志保留关联编号。详细错误提供中英文翻译。诊断不记录源码、模型正文/思考、身份或密钥；日志故障不影响请求结果。未修改模型、提示词、时限、计费、退款及重试规则，未新增付费请求。
+
+新增16项故障/HTTP回归，共462项自动测试和19份发布样本检查通过；独立浏览器通过中英文12种模拟失败的显示、失败状态及诊断透传检查，截图已查看。源码构建`87eeeade2e2a7e49`；旧安装包与43192候选进程保留原样。所有者部署诊断包后，公开`/health`已确认`policyVersion: review-thinking-v1`及`diagnosticsVersion: trial-failure-v1`。本地43193诊断页已启动并核对构建；部署检查本身未调用模型。
+
+所有者在SQL控制台执行一次性补额，截图显示实际补入1.655485元，余额2元、预留0元；补额保留请求账与独立管理员补额记录，脚本通过13项本地SQL检查。随后按原会议室样本和讲解设置手动生成，所有者反馈“生成成功”。这仅确认一次用户报告的成功交付，未直接读取页面的实际设置、模型请求次数、完整稿件及精确耗时；不据此宣称原失败原因已定位或修复，未继续重复付费测试。
+
+诊断过程发现本地PowerShell重定向会缓冲日志，运行中的空日志不能用于证明未发生错误。隔离进程已复现该行为；后续启动器改用原生子进程文件描述符，探针确认进程仍在运行时即可读到stdout及stderr。新启动器待下次启动使用，当前产品进程、登录会话和已生成稿件保持不动，生产生成逻辑没有新增改动。相关证据保存在忽略目录`.browser-artifacts/trial-failure-diagnostics-20261004/`。
+
+## 2026-10-04 发布候选验收与定点恢复
+
+16份自编/历史源码的24项验收覆盖12份讲解稿、4项词语点读、4项语句点读、2项流程和2项概览。原冻结轮次21项交付，2项模型链路失败，另1项因登录过期在模型调用前中断。原失败及暂停记录保留。
+
+确认CloudBase部署`review-thinking-v1`后，英文分页稿用4次调用交付；中文短代码稿用4次调用生成的内容已改善，但终审重复编号的两条理由不同，被旧格式检查拒绝。修复只接受同编号、同判定的最多两条记录并保留全部理由，不改变总判定、缺项检查、候选哈希与引用校验。另修复复核定位片段扩展：只接受同字段、不短于字段表片段的原样前缀，不做模糊匹配。提示、模型及各模式风格未变。
+
+47份保存响应离线回放：43份原有效结果不变，3份格式失败响应恢复，1份总判定与分项矛盾的终审仍被拒绝。中文短代码用原4次真实响应完整回放生产链路，成功交付；原Python失败稿原样复用前三阶段，仅新增1次真实终审完成交付。24份样本因此都有可交付结果，但其中1份通过原响应回放恢复，不能表述成首次或重新完整实测24/24通过。累计93/100次尝试：91次模型响应、1次早期发送前失败、1次网关限流。未执行被解释源码。
+
+最终构建`a23678706d0eb835`通过446项自动测试、19份发布样本检查。云端新版实测返回策略标记、思考参数及用量；实际扣额与usage计算一致、预留额度归零。新安装包默认CloudBase邮箱登录、试用和收藏启用；隔离安装、旧候选覆盖升级、随包Python、自测配置、卸载及用户文件保留通过。4份Word/Markdown、16页视觉检查沿用此前结果，此次未改导出代码；不等于全部Word/WPS版本认证。
+
+局部措辞错误、术语与罕见条件展开较多等观察继续保留，不以篇幅或有用重复拒绝。尚无独立目标读者对整批结果的完整反馈；安装包未签名，未公开发布。后续为所有者试用本地候选，不据此开启新的提示词优化轮次。详细证据位于忽略目录`.browser-artifacts/release-acceptance-20261003/`，原轮次、云更新、离线回放及最终报告分别保存。
+
+## 2026-10-02 步骤4—5与步骤6准备
+
+392项自动测试、19份发布样本检查通过，构建`723e93b4c5348b3c`。分场景表达要求与最终候选检查已接入；独立测试覆盖拒绝编辑新增错误、协议完整性、用量、取消及显示前长度限制。模拟AI的浏览器检查通过中英文新错误提示及已有工作台语言行为。新增模型调用尚待固定真实验收，不据离线检查宣称讲解质量提高；安装器和CloudBase未更新。方案与后续结果见[步骤4—6](docs/AI_FINAL_REVIEW.md)。
+
+后续固定真实验收在8份英文讲解稿后暂停：累计25次尝试，含1次本地网络拒绝；4份在成稿阶段遗漏可选questions而未进入复核。独立格式修正把缺省问答规范为空数组，已有问答和正文保持原样，4份实际失败响应离线回放均恢复结构。修订后397项自动测试、19份发布样本通过，构建`8b87fb7f0985bd14`。仍未恢复真实付费验收；格式恢复不代表语义合格，已返回稿件中也发现最终模型检查漏检。未完成中文和点读的本轮真实覆盖，不发布完整质量结论。
+
 ## 2026-09-28 试用点读限流与英文错误提示修复
 
 试用云端每账户两次预留至少间隔 5 秒；新增的生成、复核连续调用可能在第二次触发限流，原始“请稍后再试。”缺少英文翻译。客户端服务按同一账户串行排队，保持至少 5.1 秒发送间隔；仅对云端明确在预留与模型调用前拒绝的限流响应等待后重试一次。不自动重试网络结果不明、未结算或额度不足的调用。取消及退出登录后的待发任务不再发送，已发送任务等待原云端结算。云端额度、限流和权限保持不变。
@@ -407,3 +530,224 @@ Flask JSON provider 和 node-jsonfile 是在规则写完后取得的新样本，
 PR 首轮 Windows/Linux 源码 CI 通过；安装器在 Windows Server 2025 runner 构建和文件哈希检查通过后，快捷方式目标检查失败。诊断复跑确认 .lnk 文件存在，但 WScript.Shell 对带中文目录的文件读回空目标。本机另用超出当前代码页的 emoji 路径复现该接口的字符转换问题。
 
 验收工具改用 IPersistFile 与 IShellLinkW 读取 Unicode 路径，继续严格比较实际目标与已安装启动器；不删检查、不改变安装器。NSIS 生成的中文与 emoji 路径快捷方式本地均精确读回，非快捷方式文本被拒绝。此修正不触及产品运行代码或冻结提示词，远端最终状态以 PR 检查为准。
+
+
+## 2026-10-02 CloudBase 邮箱账户首轮接入（待真实收信验证）
+
+新增独立 CloudBase HTTP 身份适配，显式 WHO_ACCOUNT_PROVIDER=cloudbase 启用；未修改已安装软件和发布版默认云项目。按用户指示不迁移、合并或删除 Supabase 旧用户和旧余额。发送验证码、验证、按 is_user 分流注册/登录、读取服务端用户信息并核对身份；供应商令牌只保留服务内存，页面只获取不透明本地会话。邮件请求按所选语言发送 Accept-Language；实际邮件语言仍需收信验证。验证码错误最多五次，发送本机限频；取消、并发、超时、过期均不伪造登录成功，不自动重放不确定请求。需要 CAPTCHA 时明确提示未支持，不绕过。
+
+Auth-only 模式先保留本地收藏，不激活空云库、假报同步成功或授予 AI 试用额度。准备 CloudBase PostgreSQL 收藏表和 RLS/CAS SQL，尚未部署或执行数据库隔离验收；额度及服务端模型代理仍未迁移。默认环境配置保留旧路径供发布前回归，隔离的本机测试进程显式指向用户新 CloudBase 环境。
+
+341 项自动测试、19 份公开样本检查通过。新增 CloudBase 浏览器检查与原邮箱浏览器回归均通过，实际 Edge UI、模拟云响应，验证中英文错误、原源码与访客/旧账户本地数据不变、隐藏不可用云功能、刷新恢复登录和退出。截图人工查看，1229px 与390px无横向溢出。没有发送真实邮件或调用付费 AI。真实只读 CloudBase /auth/v1/user/me 返回401 unauthenticated，证明本机到该接口可达，不代表真实登录、无VPN或全球网络验收通过。
+
+已提供本机测试入口，请用户在页面自行填写邮箱和验证码并反馈结果；不要求密钥或聊天发送验证码。尚未收到真实收信/登录结果。未发布安装包、绑定域名、执行云数据库 SQL 或新增付费套餐。后续步骤见 docs/CLOUDBASE_TESTING.md。
+
+
+### CloudBase 真实邮箱登录：用户回报
+
+用户在本机测试页确认中文界面登录成功，随后确认英文界面登录成功且验证码邮件为英文。两项记录来自用户实际操作反馈，不是自动测试结果；中文邮件正文语言、邮箱供应商、是否关闭 VPN、海外网络以及两个不同账户隔离均未确认。收藏同步与平台额度仍关闭，未宣称完整云账户迁移验收通过。
+
+### CloudBase 收藏身份字段修正
+
+用户提供的数据库目录查询确认 auth.uid() 返回 JWT sub 文本，两个访问角色存在；auth.users.id 为 bigint，sub 为 varchar(255)，收藏表尚不存在。修正未部署的建表脚本：收藏 user_id 保存完整文本 sub，移除错误指向数字 id 的外键，不进行数字转换；保留 RLS、仅登录用户读取、服务端身份派生写入和原子版本检查。没有假定 sub 存在唯一约束，也未改动供应商用户表。账户删除的收藏清理需另行实现，不再假定外键级联。
+
+本轮运行 node --test tests/cloudbase-account.test.js，10/10 通过（模拟 HTTP 响应），新增超出 JavaScript 安全整数范围的数字形态 sub 和 255 字符 sub 检查，精确字符串身份可读取，数字化或其他账户归属被拒绝。本机未找到 PostgreSQL 可执行程序，未执行 SQL；云端建表、真实 JWT/RLS 与双账户隔离仍待验收。未重启用户测试服务、启用收藏同步、修改提示词或发布安装包。
+
+### CloudBase 收藏同步：真实验收准备
+
+用户随后提供控制台“执行成功，影响 0 行”的截图。真实无凭据 GET 收藏接口及 POST 保存 RPC 均返回 401 / MISSING_CREDENTIALS，记录于本地忽略目录 .browser-artifacts/cloudbase-live/anonymous-access.json；只证明网关拒绝未登录访问，不证明底层表结构或已登录账户隔离。已启动独立本机验收服务，健康检查通过，配置状态为 CloudBase、邮箱登录及收藏同步开启、AI 试用关闭；原登录测试进程和发布配置未改变。等待用户在新入口登录后验证真实保存、重新登录读取、两账户隔离与版本冲突；尚未自动发送邮件或把未完成项记为通过。
+
+用户随后确认在收藏同步测试入口登录成功，并提供已登录账户界面的截图。该入口的 enter() 会先 await library 请求后再显示已登录界面，因此可推断首次云端读取已完成；此结论来自用户截图与代码路径，不是捕获的请求日志。实际收藏写入、退出重登读回、不同用户隔离与版本冲突仍未验证。浏览器控制工具初始化两次均报 failed to write kernel assets / 系统找不到指定的路径，未执行任何页面保存动作，改由用户进行界面验收；未读取会话令牌或邮箱验证码。
+
+### CloudBase 收藏同步：单账户人工验收通过
+
+用户明确反馈上述三步成功：收藏测试内容、刷新云端收藏、退出后使用同一邮箱重新登录并确认收藏仍在。记为用户实际操作的单账户保存及读回验收通过，不是自动化抓取的网络结果，也不代表跨设备、双账户隔离或并发版本冲突已验收。下一项为两个不同邮箱账户互不可见彼此收藏；登录第二账户时跳过本地收藏导入，避免用户主动复制影响隔离判断。AI 平台额度仍未启用，未改发布配置。
+
+### CloudBase 收藏同步：双账户人工隔离验收通过
+
+用户随后反馈“隔离测试通过”，对应前述两个不同邮箱账户分别收藏、刷新，并切回原账户确认互不可见的操作步骤。记录为正常产品流程下的双账户人工隔离验收通过；不是自动化越权攻击测试，也不代表跨设备、并发旧版本写入、关闭 VPN 或海外网络已验证。邮箱登录、单账户保存/读回和正常双账户隔离已获用户实际操作确认。平台额度与服务端 AI 代理尚未迁移，发布配置和安装包未切换。
+
+### CloudBase 旧版本覆盖保护：本地 SQL 检查完成，云端待执行
+
+新增 cloudbase/check-library-conflict.sql，单个 DO 块使用随机测试身份，以 authenticated 角色检查初次保存、旧版本冲突及原文不变、正确新版本保存、另一身份不可见、不可直接写表；内部异常子事务在成功与失败时均回滚写入及角色/身份设置。没有改动业务迁移 SQL 或用户测试服务。
+
+通过仅存放于忽略目录的 PGlite 0.5.8（PostgreSQL WASM，下载包 SHA-512 与 registry integrity 一致），执行 tests/cloudbase-library-sql.cjs 验证 SQL 可运行和测试回滚。刻意移除版本条件、关闭 RLS、增加直接 UPDATE 授权，检查均能检出；预置收藏行和原会话角色/身份未改变。报告 .browser-artifacts/cloudbase-live/sql-local-acceptance.json 明确 realCloud=false、simultaneousConnectionsTested=false。这是实际本地 SQL 引擎测试，认证函数按用户提供定义建立测试环境；不是 CloudBase 在线执行或两个并发连接测试。已准备完整脚本供用户在云端运行，结果尚待反馈。产品依赖与锁文件未修改。
+
+### CloudBase 旧版本覆盖保护：云端人工执行通过
+
+用户针对整段冲突检查脚本的执行要求，提供 CloudBase 控制台“执行成功，影响 0 行”的截图。基于该操作反馈及脚本任何断言失败均抛错的设计，记录云端 SQL 断言验收通过：初次保存、旧版本拒绝且内容不变、正确新版本保存/读回、另一身份不可见、禁止直接写表及测试回滚。证据为用户截图，不是助手抓取的云端 SQL 日志；截图不包含 NOTICE 详情，不将此结果描述为两个同时发出的 HTTP 请求测试。邮箱登录、收藏持久化、正常双账户隔离及数据库旧版本保护已完成当前范围验收。平台额度/服务端 AI 代理和网络覆盖仍待后续工作；未发布新安装包。
+
+### CloudBase 2 元额度与 AI 代理：部署候选
+
+用户要求每账户 2 元，并明确取消平台总上限。新增独立 CloudBase 账本 SQL，每个邮箱账户 sub 一次性 2,000,000 微元；重复查询、登录或安装不重发，平台仅统计 spent/held，未保留原 15 元预算字段或阈值。新账本默认为停用，只有 service_role 可以调用查询/预留/结算 RPC，普通用户不能直接读写。没有迁移 Supabase 旧账本，也没有自动补齐或重置已存在余额。
+
+新增可部署的 Node.js 服务，逐次向本环境身份接口验证 active、已验证邮箱及 sub；忽略客户端身份/价格/模型，固定 DeepSeek Flash 与峰时等值额度价格（2026-10-02 官方中文价表：输入未命中 2 元、命中 0.04 元、输出 8 元/百万 token）。预留后按用量结算，未用预留释放；未知失败保留待核对金额，不自动重复模型调用或假定未扣费。客户端仅持用户令牌和 HTTPS 公共服务地址，平台 DeepSeek 密钥和 service_role 密钥仅在独立云端服务环境配置。
+
+客户端适配受显式地址及启用开关控制，按账户串行调用、只对确定的预留前限频重试一次，退出/取消后未派发的调用停止。中英文界面显示一次性总额、可用和待结算，明确固定峰时折算；支持 unlimitedPool/null 而不是伪造巨大总预算。测试页旧进程未重启，平台额度仍未实际启用。
+
+345/345 自动测试、19 份公开样本检查通过。CloudBase 与原邮箱浏览器回归通过（真实本地 UI、模拟云响应，无真实邮件或 AI 付费调用），涵盖中英文 2 元显示、无总上限、待结算及错误状态。PGlite 实际 SQL 引擎测试通过：一次性发放、重复预留/结算、余额用尽、账户隔离、普通角色不可访问、累计消耗超过 15 元仍可用。报告位于本地 .browser-artifacts/cloudbase-live；没有声称多连接压力测试。部署文件和说明已准备，云端额度建表、云服务部署、密钥配置、真实付费调用及扣费读回均仍待执行；未更换公开安装包。
+
+用户随后在 CloudBase 确认兼容性提示后，提供额度建表脚本“执行成功，影响 0 行”的截图。记录为用户反馈云端额度迁移执行成功；不等同于额度 RPC 已通过真实服务密钥调用或完成支付链路。按该脚本默认值活动暂停，无平台总金额上限、每账户一次性 2 元。下一步为部署独立云端 AI 服务并配置仅服务端持有的密钥，仍未发起真实付费调用或切换发布配置。
+
+### CloudBase AI service: live deployment smoke check (2026-10-02)
+
+The user supplied a version 001 deployment screenshot marked normal and its public default domain. Direct HTTPS requests returned GET /health 200 with {"ok":true}, and unauthenticated POST /trial 401 with a sign-in-required message. Evidence: .browser-artifacts/cloudbase-live/trial-deployment.json. These checks verify process availability and rejection of missing credentials, not service-role compatibility, authenticated quota, provider key validity or paid settlement. A separate local acceptance process now has the public trial URL and explicit client capability flag; the database campaign was not enabled. User sign-in is required to verify the real quota before activation. No paid model call or installer publication occurred.
+
+### CloudBase live quota failure: safe UI diagnosis (2026-10-02)
+
+The user signed in to the trial acceptance page, but the screenshot showed the generic quota-error fallback. A disabled campaign should still display the returned balance, so this is not evidence of a successful quota read. The UI now shows only allowlisted, localized quota failure reasons and retains a generic fallback for unknown errors; it never displays raw upstream details. The CloudBase browser regression passed with mocked responses, covering a paused campaign retaining CNY 2, service/identity failures, both languages, unknown error suppression and disabled trial controls. The live root cause remains unconfirmed pending a page refresh; no database switch or paid call was made.
+
+### CloudBase v1Profile email identity compatibility (2026-10-02)
+
+The next user screenshot exposed the gateway identity rejection (not a quota RPC failure). The official current-user HTTP example at https://docs.cloudbase.net/http-api/auth/user-me omits email_verified and instead includes a bound email provider. The earlier strict boolean check rejected that documented shape. The gateway now accepts an absent email_verified only when a trusted /user/me response supplies a matching email provider identity; true remains accepted, while explicit false/null/string values, mismatched or missing providers, disabled status, malformed subjects and client-supplied identity claims remain rejected. Active status and live token validation remain required.
+
+All 14 focused account/gateway tests passed, including the documented v1Profile shape, a paused CNY 2 quota, rejection cases and exact opaque subject forwarding. Tests use simulated upstream responses and make no paid calls. Prepared a separately named identity-fix ZIP containing the five deployment files at its root. This code is not yet deployed; the live response fields and successful authenticated quota are not independently captured. The user must replace the existing service code with this package, preserving its environment variables, then recheck the account view.
+
+### Hide trial monetary amounts (2026-10-02)
+
+At the user request, removed total grant, remaining balance, held amounts and tariff text from the account UI, and removed the CNY 2 amount from the sign-in notice in both languages. The UI retains availability, pause, pending-request and safe failure messages. The CNY 2 backend grant, balance validation, reservation and settlement rules are unchanged. CloudBase browser regression passed with mocked responses and all 7 account UI tests passed. The pending cloud identity compatibility deployment remains necessary; hiding amounts does not resolve that gateway rejection.
+
+### Trial percentage meter (2026-10-02)
+
+The user then requested a percentage progress bar. Added an accessible native progress element with localized remaining-allowance label and percentage, calculated from the validated available amount / one-time grant. Monetary amounts remain hidden. Partial percentages round down, with nonzero amounts below 1 percent shown as <1%; pending reservations reduce available percentage. Missing/error quota responses hide the meter rather than invent a balance. Paused campaigns may show their successfully read remaining percentage alongside the paused message. No backend policy or cloud package changes.
+
+CloudBase browser regression passed (mock responses, 100%, 50%, <1%, 0%, paused/pending/error, Chinese/English); all 7 account UI tests passed. English and Chinese mobile screenshots saved locally. The live identity-fix deployment remains pending, so a working live meter is not yet verified.
+
+### Live identity shape confirmed after version 002 (2026-10-02)
+
+The user still received the identity rejection after version 002 took 100% traffic. A temporary local diagnostic observed the successful current-user response without persisting identity values or credentials. Both application headers and gateway-equivalent Authorization-only headers returned HTTP 200 with a valid text subject and email, while email_verified, status and providers were absent. Evidence: ignored .browser-artifacts/cloudbase-live/identity-shape.json. Thus the previous documented-provider fallback is insufficient in this environment. This is an identity-check mismatch before service-role quota RPC or DeepSeek invocation, not evidence that those keys are valid or invalid. Next obtain only the account verification/status fields from the authoritative database; do not treat absent proof as verified or enable paid calls while investigating.
+
+### CloudBase observed NULL legacy fields: authenticated-account eligibility (2026-10-02)
+
+The user supplied the requested administrator SQL result: email_verified=NULL and status=NULL for the tested account. Together with captured sanitized HTTP 200 profile shapes (valid sub/email, absent verification/status/providers), this confirms the mandatory legacy fields cannot be used in this environment. The gateway now bases trial eligibility on successful CloudBase /user/me authentication plus a valid email and opaque subject from that response. Missing/null legacy fields remain unspecified, not proof of independent mailbox verification. Explicit false verification, non-ACTIVE statuses, malformed non-null flags, missing identity, invalid bearer and untrusted client identity overrides remain rejected. No database values were changed and no credentials were accessed.
+
+All 14 focused account/gateway tests passed with the observed absent-field shape, NULL flags, denied cases and subject-isolated quota dispatch; upstream calls are mocked. Prepared profile-v2 ZIP for replacing the existing cloud service. No real paid call or live authenticated quota success has yet occurred. UI continues to show only percentages once a quota read succeeds.
+
+### CloudBase authenticated quota: user UI acceptance (2026-10-02)
+
+After the profile-v2 deployment instruction, the user supplied a real account screenshot showing the remaining-allowance meter at 100%, paused campaign text, and disabled trial button. The UI only displays this meter after validating the response grant, currency, unit and allowance bounds; this is user-provided evidence that the authenticated gateway/privileged quota RPC chain now succeeds with an unused allowance and disabled campaign. It is not a captured raw quota response. The original identity rejection is resolved in the tested account flow. The next step is administrator activation of the existing campaign row, followed by one small actual model request and settlement verification. No activation or paid request has been performed by the assistant.
+
+
+### CloudBase trial activation and user model acceptance (2026-10-02)
+
+The user supplied administrator execution success affecting one campaign row, followed by real UI screenshots of AI token explanation, flow explanation and a generated walkthrough (4344 tokens, 2 model calls displayed for that walkthrough). The account view showed active DeepSeek trial and 98% remaining, down from the previously observed 100%. This is user-provided evidence of the working authenticated trial and reflected allowance consumption. No raw settlement rows or provider invoice were captured, so exact billed amounts are not independently reconciled. The assistant made no additional paid model call.
+
+### UI language consistency and localized failures (2026-10-02)
+
+Fixed synthetic Python entry/file-note and Gitignore rule headings at render time, preserving parser identities and source-defined names. Added missing English translations for literal backend error messages. Error rendering now goes through a dedicated i18n formatter in the workspace, walkthrough, format/repair, line reading, saved explanations, import and account paths. Known messages translate in either direction; timeout, cancellation and network failures have localized messages, and unrecognized upstream/native details receive a localized generic fallback. Clipboard-image import rejections now reach the same handler. Language-identification notices use structured status and localized templates instead of rendering backend Chinese prose. Source, comments, user titles and AI response prose are not translated by this formatter; prompts and model behavior were not changed.
+
+Added regression gates for literal translation coverage, static UI/accessibility labels and direct raw exception-message rendering. All 353 pnpm test cases passed. Headless Edge checks passed for English workspace titles, English/Chinese switching, source preservation, and known/unknown/network failures through actual local HTTP requests in flow, walkthrough and task toasts. The separate CloudBase account browser suite also passed. Cloud/model responses in these browser checks are mocked; no email or paid call occurred. Inspected the English workspace screenshot. Local evidence: .browser-artifacts/english-workspace/ (unit-tests.log, result.json, entry-en.png). Confirmed the user's running local service serves the updated i18n, app and workspace scripts. Refresh loads the fix; no cloud gateway deployment is required. Release/installer gates were not rerun for this UI-only change.
+
+
+### Walkthrough Word export and positioned format menu (2026-10-02)
+
+Added a FIMI-style Word/Markdown menu to the top right of the first generated section, below the table-of-contents divider. The label and chevron are flex-aligned; the menu stays inside the viewport at 1440px and 390px in English and Chinese. It supports keyboard navigation, Escape, Tab and outside-click dismissal. Drafts do not render the menu; invalidation removes it. Word export consumes the current result without extra model calls. Existing Markdown export remains available. Word uses semantic headings, explicit Calibri/Microsoft YaHei/Consolas font choices, readable spacing, wrapping and heading keep-with-next. Fenced code and inline code use distinct styles; source indentation and Unicode are preserved. The previously removed overview-note line is not inserted in the Word document.
+
+All 355 unit tests passed. After the final reset-menu adjustment, 13 focused talk/language tests and the browser export test passed again. The browser test downloaded real DOCX and Markdown files for both locales using mocked model responses, checked no additional API calls, aligned text/chevron geometry, right placement, viewport bounds and visibility before/after generation. Inspected desktop English and mobile Chinese menu screenshots. Python ZIP/XML validation checked CRCs, valid package parts, Unicode, escaped characters, code tabs and no external relationships. python-docx independently reopened both downloaded samples and confirmed Chinese/accented characters, headings and code indentation. Evidence: .browser-artifacts/walkthrough-export/.
+
+Visual Word pagination validation remains incomplete: the packaged render_docx.py cannot find LibreOffice on this Windows host, and native Microsoft Word COM activation fails with 0x80070520 (unavailable logon session). No claim of Word visual/layout acceptance is made from XML checks alone. UI screenshots passed, but the downloaded multi-page samples still need rendering/opening in an available Word or LibreOffice session. No installer build or release gate was run for this UI/export change. Restarted the local preview on the same port to load the new static routes with existing CloudBase/library/trial configuration; the temporary identity diagnostic wrapper is no longer used. Cloud gateway deployment is unchanged.
+
+
+### Correct local trial endpoint after preview restart (2026-10-02)
+
+The preview restart for the export feature incorrectly used the public service origin as WHO_CLOUDBASE_TRIAL_URL, omitting /trial. The gateway only serves /trial; direct unauthenticated checks confirmed POST / returns 404 and POST /trial returns 401 as expected. This local configuration regression caused the signed-in UI to fail its quota read. Corrected the preview launcher to the full endpoint and restarted on the existing port. Added root-origin normalization in cloudbase-account.js so console-provided domains automatically target /trial while explicit paths remain intact. Quota transport/JSON failures now report localized quota unavailability instead of implying a paid request reservation; paid-call uncertainty handling is unchanged.
+
+All 15 focused CloudBase account/gateway tests and the mocked CloudBase browser suite passed. New regression covers origins with/without trailing slash, explicit /trial, and distinct quota-versus-paid-call network failures. Local /health returned 200; the correct live gateway route returned the expected unauthenticated 401. No user token, key, email send or paid call was used for these checks. Authenticated quota recovery still requires the user to refresh and establish a new local login session after restart. The local launcher is ignored under .runtime; cloud secrets and deployment were not changed.
+
+
+### AI contract and final-review candidate (2026-10-02)
+
+Default walkthroughs now derive source notes, compose a validated manuscript, and independently review existing prose against complete original source. Shared condition rules cover logic connectors, independent branches, numerical transformations and scoped claims across walkthroughs and point explanations. A complete invalid fact protocol permits one repair; a review protocol permits one repair; service failures and cancellation do not retry or expose unchecked text. Normal walkthroughs use three model calls, at most five with both protocol repairs. CloudBase review-thinking-v1 pins DeepSeek Flash and bounded low/high thinking; legacy adapters retain their prior limits. This gateway package has not been deployed.
+
+The final full unit run passed all 368 tests, including 72 mocked walkthrough setting combinations, bilingual token/line scope checks, strict unknowns-array delimiter repair, parser-derived return/loop evidence, and the explicitly authorized evaluator budget extension. The release gate passed all 19 static samples (build ID a11ab73a3c660569). Relevant English/error and Word/Markdown export browser checks passed with mocked model responses; these do not establish generated semantic accuracy, actual cloud settlement, installer integration or Word visual pagination. Local evidence remains under .browser-artifacts/ai-quality-20261002/.
+
+The cumulative actual-provider evaluation completed at 88 of the user-authorized 90 requests: 36 outputs, 33 successful returns and three fact JSON/schema failures. These development runs use different revisions and are not a final-model quality pass rate. Codex source-to-output inspection found overbroad input-domain/cap claims, timing wording and density problems, plus false negative Promise guarantees and unconditional retry claims that the same-model reviewer sometimes introduced. Repeated general prompting did not reliably resolve them. The latest source-evidence rules always supply relevant syntax records and require review to check its own additions.
+
+The final four outputs used nine requests without protocol repair. The English detailed/highlights code-review manuscript included return-origin hints, avoided the false negative Promise guarantee, and corrected the locked-branch assignment order. English beginner and standard selected-line outputs plus Chinese standard used loop hints and avoided unconditional retries; standard outputs explicitly followed update and guard recheck. Together with the Chinese beginner output at request 79, this covers both languages and reading modes for that regression. These targeted checks passed Codex source-to-output inspection; no independent human review or universal quality certification is claimed. Dense detailed prose and some imprecise terminology remain; real brief-mode manuscripts, a broad unseen holdout, deployed CloudBase reasoning/settlement and a new installer were not validated. See the review report for precise scope. Records are retained and the key stays memory-only.
+
+A test-page error was reproducibly overwritten by polling; persistent error and expired-page feedback were fixed and verified in headless Edge without paid calls or credentials. The existing main preview was restarted on port 43173 to load the revised modules, preserving its configured full /trial endpoint. The new gateway ZIP is prepared but has not been deployed; the local official-provider evaluation emulates its policy rather than validating live CloudBase. See docs/AI_QUALITY_REVIEW.md for method and limitations.
+
+### 事实复核基础：仅实施步骤1—3（2026-10-02）
+
+新增六类有编号的检查规则及分场景验收标准，保存修改前工作树快照和哈希；自编样例均只作静态解析。统一讲解稿、总览、函数流程、词语和语句入口的reviewContext，补齐流程文件名；源码、选区及已有场景表达提示保留。新增Python/JS/TS AST证据，核对Unicode/CRLF原文与范围、函数归属、逻辑/比较/分支、返回/等待、循环和异常区域。语法证据及检查义务不标为模型语义通过；不支持、解析失败、环境不可用、语言冲突和超限均记录缺口。
+
+最终382/382自动测试与19份发布样本检查通过，buildId=450b3e440af4d9f6。新14项基础测试覆盖12份自编样例及正反变化；原72组合讲解稿测试增加三阶段上下文一致性检查，中英文两模式点读、函数流程和总览覆盖范围/输入保留及原调用次数。带副作用的输入仅解析、不执行。首轮全量回归发现取消时泄露系统AbortError而非应用可本地化取消提示，修复后全量通过。局部diff空白检查通过（Windows CRLF按行尾处理）。报告保存在忽略的.browser-artifacts/review-foundation-20261002。
+
+本次没有真实模型调用、付费额度消耗、云端发布或安装包构建。步骤4的新表达复核、步骤5改稿后语义拦截、步骤6冻结版本的新代码对照仍未实施；没有宣称模型内容可靠性已经通过新版本验收。详见docs/AI_REVIEW_FOUNDATION.md。
+# 2026-10-03 复核字段引用兼容
+
+复核现在兼容同一字段的完整原文引用，原96字符前缀契约不变。14项针对性测试覆盖中英文、Unicode、同前缀不同字段、过期或近似引用、重复修改、事务性及无需协议重试的模型调用路径；全套415项测试、19份公开发布样本通过。没有修改复核提示或生产输出额度。
+
+离线回放21份已保存的真实模型响应：原先有效的19份输出完全不变，1份完整原文引用响应恢复可用且两处替换文字逐字保留，1份额度耗尽的空响应仍拒绝。此结果证明已观察到的引用兼容缺陷得到修复，不证明语义漏检减少。
+
+随后仅对原空响应样本进行1次真实定点验证：使用完全相同的请求，仅把`max_tokens`从24576调整至65536，模型以`stop`正常返回，耗时20.723秒，输出5143 token（其中思考4899）、输入8662、总计13805。修改1个总结段落，补全“修剪后为空时保存fallback”的条件，其余稿件保持不变；对照源码未发现新增核心错误，未观察到明显可读性退步。由于本次用量低于旧上限，只能证明这次重试成功，不能把成功归因于提高额度，也不证明空响应问题已消除。未追加请求，生产额度与复核提示保持不变；未部署云端或更新安装包。
+# 2026-10-03 复核表达范围新旧配对
+
+固定10份输入各跑一次现版和候选版：6组讲解稿（4份自然B/E原稿、2份人工植错稿），4组中英文双模式语句点读，共5段独立源码。每对源码、原稿、上下文、模型及输出额度一致；交替运行，未重新成稿，未调用付费最终审核。授权最多22次，实际20次，无格式重试；结束后清除本轮测试服务内存密钥。
+
+两版均10/10首次完整返回，5份含明确纠错目标的输入均得到修正。讲解稿修改字段合计由23降至20；新版中文零基础点读遵循局部请求，未像旧版扩写循环计数和后续分支，英文零基础点读也更集中。部分稿件保留了更多原句和有用重复，未观察到明显零基础可读性退步。但新版在2组中仍做了不必要的额外修改，英文评审稿仍有10个字段被改写；两版均新增1处关于文本转换失败的过宽边界表述，按局部措辞风险记录，不能宣称无误。每组仅一次、同一开发助手静态对照，不是独立盲评或通用准确率证据。
+
+采用完全相同的已测候选，仅收窄复核表达职责；事实约束、成稿提示、最终审核提示及生产额度保持不变，字段引用兼容修复继续保留。旧版快照及完整请求/响应已封存。应用后417项自动测试、19份发布样本检查通过，构建`6f645fee7fae7758`。旧/新版本轮平均耗时分别19.19/20.23秒、总token分别115501/120157，不宣称性能或费用改善。未部署云端、更新安装包或验证完整线上生成链路。详细对照留在忽略目录`.browser-artifacts/review-scope-20261003/`。
+
+2026-10-03 最终验收独立验证使用10份保存的复核后文稿和4份单错误副本，另原样复现两个异常，共16次请求。首轮协议有效13/14，三份故意植入的异常范围、异步返回和循环条件错误被拦截，且/或错误漏检；同一错误再请求仍漏检。10份已有文稿中9份放行，1份因重复RETURN-01检查项产生协议失败，复现则正常通过。没有发现明确的风格误拦，但不证明整体生产净收益。相关样本只有5份源码，种子错误不能计为自然错误检出率。
+
+随后对重复检查项兼容和候选陈述核对提示进行修复候选验证。授权最多16次，首批实际6次：3份正常稿放行、2份错误拦截、同一且/或错误仍漏检，按预定条件停止，剩余10次未使用。可见报告直接引用错误的“both null and undefined at the same time”，却以另一段正确的nullish说明为由放行。候选与旧版首批结果相同，平均耗时21.124秒对16.889秒，不能宣称语义收益；输入、输出及全部冻结快照保留。
+
+最终撤回新增逻辑提示，仅保留严格限定的重复检查项兼容。旧16份响应及新6份响应离线回放，原21份有效报告逐项不变，原1份冗余编号失败恢复可用；缺项、状态/实质理由冲突、错误哈希与伪造引用仍拒绝。60种任务/语言/模式/受众组合的提示与原版完全一致，不新增模型调用，不修改候选文稿。保留版本421项自动测试、19份发布样本通过，构建`18e55ccca94e5874`。候选曾通过422项，其中仅针对已撤回提示标记的测试随该提示归档；格式安全和完整链路测试继续保留。逻辑漏检尚未解决，未部署或更新安装包。记录在忽略目录`.browser-artifacts/final-audit-fix-20261003/`。
+
+### 2026-10-03 现有层整合：E默认、B回退
+
+默认讲解稿接入已测E提示与写作示例，官方DeepSeek Flash成稿开启high思考，B＋high保留为进程环境回退；不重写或融合新提示。选择依据是部分零基础表达优势，不宣称E有普遍准确率优势。通过正式生成函数及模拟供应商，6组E与6组B的实际成稿请求分别与既有冻结请求逐项一致；72组提示与候选逐字一致。原事实基础、改稿复核、终审及点读/流程相关11个模块与整合前字节一致，撤回的终审逻辑提示未恢复。
+
+成稿格式恢复从实验接入产品：41份历史正常稿文字和层级不变，1份多余闭括号故障本地恢复；本轮额外收紧多根对象的修复资格，避免无用模型请求。一次分隔符修复只接受原字符串和容器顺序，格式成功后仍须两层内容检查。正常讲解稿4次、最大7次，点读等原次数不变；讲解稿前端等待上限调整为900秒以覆盖有界纠正，各单次模型请求仍限120秒。错误、截断、取消及终审失败不自动开展新语义重跑。
+
+最终433项自动测试、19份发布样本通过，构建`9d886d9d4d737969`。新`tests/browser-ai-integration.cjs`使用真实页面→本机API→产品生成/复核/终审→本地模拟模型，20项检查通过：中英文×两阅读模式×三受众共12组稿件、四组词语与语句点读、格式恢复、实际后端格式错误的语言与保留上稿、取消到达模型连接后不进入下一层、晚到回复丢弃、重试、Word和Markdown下载。该浏览器测试最终运行95次本地模拟响应，不是95次付费请求或内容准确性样本。源码原文保持一致，未执行样本。
+
+既有英文工作台/双语错误及导出浏览器检查也通过，检查了桌面与390px截图。页面验收发现切换语言时残留旧提示和无问答时空标题，分别清除过期提示、隐藏空问答区域，并验证真实问答仍显示。三个实际下载DOCX通过ZIP CRC、全部XML解析与字符检查；不据此宣称Word分页视觉已验证。
+
+本轮零付费请求。CloudBase当前网关策略对四阶段模型参数的透传检查通过，但真实已部署网关、结算、生成质量、安装器和公开发布未验收。此前且/或终审漏检仍未解决。源文件、截图、下载、完整日志和改前快照在忽略目录`.browser-artifacts/integration-20261003/`；具体链路与回退方法见[整合说明](docs/AI_INTEGRATION.md)。
+
+2026-10-03 交付失败修复：保存的`questions_note: null`失败稿从格式拒绝变为本地规范化成功，8节正文及5组问答完全保留。终审指出同一开头片段的另一个失败稿具备一次局部恢复资格；离线人工修正仅验证片段应用，不计为模型成功。此前8份成功输出内容与终审报告读取不变。篇幅、节数和有益重复明确不作终审拒绝理由，不改变事实检查或点读路径。
+
+新增正反测试覆盖空附加元数据、不可丢弃值与必需内容、终审引用限定、其他文字不变、一次修正后独立整稿审核、服务错误/取消/截断/再次拒绝与最多9次调用。442项自动测试、19份发布样本均通过，构建`35703b18bad497a5`。24项浏览器检查经真实页面/本机后端与模拟模型通过，共115次本地模拟调用，含中英文恢复交付和Word/Markdown导出。本阶段0次付费模型请求，不能据此宣称实际模型已修正第二份失败稿。记录保存在`.browser-artifacts/delivery-fix-20261003/`；未部署云端或打包发布。
+
+随后同一构建进行两份保存失败稿的定点真实验证，授权新增最多7次、实际4次、53507 token。每份2次，均交付并通过真实模型最终检查。accept-05沿用原约定笔记与成稿，清除空元数据后补做复核和终审；accept-06沿用原复核后文稿及旧拒绝报告，仅修正指定片段并重新审查整稿。旧阶段请求与保存版本一致，未重新成稿；修正后显示正文与终审候选逐字一致。全部请求HTTP200、finish_reason=stop，没有协议重试，结束清除内存密钥。该结果证明两份具体失败被恢复，不能外推到所有代码，也不证明终审漏检消失。非阻断的旧表述问题继续保留记录，未追加打磨请求。
+
+### 2026-10-04 方法3与新版段落复核接入
+
+用户查看三栏全文对照后选择方法3初稿与新版复核，暂时取消中文零基础词语点读和选中代码段解释的独立AI终审。接入保留已测提示原文，不再次融合或改写提示。其他语言、标准阅读模式、流程解释与讲解稿未切换到这条链路。中文段读按钮的默认问题同步取消旧“一两句”限制；用户自行提出的选区问题继续保留。
+
+选择依据仍是此前4份源码、16份方法3初稿的保存结果对照：新版较旧版7份更好、4份基本等价、2份各有得失、3份较差；相对初稿4份改善、8份等价、1份混合、3份出现可读性副作用。不能把选用新版解释为16份全部改善。`suggestions-nullish-m3`和`suggestions-preferences-m3`仍有技术细节偏多，`notices-collect-m3`没有补回旧复核对名字含义的解释。保留这些问题记录，不在此次接入时重写选定提示或追加付费调优。
+
+整合构建`c161cbbbd69a090d`通过480项自动测试、19份发布样本检查，以及24项真实页面→本机后端→模拟模型浏览器检查（113次本地模拟响应，0次付费请求）。16份真实保存响应经过正式生成入口离线回放，初稿请求、复核请求与最终展示正文均和已测实验记录一致，每份恰好两次模拟调用。另验证未知/重复段落编号、空字段、截断、取消、无效源码范围、UTF-16位置、显示长度边界及兼容供应商参数隔离。测试仅证明工程接入与协议行为，不是新一轮生成质量或线上CloudBase验收。
+
+改前快照、日志、请求一致性报告和浏览器证据保存在忽略目录`.browser-artifacts/method3-integration-20261004/`；原实验冻结清单与结果不覆盖。未重新发布云端服务、重建安装包或替换正在运行的旧产品服务。
+
+### 2026-10-04 英文方法3与新版复核适配
+
+按用户确认，将英文零基础词语点读、单行解释与多行段读接入方法3初稿＋段落复核，暂时取消这三类解释的独立AI终审。新增英文提示以自然、常用英语表达同一教学目标：先说明动作和作用，再解释过程及结果；允许自然衔接，不强制四个标题或中文字符指标。必要术语先解释含义，保留源码名字和关键条件，不猜设计动机。英文复核沿用必要修改、原样保留未改段落及内部自查的职责，避免因补细节而重新引入大量代码名称。英文按钮默认问题同步移除旧“一两句”限制，保留用户明确提出的问题。
+
+构建`3484695b6aef8641`通过483项自动测试、19份发布样本检查、24项浏览器检查（111次本地模拟响应）。新增英文链路检查确认两阶段均为英文提示、正常恰好两次请求、原始中文标识符不被翻译、普通名称与术语不由代码强行替换、未修改段落逐字保留。中文提示与段落协议文件字节未变，16份原中文真实响应在新版本离线回放时，请求和显示正文仍一致。
+
+本阶段0次付费请求；这些结果证明工程适配，不证明英文真实模型质量已通过。另准备6个固定选区（点读、行读、段读各2），用原有Python/JavaScript/TypeScript源码单独检查英文可读性、事实边界和复核净收益；初稿与复核全文均需保存，预计且最多12次请求，不追加终审、自动重试或隐藏重生成。新预算批准及本地连接完成之前不得执行。记录与候选提示冻结在`.browser-artifacts/method3-english-20261004/`。未更新云端或安装包，也未替换旧产品预览服务。
+
+随后用户授权最多12次并完成连接，固定6组选区各运行方法3初稿与新版段落复核一次，实际12次全部正常完成，未重试或调用独立终审。共84984 token，每组两阶段合计21.329–59.737秒，平均38.374秒。全部134个冻结运行及实验文件哈希保持一致，源码未执行。原始阶段响应经正式段落修改函数回放，6份最终正文逐字一致；1440px与390px浏览器检查确认12份初稿/复核全文及6处完整源码与保存记录一致，无横向溢出。完成后测试服务清除内存密钥。
+
+按源码和真实前后文逐组判断：3组复核有明确净收益（库存复制行、返回姓名行、库存分配段），1组原稿保留（except），2组有得有失（空值回退符号、通知结果汇总段）。收益包括减少未解释术语、修正“请求成功等于通知送达”的过强说法、澄清库存只在接受订单时减少及复制/打印的因果关系。空值回退说明部分改得更绕；通知结果汇总虽然补充了网络请求可能失败的条件，却新增未解释的async、promise等概念，是实际可读性副作用，且保留了一处对Mina请求成功的无依据预期。不能把6/6完成等同为6/6质量通过，也不能据此证明相对旧英文提示的整体优势。六组是已知代码单次试验，无独立英语母语读者评审。
+
+测试页最初因外层模板误处理内嵌脚本换行而无法绑定连接按钮。零模型请求时已单独修复模板、保存旧快照并重新冻结；浏览器验证连接/断开后才开始上述12次测试，生产提示与样本未变。另外人工进度判断曾把JSON展示转义误认为正文反斜线，已向用户更正；保存正文、正式回放与浏览器均无该显示问题，此项不计为模型副作用。完整初稿/复核、逐组评价、调用用量和浏览器证据分别保存在同目录的`comparison.html`、`assessment.json`及`verification.json`。本轮完成后不追加调优请求，不改写冻结提示；未更新云端、安装包或旧产品预览服务。
+
+2026-10-04 用户在查看中英文可读性对照后明确要求“把英文版的定下来”。据此将已测英文方法3初稿＋新版段落复核正式记录为当前选用基线，覆盖英文零基础点读、行读和段读，保持两次请求与暂不独立终审。提示、运行参数和协议继续使用构建`3484695b6aef8641`的原样版本；保留两组混合结果及其可读性副作用，不将选用决定改写为全部质量通过。此次仅补充选择记录、文档和本地快照，核对冻结文件哈希，不新增模型请求或修改运行代码，也不更新旧产品预览、云端或安装包。既有483项测试、19份发布样本和24项浏览器检查的结果继续作为该代码版本的验证记录。
+# 2026-10-07 零基础单词点读 V3 与关闭复核
+
+发布准备补充：桌面品牌浏览器检查及Word/Markdown导出检查通过。整合浏览器脚本已同步到当前选用链路，移除对讲解稿和单词终审的过期要求，验证真实页面→本机后端→模拟供应商的22项检查（78次本地模拟响应，0次付费请求）。覆盖中英文、三档讲解稿、单词/行解释的实际调用次数、格式失败、有限格式恢复、取消与导出。旧终审恢复仍由独立单元测试覆盖，不再作为当前讲解稿入口的必要阶段。安装包仍需本次GitHub构建及安装验收，不能由浏览器检查替代。
+
+采用用户新版角色优先提示，移除旧作用优先和单术语上限，保留源码准确性、上下文边界和JSON传输要求；英文独立适配相同原则。零基础单词单次成稿后直接通过本地协议与显示检查交付，标准单词仍复核，行读、段读、讲解稿不改。标准中英文初稿/复核提示与改前快照逐字一致。
+
+构建`07b79f12645158a0`通过517项自动测试与19份发布样本检查。新增/调整检查覆盖零基础恰好一次请求、标准两次、无终审，空正文、超显示长度、请求前及响应后的取消、无效选区与现有JSON要求。测试日志和改前文件保存在忽略目录`.browser-artifacts/beginner-hover-v3-20261007/`。本阶段0次付费模型请求，未做新一轮生成质量评测；没有更新云端或重建安装包。自动化结果不等于真实模型可读性验证。
+
+# 2026-10-07 账户额度查询失败的提示与恢复入口
+
+当前试用不可用截图对应服务记录中的两次 `trial_gateway_response`（约30.5秒、15.3秒）；公开健康检查成功。仅能定位到额度响应读取失败，不能据此认定余额耗尽、账户失效或具体云端根因。浏览器账户请求自身20秒超时此前落入通用“试用暂不可用”提示。
+
+新增明确的查询超时/失败提示和手动“重新查询额度”，支持中英文和查询中防重复点击；保持真实零余额、占用额度、登录错误及乱序响应的原有保护。不自动重试AI、不变更余额或模型流程。12项账户UI测试与30项翻译/云端账户/安全诊断检查通过。现有本地服务直接读取更新后的静态页面，无需重启或清除登录；没有新增付费请求。浏览器控制连接超时，尚未完成真实账户重查及浏览器视觉验收，不能宣称云端故障已消除。

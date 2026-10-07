@@ -50,7 +50,7 @@ test('credit settlement rounds up cache charges and refuses unknown/out-of-bound
 });
 test('sponsored transport receives the existing explanation rules and has no client key',async()=>{
  let sent;
- const text=await modelCall({base:'https://api.deepseek.com',model:'deepseek-flash',sponsoredCall:async body=>{sent=body;return {choices:[{message:{content:'说明'}}]};}},[{role:'system',content:'Explain'},{role:'user',content:'const a=1;'}],{explanation:true,maxTokens:100});
+ const text=await modelCall({base:'https://api.deepseek.com',model:'deepseek-flash',sponsoredCall:async body=>{const audit=require('./final-audit-mock.cjs').mockFinalAudit(body);if(audit)return audit;sent=body;return {choices:[{message:{content:'说明'}}]};}},[{role:'system',content:'Explain'},{role:'user',content:JSON.stringify({source:'const a=1;'})}],{explanation:true,maxTokens:100});
  assert.equal(text,'说明');assert.match(sent.messages[0].content,/async/);assert.equal(sent.max_tokens,100);
  assert.throws(()=>createCloudAccount({env:{}}).trialConfig({headers:{}}),/登录/);
 });

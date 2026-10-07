@@ -290,11 +290,16 @@ select:not([multiple]) option::checkmark{color:#63884a}
 #accountGithub,#accountCancel{display:block;margin:20px auto}
 #account{padding:30px 34px;border-radius:24px}
 #accountLogin{text-align:center}#accountLogin h3{font-size:24px;margin:16px 0 12px}
+#accountEmailLogin{text-align:left;margin:20px 0;padding:16px;border:1px solid #d5dfc9;border-radius:16px}#accountEmailLogin input{box-sizing:border-box;width:100%;margin:6px 0 12px}#accountEmailVerify{margin-top:14px}
+#accountLogin:has(#accountEmailLogin:not([hidden])) .account-welcome-mark{display:none}
+#accountLogin:has(#accountEmailLogin:not([hidden])) h3{font-size:21px;margin:8px 0}
+#accountLogin:has(#accountEmailLogin:not([hidden])) #accountEmailLogin{margin:12px 0;padding:12px}
 .account-welcome-mark{width:54px;height:54px;display:grid;place-items:center;margin:12px auto 20px;border-radius:16px;background:#edf3e5;color:#607f43;font-size:27px}
 #accountGithub.github-login{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px 20px;margin:26px auto 12px;font-size:16px}
 .github-login svg{width:22px;height:22px;flex:none}#accountSkip{border:0;background:transparent;color:#8b977e;display:block;margin:6px auto 16px}
 .account-identity{text-align:center;margin-top:25px}.account-identity strong{display:block;font-size:17px;color:#344b38;margin-top:5px}
 .account-trial{text-align:center;background:#f4f7ee;border-radius:17px;padding:24px 18px;margin:26px 0 30px}.account-trial p{margin:0 0 17px}.account-trial button{min-width:162px}
+.account-quota{max-width:420px;margin:0 auto 20px;text-align:left}.account-quota-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:10px;color:#43543b;font-size:14px}.account-quota-heading span{font-variant-numeric:tabular-nums;font-weight:600}.account-quota progress{display:block;appearance:none;width:100%;height:8px;border:0;border-radius:999px;overflow:hidden;background:#e0e7d9;accent-color:#66844e}.account-quota progress::-webkit-progress-bar{background:#e0e7d9;border-radius:999px}.account-quota progress::-webkit-progress-value{background:#66844e;border-radius:999px}.account-quota progress::-moz-progress-bar{background:#66844e;border-radius:999px}
 .account-actions{justify-content:center;gap:14px;border-top:1px solid #e8ecdf;padding-top:25px}.account-actions button{flex:1;padding:13px 10px}
 #account .account-hint{text-align:center;font-size:12px;margin-top:18px}#accountGuest{border-top:1px solid #e8ecdf;margin-top:18px;padding-top:8px}
 #accountStatus{background:none;padding:0;color:#8d573b}#accountSyncToast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#2d4833;color:#f3f7ee;padding:14px 24px;border:0;border-radius:12px;box-shadow:0 8px 30px #20321e2a;font-size:14px;margin:0;max-width:90vw}
@@ -328,7 +333,7 @@ html[lang="en"] #empty{padding:32px 28px}html[lang="en"] #empty h2{white-space:p
 
 /* FIMI brand marks retain the previous header slot and sidebar icon size. */
 .header-brand{display:flex;align-items:center;width:8.9em;height:1.3em;flex-shrink:0;color:#29472f;font-weight:650;letter-spacing:.06em}
-.rail .fimi-logo{display:grid;place-items:center;background:transparent;letter-spacing:normal;line-height:normal;flex-shrink:0}.fimi-logo>svg{display:block;width:100%;height:100%}
+.rail .fimi-logo{display:grid;place-items:center;background:transparent;letter-spacing:normal;line-height:normal;flex-shrink:0}.fimi-logo>img{display:block;width:100%;height:100%}
 
 .footer-runtime{margin-left:auto}
 
@@ -344,3 +349,20 @@ html[lang="en"] #empty{padding:32px 28px}html[lang="en"] #empty h2{white-space:p
 .studio-token.selected-token{background:#62765b!important;outline:1px solid #c6dcac}
 #studioRange{overflow-wrap:anywhere;text-align:right}
 #studioPanel>.input-notes{margin-bottom:18px}
+.talk-generate{text-align:center}
+.talk-generate:has(#talkStatus[data-ready=true]){display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0}
+.talk-generate:has(#talkStatus[data-ready=true]) #generateTalk{flex:0 1 auto}
+#talkStatus[data-ready=true]{flex:0 0 auto;margin:0;text-align:left;font-size:12px;line-height:1.6;color:#698451;white-space:nowrap}
+#talkStatus[data-ready=true]::before{content:"● ";color:inherit}
+@media(max-width:600px){.talk-generate:has(#talkStatus[data-ready=true]){gap:12px}}
+.speech-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.speech-head .speech-kicker{min-width:0;overflow-wrap:anywhere}
+.walkthrough-export{position:relative;flex-shrink:0;margin-left:auto}
+.walkthrough-export-trigger{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:40px;padding:10px 14px;line-height:20px;white-space:nowrap;background:#f8faf5;color:#35482e;border:1px solid #dce4d6;border-radius:12px;font-size:13px}
+.export-chevron{display:block;flex:none;width:7px;height:7px;border-right:1.5px solid #627e4d;border-bottom:1.5px solid #627e4d;transform:translateY(-2px) rotate(45deg)}
+[aria-expanded=true]>.export-chevron{transform:translateY(2px) rotate(225deg)}
+.walkthrough-export-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:5;min-width:210px;max-width:calc(100vw - 56px);padding:6px;border:1px solid #dce4d6;border-radius:14px;background:#fafcf7;box-shadow:0 8px 24px #29472f18}
+.walkthrough-export-menu[hidden]{display:none}
+.walkthrough-export-menu button{display:block;width:100%;border:0;border-radius:9px;background:transparent;text-align:left;padding:12px 14px;color:#35482e;line-height:20px;white-space:nowrap;font-size:13px}
+.walkthrough-export-menu button:hover,.walkthrough-export-menu button:focus-visible{background:#edf3e7;outline:2px solid #789762;outline-offset:-2px}
+@media(max-width:520px){.speech-head{flex-wrap:wrap}.speech-head .speech-kicker{flex:1 1 120px}.walkthrough-export-trigger{font-size:12px;gap:10px;padding:9px 12px}}

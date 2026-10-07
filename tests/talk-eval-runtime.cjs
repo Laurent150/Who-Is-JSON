@@ -29,7 +29,7 @@ function prepare(config,env=process.env){
  const save=()=>fs.writeFileSync(path.join(path.dirname(file),'model-observation-'+setting.used+'.json'),JSON.stringify(metadata,null,2)+'\n');
  save();
  return {config:{...config,model:setting.model},metadata,options:{evaluationModelComparison:true,onProviderModel:model=>{metadata.reportedModels.push(model);save();},onModelText:(text,phase)=>{
-  if(['contracts','composition','draft','review','repair'].includes(phase))fs.writeFileSync(path.join(path.dirname(file),'model-output-'+setting.used+'-'+phase+'.json'),JSON.stringify({phase,text},null,2)+'\n');
+  if(['contracts','contract-repair','composition','draft','review','repair'].includes(phase))fs.writeFileSync(path.join(path.dirname(file),'model-output-'+setting.used+'-'+phase+'.json'),JSON.stringify({phase,text},null,2)+'\n');
  }}};
 }
 module.exports={prepare};
