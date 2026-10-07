@@ -2,6 +2,8 @@ async function changeInterfaceLanguage(value){
  if(WhoI18n.normalize(value)===WhoI18n.locale)return;
  // Never reload: the editor, API key and account session live in this page.
  WhoI18n.set(value);revision++;analysisAbort?.abort();resetTalk();studioReset();studioSource=null;
+ // Transient notices belong to the language in which they were created.
+ $('toast').hidden=true;$('toast').textContent='';
  applyLanguageUI();formatSourceChanged();meta();connection();
  $('rehearse').textContent=uiText(document.body.classList.contains('rehearsing')?'退出专注 · Esc':'专注讲稿');
  // These UI nodes are replaced by dynamic actions, so their original text nodes may be detached.

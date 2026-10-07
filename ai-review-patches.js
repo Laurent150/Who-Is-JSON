@@ -54,7 +54,12 @@ function apply(draft,text){
   if(Object.hasOwn(edit||{},'field')){
    if(Object.hasOwn(edit,'path')||typeof edit.field!=='string'||!/^f(?:0|[1-9]\d*)$/.test(edit.field))throw invalid('invalid field reference',null);
    const entry=catalog[Number(edit.field.slice(1))];
-   if(!entry||typeof edit.anchor!=='string'||edit.anchor!==entry.anchor)throw invalid('field anchor mismatch',null);
+   if(!entry||typeof edit.anchor!=='string')throw invalid('field anchor mismatch',null);
+   // A reviewer may extend the catalog prefix to finish a word or quote.
+   // Require an exact prefix of this original field, no shorter than the
+   // catalog anchor. Never trim, normalize, guess another field or match edits.
+   let original=draft;for(const key of entry.path)original=original[key];
+   if(edit.anchor!==entry.anchor&&!(edit.anchor.length>=entry.anchor.length&&original.startsWith(edit.anchor)))throw invalid('field anchor mismatch',null);
    path=entry.path;
   }
   if(!Array.isArray(path)||path.length<1||path.length>64||typeof edit.value!=='string'||edit.value.length>12000||!proseFields.has(path.at(-1)))throw invalid('invalid path or replacement type',path);
@@ -91,10 +96,44 @@ function readabilityHints(draft,options={}){
   ? '\nReadability signals (advisory): '+JSON.stringify(flagged)+'. Shorten or split only when density obstructs the selected audience. Length alone is not a required edit. Do not expand a section to explain every technical detail.'
   : '\n可读性参考（非强制修改）：'+JSON.stringify(flagged)+'。只有密度妨碍所选受众理解时才缩短或分段，字数本身不是必须修改的理由，不为解释全部技术细节扩写章节。';
  return options.locale==='en'
-  ? '\nREQUIRED BEGINNER EDITS: '+JSON.stringify(flagged)+'. These paragraph fields are too dense. Include a correction for each listed field. Rewrite into short, natural paragraphs of one or two sentences, each preferably under 65 words. Explain data and decisions in ordinary words; define unfamiliar terms in place. Preserve important branches and failure conditions. Do not chain source identifiers as the explanation. Separate independent ideas with a blank line if all the facts cannot fit a short paragraph.'
-  : '\n必须修改的零基础段落：'+JSON.stringify(flagged)+'。这些字段过于密集，请逐一提供修正，改为每段一两句的自然短段，先讲数据和实际动作，必要术语就地说明，保留关键分支和失败条件。不用标识符串代替解释；内容较多时以空行分开独立思路。';
+  ? '\nReadability signals (advisory): '+JSON.stringify(flagged)+'. Length alone is not a defect or a required edit. Check whether essential terms, actual data and deciding conditions are understandable to the selected reader. Rewrite only to remove an identified comprehension obstacle, preserving necessary explanations and failure conditions. Keep useful repetition; do not compress merely to meet a word or sentence count.'
+  : '\n可读性参考（非强制修改）：'+JSON.stringify(flagged)+'。长度本身不是错误或必须修改的理由。核对所选读者能否理解必要术语、实际数据和决定条件；只为消除明确理解障碍改写，保留必要解释、失败条件和有用重复，不为字数或句数压缩。';
 }
 function allowedPaths(draft){
  return '\nReview field catalog (copy field and anchor from the same entry; context identifies the section/node): '+JSON.stringify(fieldCatalog(draft));
 }
-module.exports={parseDraft,apply,instruction,readabilityHints,allowedPaths};
+function claimHints(draft,options={}){
+ const fields=fieldCatalog(draft).filter(entry=>{
+  let value=draft;for(const key of entry.path)value=value[key];
+  return /\b(only|all|always|never|every|instant(?:ly|aneous)?|immediately|non.numeric|mixed.type)\b|只有|所有|一定|总是|从不|瞬间|非数字|混合类型/i.test(value);
+ }).map(entry=>entry.field);
+ if(!fields.length)return '';
+ return options.locale==='en'
+  ? '\nScope audit signals (advisory, not proof of error): '+JSON.stringify(fields)+'. Independently test these fields, including headings, for a source-supported counterexample and their input domain. Check the whole original field, not just its catalog anchor. A later caveat cannot repair an overbroad heading or earlier guarantee. Keep correct scoped conditions unchanged; correct or qualify unsupported claims in their own field. Do not add a catalogue of exotic inputs.'
+  : '\n范围核对提示（参考信号，不代表已判错）：'+JSON.stringify(fields)+'。独立对照源码检查这些字段（含标题）的反例与输入范围，检查完整原文，不只看字段表中的anchor。后文限定不能修补标题或前文过宽的保证。正确的条件无需修改；无依据结论在原字段内修正或加必要限定，不扩写特殊输入清单。';
+}
+function returnHints(draft,messages,options={}){
+ const fields=fieldCatalog(draft).filter(entry=>{
+  let value=draft;for(const key of entry.path)value=value[key];
+  return /\b(?:does(?:n't| not)|do(?:n't| not)|never|cannot|can't|no)\b.{0,70}\b(?:promise|asynchronous)\b|不存在.{0,24}(?:等待|稍后)|没有.{0,20}Promise/i.test(value);
+ }).map(entry=>entry.field);
+ let payload;for(const message of messages){if(message.role!=='user')continue;try{const value=JSON.parse(message.content);if(typeof value.source==='string'){payload=value;break;}}catch{}}
+ if(!payload)return '';
+ const facts=require('./ai-source-returns').parameterReturns(payload.source,payload.filename);
+ if(!facts.length)return '';
+ const data=JSON.stringify({fields,parameterReturnSyntax:facts});
+ return options.locale==='en'
+  ? '\nREQUIRED RETURN-TYPE CHECK: '+data+'. These records prove syntax only, not reachability or runtime types. For EACH listed prose field, compare its negative Promise/async guarantee with the exact returned expression. Also check any such guarantee you introduce during review. Trace assignments, actual guards and finally before deciding its type. A plain non-async function can return a caller-supplied Promise unchanged; no automatic wrapping is different from never returning a Promise. Unless source conditions establish the claimed type, correct the whole field, including the early guarantee. Do not preserve an unsupported guarantee and add a later caveat. Preserve correct statements about work performed by the function itself. Do not add a Promise discussion when no return-type claim needs correcting.'
+  : '\n必须检查的返回类型结论：'+data+'。这些记录只证明语法，不证明可达性或运行时类型。逐个对照列出的说明字段，把“没有Promise/没有稍后结果”等保证与原样返回表达式比较，也检查你在复核时新增的同类保证；沿赋值、实际条件与finally确认其类型。非async函数也可以原样返回调用者传入的Promise；没有自动包装不等于绝不返回Promise。源码条件不能建立该类型时，修正完整字段及前面的保证，不保留错误保证再追加后文限定；保留关于函数自身执行工作的正确说明。无需修正返回类型陈述时，不额外加入Promise讲解。';
+}
+function loopHints(draft,messages,options={}){
+ let payload;for(const message of messages){if(message.role!=='user')continue;try{const value=JSON.parse(message.content);if(typeof value.source==='string'&&value.selectedSource){payload=value;break;}}catch{}}
+ if(!payload)return '';
+ const loops=require('./ai-source-returns').enclosingLoops(payload.source,payload.filename,payload.selectedSource);
+ if(!loops.length)return '';
+ const data=JSON.stringify(loops);
+ return options.locale==='en'
+  ? '\nREQUIRED LOOP-CONTINUATION CHECK for the selected statement: '+data+'. These are exact parser-derived loop headers, not an executed trace. Finishing a catch block does not guarantee another attempt: follow any update, then re-evaluate the actual continuation condition. A default count does not prove supplied counts are positive integers. An exact equality used to rethrow is not necessarily the same boundary as a loop comparison. Correct unconditional retry/next-iteration statements, including any you introduce during review; describe the next guard check or leave it conditional. Keep the explanation local instead of listing unrelated input cases. Do not add a loop lecture when the answer need not discuss another iteration.'
+  : '\n必须检查选中语句后的循环延续：'+data+'。这是解析器提取的原样循环头，不是运行轨迹。catch结束不保证再次尝试：先沿更新语句，再重新检查实际循环条件。默认次数不能证明调用者传入的次数都是正整数；用于重新抛错的严格相等，与循环比较未必是同一边界。修正无条件重试或下一轮执行的说法，包括复核时新增的说法；说明要继续检查条件或保留必要前提；仍只解释当前语句，不罗列无关输入。回答不需要讲下一轮时，不扩写循环教程。';
+}
+module.exports={parseDraft,apply,instruction,readabilityHints,allowedPaths,fieldCatalog,claimHints,returnHints,loopHints};

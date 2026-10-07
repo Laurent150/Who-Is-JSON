@@ -1,3 +1,4 @@
+const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {apply,parseDraft}=require('../ai-review-patches');
 const {modelCall}=require('../ai-client');
@@ -13,12 +14,12 @@ test('review edits only existing prose strings and preserves identities transact
 });
 test('structured model review applies a correction without returning the patch protocol to the UI',async()=>{
  let calls=0;
- const config={base:'https://example.org',model:'mock',sponsoredCall:async body=>{
+ const config={base:'https://example.org',model:'mock',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
   calls++;
   if(calls===2)assert.match(body.messages[0].content,/REVIEW OUTPUT CONTRACT/);
   return {choices:[{message:{content:calls===1?'{"kind":"definition","answer":"Wrong"}':'{"corrections":[{"path":["answer"],"value":"Use the new value only when it is not None."}]}'}}]};
  }};
- const result=JSON.parse(await modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:'if incoming is not None: current = incoming'}],{json:true,explanation:true,task:'knowledge',locale:'en'}));
+ const result=JSON.parse(await modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:JSON.stringify({source:'if incoming is not None: current = incoming'})}],{json:true,explanation:true,task:'knowledge',locale:'en'}));
  assert.equal(result.kind,'definition');assert.match(result.answer,/not None/);assert.equal(result.corrections,undefined);
 });
 test('cancelling between draft and review never starts another sponsored request',async()=>{
@@ -41,12 +42,12 @@ test('beginner readability flags dense paragraphs without rewriting text or flag
  assert.equal(readabilityHints(draft,{locale:'en',readingMode:'standard'}),'');
  assert.equal(readabilityHints({sections:[{text:'短段'}]},{locale:'zh-CN',readingMode:'beginner'}),'');
  assert.equal(readabilityHints({sections:[{text:'字'.repeat(170)}]},{locale:'zh-CN',readingMode:'beginner'}),'');
- assert.match(readabilityHints({sections:[{text:'字'.repeat(300)}]},{locale:'zh-CN',readingMode:'beginner'}),/必须修改/);
+ assert.match(readabilityHints({sections:[{text:'字'.repeat(300)}]},{locale:'zh-CN',readingMode:'beginner'}),/非强制修改/);
 });
 test('beginner review removes hidden questions before listing allowed prose edits',async()=>{
  let calls=0;
  const draft={title:'Walkthrough',sections:[{title:'Step',text:'Read the input.'}],questions:[{question:'Why?',answer:'Because.'}]};
- const config={base:'https://example.org',model:'mock',sponsoredCall:async body=>{
+ const config={base:'https://example.org',model:'mock',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
   calls++;
   if(calls===2){
    const reviewed=JSON.parse(body.messages.find(m=>m.role==='assistant').content);
@@ -56,7 +57,7 @@ test('beginner review removes hidden questions before listing allowed prose edit
   }
   return {choices:[{message:{content:calls===1?JSON.stringify(draft):'{"corrections":[]}'}}]};
  }};
- const output=JSON.parse(await modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:'source'}],{json:true,explanation:true,task:'talk',locale:'en',readingMode:'beginner'}));
+ const output=JSON.parse(await modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:JSON.stringify({source:'value = input()'})}],{json:true,explanation:true,task:'talk',locale:'en',readingMode:'beginner'}));
  assert.deepEqual(output.questions,[]);assert.equal(draft.questions.length,1);
 });
 test('nested flow prose can be reviewed without loosening identity or path checks',()=>{
@@ -90,6 +91,64 @@ test('catalog IDs address nested prose and reject unknown, ambiguous and duplica
  assert.equal(draft.summary,'Draft');
 });
 
+test('field anchors accept exact prefixes or full originals in English and Chinese without changing the catalog',()=>{
+ const {fieldCatalog}=require('../ai-review-patches');
+ for(const text of ['Original paragraph with spaces. '.repeat(8),'说明原文：保留条件、空格与换行。\n'.repeat(10),'x'.repeat(95)+'😀 café e\u0301\r\n'+'原文'.repeat(60)]){
+  const draft={sections:[{title:'Heading',text}]},before=JSON.stringify(draft),catalog=fieldCatalog(draft);
+  const entry=catalog.find(f=>f.path.at(-1)==='text');
+  assert.equal(entry.anchor,text.slice(0,96));assert.equal(entry.anchor.length,96);
+  for(const anchor of [entry.anchor,text.slice(0,97),text.slice(0,110),text]){
+   const result=JSON.parse(apply(draft,JSON.stringify({corrections:[{field:entry.field,anchor,value:'Exact replacement\n保留原样 😀'}]})));
+   assert.equal(result.sections[0].text,'Exact replacement\n保留原样 😀');
+   assert.equal(result.sections[0].title,'Heading');assert.equal(JSON.stringify(draft),before);
+  }
+  assert.deepEqual(fieldCatalog(draft),catalog);
+ }
+});
+
+test('anchors reject other fields with the same prefix, stale text and approximate matches',()=>{
+ const prefix='  Shared original prefix. '.repeat(5),text=prefix+'first field 😀 café e\u0301\r\n';
+ const draft={summary:text,sections:[{text:prefix+'second field'}]},before=JSON.stringify(draft);
+ for(const anchor of [draft.sections[0].text,text+' ',text.trim(),text.slice(1),text.slice(0,95),text.replace('first','stale'),text.normalize('NFC'),text.replace('\r\n','\n')]){
+  assert.throws(()=>apply(draft,JSON.stringify({corrections:[{field:'f0',anchor,value:'Wrong'}]})),e=>e.code==='AI_REVIEW_PROTOCOL');
+  assert.equal(JSON.stringify(draft),before);
+ }
+ for(const edits of [
+  [{field:'f0',anchor:text,value:'Changed'},{field:'f0',anchor:text,value:'Again'}],
+  [{field:'f0',anchor:text,value:'Changed'},{path:['summary'],value:'Again'}],
+  [{field:'f0',anchor:text,value:'Changed'},{field:'f1',anchor:text,value:'Wrong field'}],
+  [{field:'f0',path:['summary'],anchor:text,value:'Ambiguous'}],
+  [{field:'f0',anchor:text,value:'x'.repeat(12001)}]
+ ]){
+  assert.throws(()=>apply(draft,JSON.stringify({corrections:edits})),e=>e.code==='AI_REVIEW_PROTOCOL');
+  assert.equal(JSON.stringify(draft),before);
+ }
+});
+
+test('a quote completed beyond the catalog boundary uses the same field without fuzzy matching',()=>{
+ const {fieldCatalog}=require('../ai-review-patches');
+ for(const lead of ['原文','Original']){
+  const text=(lead+' ').repeat(40).slice(0,87)+'["checked"] = True;';
+  const draft={summary:text,output:text.slice(0,96)+' different field'};
+  const entry=fieldCatalog(draft)[0],anchor=text.slice(0,98);
+  assert.equal(JSON.parse(apply(draft,JSON.stringify({corrections:[{field:entry.field,anchor,value:'Corrected'}]}))).summary,'Corrected');
+  for(const bad of [anchor+' invented',anchor.replace('"','”'),anchor.slice(0,95)])assert.throws(()=>apply(draft,JSON.stringify({corrections:[{field:entry.field,anchor:bad,value:'Wrong'}]})),{code:'AI_REVIEW_PROTOCOL'});
+  assert.throws(()=>apply(draft,JSON.stringify({corrections:[{field:'f1',anchor,value:'Wrong field'}]})),{code:'AI_REVIEW_PROTOCOL'});
+ }
+});
+
+test('a full original anchor completes model review without another protocol repair request',async()=>{
+ const original='A paragraph needing a correction. '.repeat(7),draft={kind:'definition',answer:original};
+ let calls=0;
+ const config={base:'https://example.org',model:'mock',sponsoredCall:async body=>{
+  const audit=mockFinalAudit(body);if(audit)return audit;
+  calls++;assert.ok(calls<=2,'Full original anchor must not cause a repair request');
+  return {choices:[{message:{content:calls===1?JSON.stringify(draft):JSON.stringify({corrections:[{field:'f0',anchor:original,value:'Use the new value only when it is not None.'}]})}}]};
+ }};
+ const output=JSON.parse(await modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:JSON.stringify({source:'if incoming is not None: current = incoming'})}],{json:true,explanation:true,task:'knowledge',locale:'en'}));
+ assert.equal(calls,2);assert.equal(output.answer,'Use the new value only when it is not None.');assert.equal(output.kind,draft.kind);
+});
+
 test('full review compatibility preserves non-prose structure and identities',()=>{
  const draft={summary:'Draft',nodes:[{id:'n1',start:2,explanation:'Wrong'}]};
  assert.equal(JSON.parse(apply(draft,JSON.stringify({...draft,summary:'Correct'}))).summary,'Correct');
@@ -100,12 +159,12 @@ test('invalid review gets at most one protocol repair using the original source 
  const source='async function value() { return 1; }',draft={summary:'Wrong',nodes:[{id:'n1',explanation:'Wrong'}]};
  for(const invalid of ['{','{"corrections":[{"path":"nodes[17].explanation","value":"bad"}]}','{"corrections":[{"path":["nodes",17,"explanation"],"value":"bad"}]}']){
   const seen=[];
-  const config={base:'https://example.org',model:'mock',sponsoredCall:async body=>{
+  const config={base:'https://example.org',model:'mock',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
    seen.push(body);return {choices:[{message:{content:seen.length===1?JSON.stringify(draft):seen.length===2?invalid:'{"corrections":[{"field":"f0","anchor":"Wrong","value":"Returns a Promise that fulfills with 1."}]}'}}]};
   }};
-  const output=JSON.parse(await modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:source}],{json:true,explanation:true,task:'flow',locale:'en'}));
+  const output=JSON.parse(await modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:JSON.stringify({source})}],{json:true,explanation:true,task:'flow',locale:'en'}));
   assert.equal(seen.length,3);assert.match(output.summary,/Promise/);assert.equal(output.nodes[0].id,'n1');
-  assert.equal(seen[2].messages[1].content,source);
+  assert.equal(JSON.parse(seen[2].messages[1].content).source,source);
   assert.deepEqual(JSON.parse(seen[2].messages.find(m=>m.role==='assistant').content),draft);
  }
 });

@@ -23,4 +23,17 @@ if (!name) return → name是空字符串、null等被当作“否”的值时�
 const standard='当前为标准模式：使用简洁准确的技术表达，必要时说明术语、机制与边界。不要无关扩写；保持原任务要求的输出结构。';
 function normalize(mode){return mode==='beginner'?'beginner':'standard';}
 function prompt(mode){return normalize(mode)==='beginner'?beginner:standard;}
-module.exports={normalize,prompt};
+// The popup displays answer on its own. Use this same local-reading contract
+// during drafting, editing and final checking, without the generic size target.
+function tokenPrompt(locale){return locale==='en'
+ ? `FIMI_BEGINNER_TOKEN_V1: BEGINNER MODE. Explain the selected word or symbol to an adult who has never programmed. The answer must make sense on its own: the popup does not display the other lesson fields beside it.
+Start with the word's role in the current operation, then connect it to the actual data and consequence. Introduce what a name means before using its exact identifier to help the reader locate it. Do not string identifiers together in place of explaining the action, or explain an unfamiliar term with another unfamiliar term. State relevant unknowns plainly; never infer an implementation from its name.
+For error handling, describe which problem leads here, what this handler actually does, and what happens next when necessary to understand it. Introduce an error category by its everyday meaning, followed by its exact source name when needed to show the boundary. Preserve which errors and operations are covered; do not turn selected error types into all errors, or assume handling always means continuing. A handler may end the call or pass the error to its caller. Follow this source.
+Use natural sentences, each with a clear main point. Do not squeeze several concepts into slash-separated lists, nested parentheses or jargon such as catch, throw and propagate without explaining their role here. Add a sentence when needed for understanding; there is no fixed sentence or word target. A simple name may still need only one sentence. Keep decisive conditions and explain them plainly instead of dropping them for brevity.
+Source-checking rules are internal checks, not a list of details to append to the answer. Include only what the reader needs to understand this occurrence; do not retell the function, list every possible failure or generate a tutorial to fill a knowledge card. Do not require lesson fields or an example to understand answer. In review, correct a concrete comprehension obstacle, not harmless wording or length. Keep the existing JSON contract and source identifiers unchanged.`
+ : `FIMI_BEGINNER_TOKEN_V1：面向没有编程基础的成年读者解释选中词语或符号。弹窗单独显示answer，不会同时展示其他知识卡字段，所以answer本身必须能读懂。
+先说这个词在眼前操作中起什么作用，再连接实际数据和处理结果。先说明名字代表什么，再保留原名帮助对照代码；不串联变量名代替解释，不用陌生术语解释另一个术语。相关未知用日常语言说明，不根据名字猜实现。
+涉及错误处理时，说清什么问题会进入这里、这里实际怎么处理，以及理解该操作必需的后续结果。错误类别先讲日常含义，必要时附源码中的原名来说明范围。保留处理哪些错误、哪些操作的边界，不把限定类别说成所有错误，也不默认处理后总会继续；源码可能结束这次调用或把错误交给调用处处理，必须按实际代码解释。
+用自然短句，每句有一个清楚的重点。不把多个概念挤成斜杠串列、多层括号，或未解释的“捕获、抛出、向上传播”等术语。为说清含义可以多一句，不设固定字数和句数；简单名称仍可一句讲完。决定结果的条件用日常话说清，不能为简短删掉。
+源码核对规则用于内部检查，不是需要追加到回答的细节清单。只保留理解这个位置所需的信息，不复述整个函数、不罗列所有可能失败、不为填知识卡扩写教程，不让answer依赖其他字段或额外例子才能懂。复核只修正具体理解障碍，不因措辞偏好或篇幅改写。保持原JSON约定和源码标识符不变。`;}
+module.exports={normalize,prompt,tokenPrompt};

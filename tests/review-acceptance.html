@@ -1,0 +1,15 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FIMI · 第6步固定验收</title>
+<style>body{max-width:1000px;margin:40px auto;padding:0 24px;color:#29432e;background:#fafbf6;font:18px/1.7 Calibri,'Microsoft YaHei',sans-serif}fieldset{background:white;border:1px solid #d6dfce;border-radius:18px;padding:24px}button,input{font:inherit;color:inherit;background:white;border:1px solid #d6dfce;border-radius:12px;padding:10px 14px;margin:6px}button{cursor:pointer;background:#edf3e7}input{width:330px}#error{color:#a8492b}li{margin:6px 0}small{color:#728667}</style>
+<h1>FIMI · 第6步固定验收</h1>
+<p>6段新代码，20份新版结果、8份旧版对照。常规92次请求，本轮硬上限104次。启动后版本与样本冻结；连接本身不调用模型。</p>
+<fieldset><legend>连接个人 DeepSeek API</legend><input id="key" type="password" autocomplete="off" placeholder="密钥仅存于本地进程内存"><button id="connect">连接</button><button id="disconnect">清除连接</button><p id="connection"></p></fieldset>
+<p id="status" role="status" aria-live="polite"></p><p id="error" role="alert"></p>
+<button id="next" disabled>运行固定计划的下一项</button><button id="stop">停止当前项</button>
+<p><small>请连接后回复“已连接”，由助手按计划逐项运行并核对。刷新页面不会清除当前服务内存中的密钥；重启服务会清除。这里不验证线上CloudBase部署，也不执行测试源码。</small></p><ol id="results"></ol>
+<script nonce="__NONCE__">
+const token='__NONCE__',$=id=>document.getElementById(id);let busy=false,localError='';
+async function post(route,body={}){const r=await fetch(route,{method:'POST',headers:{'Content-Type':'application/json','X-Evaluation-Token':token},body:JSON.stringify(body)}),d=await r.json();if(!r.ok)throw Error(d.error);return d;}
+async function refresh(){try{const s=await(await fetch('/status')).json();$('connection').textContent=s.connected?'已连接：密钥保存在本地测试服务中':'未连接';$('status').textContent=`${s.running?'正在测试 · '+s.phase:'等待或已结束'} · 请求 ${s.dispatched}/${s.limit} · 结果 ${s.completed}/${s.total}`;$('error').textContent=localError||s.lastError;$('connect').disabled=busy||s.running;$('disconnect').disabled=busy||s.running;$('next').disabled=busy||s.running||!s.connected||!s.remaining;$('results').replaceChildren(...s.results.map(r=>{const li=document.createElement('li');li.textContent=[r.jobId,r.id,r.locale,r.readingMode,r.audience,r.ok?'已返回':'未返回：'+r.error,`${r.calls}次请求`].join(' · ');return li;}));}catch(e){$('error').textContent=e.message;}}
+async function action(fn){if(busy)return;busy=true;localError='';$('connect').textContent='处理中…';try{await fn();}catch(e){localError=e.message;}finally{busy=false;$('connect').textContent='连接';await refresh();}}
+$('connect').onclick=()=>action(async()=>{await post('/connect',{key:$('key').value});$('key').value='';});$('disconnect').onclick=()=>action(()=>post('/disconnect'));$('next').onclick=()=>action(()=>post('/next'));$('stop').onclick=()=>action(()=>post('/stop'));refresh();setInterval(refresh,3000);
+</script></html>

@@ -2,6 +2,11 @@ var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}
 let readingMode='beginner';
 try{if(localStorage.getItem('whoisjson.readingMode')==='standard')readingMode='standard';}catch{}
 function beginnerMode(){return readingMode==='beginner';}
+function beginnerSelectionQuestion(){
+ return globalThis.WhoI18n?.locale==='en'
+  ?'Explain the selected code here to an adult with no programming background.'
+  :'请解释选中的代码段，让一个没有编程背景的成年人能看懂。';
+}
 function applyReadingMode(){
  $('readingMode').value=readingMode;
  document.body.dataset.readingMode=readingMode;

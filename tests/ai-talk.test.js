@@ -1,3 +1,4 @@
+const {mockFinalAudit}=require('./final-audit-mock.cjs');
 // Legacy direct pipeline regression; the release default is tested separately.
 process.env.WHO_TALK_PIPELINE='direct';
 const {test}=require('node:test'),assert=require('node:assert/strict');
@@ -20,7 +21,7 @@ test('localized nontechnical guidance reaches draft and review without changing 
  const detailLabels={en:{brief:'Brief',standard:'Standard',detailed:'Detailed'},'zh-CN':{brief:'简要',standard:'标准',detailed:'详细'}};
  for(const locale of ['zh-CN','en'])for(const readingMode of ['beginner','standard'])for(const audience of ['nontechnical','beginner','peer','review'])for(const detail of ['brief','standard','detailed'])for(const coverage of ['full','highlights']){
   const seen=[];
-  const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{
+  const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
    seen.push(body);
    return {choices:[{finish_reason:'stop',message:{content:seen.length===1?JSON.stringify({title:'Total',sections:[{title:'Result',text:'Return the sum of the supplied prices.'}],questions:[]}):'{"corrections":[]}'}}]};
   }};

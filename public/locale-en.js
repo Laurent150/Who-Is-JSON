@@ -1,5 +1,26 @@
 // Authored interface messages only; never used to translate source code or saved content.
 (function(root){root.WhoEnglish={
+  "AI 服务响应超时，本次调用及预留额度待核对，请勿连续重试。": "The AI service timed out. This request and its reserved allowance need to be checked. Please avoid repeated retries.",
+  "与 AI 服务的连接中断，本次调用及预留额度待核对，请勿连续重试。": "The connection to the AI service was interrupted. This request and its reserved allowance need to be checked. Please avoid repeated retries.",
+  "AI 服务返回错误，本次调用及预留额度待核对，请勿连续重试。": "The AI service returned an error. This request and its reserved allowance need to be checked. Please avoid repeated retries.",
+  "AI 服务返回数据不完整，本次调用及预留额度待核对，请勿连续重试。": "The AI service returned an incomplete response. This request and its reserved allowance need to be checked. Please avoid repeated retries.",
+  "AI 服务的用量信息无法核验，预留额度待核对，请勿连续重试。": "The AI service's usage information could not be verified. The reserved allowance needs to be checked. Please avoid repeated retries.",
+  "已收到 AI 响应，但试用额度结算未确认，请勿连续重试。": "An AI response was received, but settlement of the trial allowance could not be confirmed. Please avoid repeated retries.",
+  "邮箱地址": "Email address",
+  "发送登录验证码": "Send sign-in code",
+  "邮箱验证码": "Email verification code",
+  "验证并登录": "Verify and sign in",
+  "已登录账户：": "Signed in as: ",
+  "邮箱登录支持收藏同步；平台赠送额度目前需 GitHub 身份。也可连接自己的 AI 服务。": "Email sign-in supports saved-item sync. Platform trial credits currently require a GitHub identity. You can also connect your own AI service.",
+  "邮箱账户可同步收藏，请在 AI 设置中连接自己的服务。": "Your email account can sync saved items. Connect your own service in AI settings.",
+  "邮箱登录尚未启用，请使用其他登录方式。": "Email sign-in is not enabled. Please use another sign-in method.",
+  "请输入有效的邮箱地址。": "Enter a valid email address.",
+  "验证码无效或已过期，请重新获取。": "The code is invalid or has expired. Request a new code.",
+  "请输入邮件中的数字验证码。": "Enter the numeric code from your email.",
+  "邮件未能发送，请稍后重试或使用其他登录方式。": "The email could not be sent. Try again later or use another sign-in method.",
+  "未能确认邮箱身份。": "Your email identity could not be verified.",
+  "正在验证，请稍候。": "Verification is in progress. Please wait.",
+  "验证码已发送，请在此输入；未收到可在一分钟后重试。": "Code sent. Enter it here; if it does not arrive, try again after one minute.",
   "操作未完成": "The operation could not be completed",
   " 行 · 原代码不会被执行": " lines · Your code is never executed",
   "未命名片段": "Untitled snippet",
@@ -86,6 +107,10 @@
   "修复建议：对照原始文件检查括号、引号和缩进。Python 缩进决定语句属于哪个分支；缺少上下文时，软件不会擅自替你选择一种写法。": "Check brackets, quotes and indentation against the original file. Python indentation determines which branch a statement belongs to; the app will not guess when context is missing.",
   "取消 AI 试用": "Stop using AI trial",
   "使用 AI 试用": "Use AI trial",
+  "重新查询额度": "Check trial balance again",
+  "正在查询额度…": "Checking trial balance…",
+  "额度查询超时，尚未确认剩余额度。请重新查询。": "The balance check timed out. Your remaining trial balance is unknown. Please try again.",
+  "额度查询失败，尚未确认剩余额度。请重新查询。": "We couldn't check your remaining trial balance. Please try again.",
   "正在使用 DeepSeek AI 试用": "Using the DeepSeek AI trial",
   "可使用 AI 试用，也可自行配置服务。": "Use the AI trial or connect your own service.",
   "额度数据异常": "Trial usage data unavailable",
@@ -177,7 +202,7 @@
   "选择阅读基础、详略和范围，生成帮助理解代码的解释稿。": "Choose your audience, detail level and scope to generate a code walkthrough.",
   "点击生成会将本次分析的源码发送到你配置的 AI 服务。讲稿由 AI 完整撰写。": "Generating a walkthrough sends this source to your configured AI service. The walkthrough is written by AI.",
   "AI 正在撰写完整讲解稿 · ": "AI is writing the walkthrough · ",
-  "讲解稿已生成，可导出或进入专注讲稿。": "Walkthrough ready. Export it or open focus mode.",
+  "讲解稿已生成": "Walkthrough ready",
   "已停止生成，可以重试。": "Generation stopped. You can try again.",
   "生成未完成：": "Could not generate: ",
   "等待超时，请重试。": "The request timed out. Please try again.",
@@ -713,6 +738,9 @@ Object.assign(globalThis.WhoEnglish, {
  'AI 解释超过本次长度限制。请选择较小范围后重试。':'The AI response exceeded the length limit. Select less code and try again.',
  'AI 服务没有返回可用的文本解释，请检查模型兼容性。':'The AI service returned no usable explanation. Check model compatibility.',
  'AI 服务返回的不是完整 JSON，请检查接口或稍后重试。':'The AI service returned incomplete JSON. Check the API or try again later.',
+ 'AI 源码分析达到本次输出上限，未能完成；本次未生成讲解稿。':'Source analysis reached its output limit before it could finish. No walkthrough was generated.',
+ '云端尚未启用代码评审的大额度请求，请更新试用服务或使用个人 API。':'The trial service does not yet support the larger code-review budget. Update the trial service or connect your own API.',
+ '代码评审达到单次输出保护上限，内容未完整生成；请保留本次错误信息后再重试。':'The code review reached the per-request output safety limit before it could finish. Save these error details before trying again.',
  'AI 返回的说明格式不完整，请重试。本地分析仍可使用。':'The AI explanation is incomplete. Try again; local analysis is still available.',
  'AI 没有返回完整的用途说明。本地分析仍可使用。':'The AI did not return a complete overview. Local analysis is still available.',
  'AI 流程说明格式不完整，请重试。':'The AI flow explanation is incomplete. Please try again.',
@@ -802,3 +830,60 @@ Object.assign(WhoEnglish, {
 Object.assign(WhoEnglish,{"FIMI · 从功能读懂代码":"FIMI · Understand code, step by step"});
 
 Object.assign(WhoEnglish,{"未确定":"Unknown language"});
+
+Object.assign(WhoEnglish,{
+ 'Word 文档（.docx）':'Word document (.docx)',
+ 'Markdown（.md）':'Markdown (.md)',
+ 'FIMI-讲解稿.docx':'FIMI-walkthrough.docx',
+ '请先生成讲解稿。':'Generate a walkthrough first.',
+  "CloudBase 账户试用尚未启用，请在 AI 设置中连接自己的服务。": "AI trial credits are not enabled for CloudBase accounts yet. Connect your own service in AI settings.",
+  "CloudBase 邮箱登录测试。试用额度尚未启用，可连接自己的 AI 服务。": "CloudBase email sign-in test. Trial credits are not enabled yet. You can connect your own AI service.",
+  "当前仅测试账户登录，收藏仍保存在本机，尚未同步到 CloudBase。": "This currently tests account sign-in only. Saved items remain on this device and are not synced to CloudBase yet.",
+  "CloudBase 收藏同步尚未启用，收藏仍保存在本机。": "CloudBase sync is not enabled yet. Saved items remain on this device.",
+  "CloudBase 操作未完成，请检查环境配置后重试。": "The CloudBase operation did not complete. Check the environment configuration and try again.",
+  "云服务要求额外的人机验证，当前测试入口暂不支持，请稍后重试。": "The cloud service requires an additional CAPTCHA, which this test interface does not support yet. Try again later."
+});
+
+Object.assign(WhoEnglish,{"登录 FIMI 账户":"Sign in to FIMI"});
+Object.assign(WhoEnglish,{"剩余试用额度":"Trial allowance remaining"});
+Object.assign(WhoEnglish,{
+ "文件中的说明":"File notes",
+ "忽略与例外规则":"Ignore rules and exceptions",
+ "请在「连接 AI」中填写服务地址和模型名称。":"Enter the service URL and model name in AI settings.",
+ "服务地址格式不正确":"The service URL is invalid.",
+ "远程模型服务需使用 HTTPS；本机服务可使用 HTTP。":"Remote model services require HTTPS. Local services may use HTTP.",
+ "选中源码范围无效，请重新选择。":"The selected source range is invalid. Select it again.",
+ "词语位置无效，请重新选择。":"The selected token position is invalid. Select it again.",
+ "AI 语言判断格式不完整。":"The AI language identification response is incomplete.",
+ "AI 返回了无法识别的语言判断。":"The AI returned an unrecognized language identification.",
+ "不支持该语言的结构解析。":"Structural parsing is not supported for this language.",
+ "AI 修复建议格式不完整，请重试。":"The AI repair suggestion is incomplete. Please try again.",
+ "AI 没有返回完整的修复建议，请重试。":"The AI did not return a complete repair suggestion. Please try again.",
+ "请选择不超过 100 KB 的源码。":"Select source code no larger than 100 KB.",
+ "讲解稿设置无效，请重新选择。":"The walkthrough settings are invalid. Select them again.",
+ "云服务必须是有效的 HTTPS Supabase 项目地址。":"The cloud service requires a valid HTTPS Supabase project URL.",
+ "账户服务只能使用 publishable / anon key，不能使用管理员密钥。":"The account service requires a publishable or anon key, not an administrator key.",
+ "自定义云服务必须同时设置项目 URL 和 publishable key，不能与发布版配置混用。":"A custom cloud service requires both a project URL and a publishable key. Do not mix them with release configuration.",
+ "CloudBase 环境 ID 格式不正确。":"The CloudBase environment ID is invalid.",
+ "CloudBase 设备 ID 格式不正确。":"The CloudBase device ID is invalid.",
+ "文件过大，第一版最多接收 8 MB 图片或 100 KB 源码。":"The file is too large. The limit is 8 MB for images or 100 KB for source code.",
+ "请求格式不正确":"The request format is invalid.",
+ "请先粘贴或导入代码。":"Paste or import source code first.",
+ "第一版最多分析 100 KB 源码，请选择更小的文件或片段。":"Source code is limited to 100 KB. Select a smaller file or snippet.",
+ "请先分析代码，再填写问题。":"Analyze the code before entering a question.",
+ "请选择 PNG、JPG 或 WebP 图片。":"Select a PNG, JPG or WebP image.",
+ "已有截图正在进行。":"A screen capture is already in progress.",
+ "请选择源码文本或图片文件。":"Select a source text file or an image.",
+ "悬浮窗目前仅支持 Windows。":"The floating window currently supports Windows only."
+});
+Object.assign(WhoEnglish,{
+ 'AI 辅助识别为 {0}；结构和源码位置已由本地解析。':'AI identified {0}; structure and source locations were verified by the local parser.',
+ 'AI 未能确定语言，保留本地结果。':'AI could not identify the language. Local results are retained.',
+ 'AI 判断为 {0}，当前没有对应的本地结构解析器；仍可点读源码。':'AI identified {0}, which has no local structural parser yet. You can still select source code for explanations.',
+ 'AI 判断为 {0}，但本地解析未确认有效结构，保留原结果。':'AI identified {0}, but the local parser could not verify the structure. Original results are retained.',
+ 'AI 辅助识别未完成，保留本地结果。':'AI language identification did not complete. Local results are retained.',
+ '请求已取消。':'The request was canceled.',
+ '网络连接失败，请检查网络后重试。':'The network connection failed. Check your connection and try again.'
+});
+
+Object.assign(globalThis.WhoEnglish, {"AI 最终复核格式不完整，请重试。":"The final AI check was incomplete. Please try again.","AI 最终复核未通过，请重试或缩小讲解范围。":"The explanation did not pass the final AI check. Please try again or select a smaller scope."});

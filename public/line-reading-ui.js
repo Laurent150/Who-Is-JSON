@@ -1,5 +1,6 @@
 var uiText = globalThis.WhoI18n?.t || ((text,...values)=>text.replace(/\{(\d+)\}/g,(m,n)=>n<values.length?String(values[n]):m));
 // Rendering and selection only. Explanations come from parser-owned reading units.
+var uiError = globalThis.WhoI18n?.error || (error=>uiText(error?.message || String(error || '请求未完成。')));
 let lineReadingSelection = null, lineReadingAnchor = 1, lineReadingRequest = 0;
 function renderLineReading() {
     const host = $('lineCode');
@@ -102,14 +103,14 @@ $('lineAiBtn').onclick = async () => {
     $('lineAiBtn').disabled = true; $('lineAiBtn').textContent = uiText("正在结合上下文讲解…");
     try {
         const response = await api('ask',{code:analyzedSource,config,selection:{start:selection.start,end:selection.end},
-            question:beginnerMode()?uiText("请只用一两句解释 selectedSource 在做什么，像朋友指着代码回答。不要默认举例或补充下一步；不要猜外部函数的行为。"):uiText("请面向初学者解释这份源码的第 ")+selection.start+'—'+selection.end+uiText(" 行。结合所在函数和前后语句，但只围绕选中部分。先用一句自然中文说它做什么，再用一组很小的假设数值逐步说明怎么算，最后说明下一步做什么。新术语就地解释；只保留读懂这一句所需的知识。不要仅把运算符替换成中文，也不要猜测作者的性能动机。区分定义与调用、真实代码与假设示例。不能确定外部行为时明确说明；不声称运行过代码。")});
+            question:beginnerMode()?beginnerSelectionQuestion():uiText("请面向初学者解释这份源码的第 ")+selection.start+'—'+selection.end+uiText(" 行。结合所在函数和前后语句，但只围绕选中部分。先用一句自然中文说它做什么，再用一组很小的假设数值逐步说明怎么算，最后说明下一步做什么。新术语就地解释；只保留读懂这一句所需的知识。不要仅把运算符替换成中文，也不要猜测作者的性能动机。区分定义与调用、真实代码与假设示例。不能确定外部行为时明确说明；不声称运行过代码。")});
         if (request!==lineReadingRequest || sourceRevision!==revision || result!==current) return;
         target.replaceChildren(element('span',uiText("AI 解释 · 请对照源码核对"),'line-badge'),element('p',response.answer));
         appendExplanationSave(target,response.answer,explanationSource(selection));appendBuiltinReference(target,selection);$('lineLocal').before(target);$('lineLocal').open=false;
         target.hidden = false;
     } catch (error) {
         if (request===lineReadingRequest && sourceRevision===revision) {
-            target.replaceChildren(element('p',uiText(error.message))); target.hidden = false;
+            target.replaceChildren(element('p',uiError(error))); target.hidden = false;
         }
     } finally {
         if (request===lineReadingRequest && sourceRevision===revision) {

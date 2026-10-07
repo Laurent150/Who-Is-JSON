@@ -1,3 +1,6 @@
+// These cases retain coverage of the B rollback prompt; E is covered by ai-integration.test.js.
+process.env.WHO_TALK_COMPOSITION="B";
+const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {parse}=require('../ai-talk-contracts');
 const source='async function fetchOne(load) {\r\n  return await load("值");\r\n}';
@@ -12,12 +15,12 @@ test('fact-first generation preserves source and settings across the contract an
  const previous=process.env.WHO_TALK_PIPELINE;process.env.WHO_TALK_PIPELINE='contracts';
  try{
   for(const locale of ['zh-CN','en'])for(const audience of ['beginner','peer','review'])for(const readingMode of ['beginner','standard'])for(const detail of ['brief','standard','detailed'])for(const coverage of ['full','highlights']){
-   const calls=[];const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{
+   const calls=[];const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{const audit=mockFinalAudit(body,{prompt_tokens:10,completion_tokens:20,total_tokens:30});if(audit)return audit;
     calls.push(body);const content=calls.length===1?JSON.stringify(ledger()):JSON.stringify({title:'Load a value',sections:[{title:'Result',text:'It requests one value and reports the result when the work finishes.'}],questions:[]});
     return {usage:{prompt_tokens:10,completion_tokens:20,total_tokens:30},choices:[{finish_reason:'stop',message:{content}}]};
    }};
    const result=await require('../ai-talk').generateTalk(source,'fetch.js',{audience,detail,coverage},config,{locale,readingMode});
-   assert.equal(calls.length,2);assert.deepEqual(result.usage.calls.map(c=>c.phase),['contracts','composition']);
+   assert.equal(calls.length,3);assert.deepEqual(result.usage.calls.map(c=>c.phase),['contracts','composition','review']);
    for(const c of calls)assert.equal(JSON.parse(c.messages.find(m=>m.role==='user').content).source,source);
    assert.equal(result.evaluationContracts,undefined);
    const system=calls[1].messages[0].content;
@@ -40,9 +43,9 @@ test('invalid contracts and cancellation cannot fall through to an unchecked man
  const previous=process.env.WHO_TALK_PIPELINE;process.env.WHO_TALK_PIPELINE='contracts';
  try{
   let calls=0;const config={base:'https://example.org',model:'test',sponsoredCall:async()=>{calls++;return {choices:[{finish_reason:'stop',message:{content:'{"purpose":"missing units"}'}}]};}};
-  await assert.rejects(()=>require('../ai-talk').generateTalk(source,'x.js',{},config),/源码依据不完整/);assert.equal(calls,1);
+  await assert.rejects(()=>require('../ai-talk').generateTalk(source,'x.js',{},config),/源码依据不完整/);assert.equal(calls,2);
   const controller=new AbortController();controller.abort();
-  await assert.rejects(()=>require('../ai-talk').generateTalk(source,'x.js',{},config,{signal:controller.signal}),/取消/);assert.equal(calls,1);
+  await assert.rejects(()=>require('../ai-talk').generateTalk(source,'x.js',{},config,{signal:controller.signal}),/取消/);assert.equal(calls,2);
  }finally{if(previous===undefined)delete process.env.WHO_TALK_PIPELINE;else process.env.WHO_TALK_PIPELINE=previous;}
 });
 test('optional contract label never weakens required facts, anchors or the single-object protocol',()=>{
@@ -64,10 +67,10 @@ test('question schema is explicit in both languages and nonempty Q&A survives tw
    const question=locale==='en'?{question:'What is returned?',answer:'A Promise adopting the supplied load result.'}:{question:'交回什么？',answer:'交回采用传入load结果的Promise。'};
    const manuscript={title:'Result',sections:[{title:'Outcome',text:'Original prose.'}],questions:[question]};
    const calls=[];
-   const result=await require('../ai-talk').generateTalk(source,'sample',{audience:'review',detail:'standard'},{base:'https://example.org',model:'test',sponsoredCall:async body=>{
+   const result=await require('../ai-talk').generateTalk(source,'sample',{audience:'review',detail:'standard'},{base:'https://example.org',model:'test',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
     calls.push(body);return {choices:[{finish_reason:'stop',message:{content:JSON.stringify(calls.length===1?ledger():manuscript)}}]};
    }},{locale,readingMode:'standard'});
-   assert.equal(calls.length,2);assert.deepEqual(result.questions,[question]);assert.equal(result.sections[0].text,manuscript.sections[0].text);
+   assert.equal(calls.length,3);assert.deepEqual(result.questions,[question]);assert.equal(result.sections[0].text,manuscript.sections[0].text);
    for(const call of calls)assert.equal(JSON.parse(call.messages.find(m=>m.role==='user').content).source,source);
    const prompt=calls[1].messages[0].content;
    assert.match(prompt,locale==='en'?/Never return an array of question strings/:/禁止返回问题字符串数组/);
@@ -80,16 +83,16 @@ test('question schema is explicit in both languages and nonempty Q&A survives tw
   }
  }finally{if(previous===undefined)delete process.env.WHO_TALK_PIPELINE;else process.env.WHO_TALK_PIPELINE=previous;}
 });
-test('contracts without optional label still use two calls and preserve Unicode CRLF source and prose',async()=>{
+test('contracts without optional label use a separate final review and preserve Unicode CRLF source and prose',async()=>{
  const previous=process.env.WHO_TALK_PIPELINE;process.env.WHO_TALK_PIPELINE='contracts';
  try{
   for(const locale of ['en','zh-CN']){
    const data=ledger();delete data.purpose;const calls=[];
    const manuscript={title:'Result',sections:[{title:'Outcome',text:'Exact model prose; no replacement.'}],questions:[]};
-   const result=await require('../ai-talk').generateTalk(source,'sample',{audience:'beginner'},{base:'https://example.org',model:'test',sponsoredCall:async body=>{
+   const result=await require('../ai-talk').generateTalk(source,'sample',{audience:'beginner'},{base:'https://example.org',model:'test',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
     calls.push(body);return {choices:[{finish_reason:'stop',message:{content:JSON.stringify(calls.length===1?data:manuscript)}}]};
    }},{locale,readingMode:'beginner'});
-   assert.equal(calls.length,2);assert.equal(result.sections[0].text,manuscript.sections[0].text);
+   assert.equal(calls.length,3);assert.equal(result.sections[0].text,manuscript.sections[0].text);
    for(const c of calls)assert.equal(JSON.parse(c.messages.find(m=>m.role==='user').content).source,source);
    assert.match(calls[1].messages[0].content,locale==='en'?/exactly ONE final JSON object/:/只序列化一个最终JSON对象/);
    assert.match(calls[1].messages[0].content,locale==='en'?/other failures still escape/:/其他失败仍会向外报错/);
@@ -102,11 +105,11 @@ test('purpose-first experiment only appends an introductory constraint and prese
   for(const locale of ['en','zh-CN'])for(const audience of ['beginner','peer','review']){
    const variants=[];
    for(const introComposition of [undefined,'purpose-first']){
-    const calls=[],config={base:'https://example.org',model:'test',sponsoredCall:async payload=>{
+    const calls=[],config={base:'https://example.org',model:'test',sponsoredCall:async payload=>{const audit=mockFinalAudit(payload);if(audit)return audit;
      calls.push(payload);return {choices:[{finish_reason:'stop',message:{content:JSON.stringify(calls.length===1?ledger():{title:'Purpose',sections:[{title:'Result',text:'Original complete prose.'}],questions:[]})}}]};
     }};
     const result=await require('../ai-talk').generateTalk(source,'x.js',{audience,detail:'brief'},config,{locale,readingMode:'beginner',introComposition,asyncFocusRules:false});
-    assert.equal(calls.length,2);assert.equal(result.sections[0].text,'Original complete prose.');variants.push(calls);
+    assert.equal(calls.length,3);assert.equal(result.sections[0].text,'Original complete prose.');variants.push(calls);
    }
    assert.deepEqual(variants[0][0],variants[1][0]);
    const before=variants[0][1].messages,after=variants[1][1].messages;
@@ -126,6 +129,7 @@ test('contract reasoning is bounded and provider-specific, and failed calls reta
  assert.equal(body.reasoning_effort,'low');assert.equal(body.max_tokens,16384);
  assert.equal(requestOptions({...config,base:'https://example.org'},[],options).body.thinking,undefined);
  assert.equal(requestOptions({...config,sponsoredCall:()=>{}},[],options).body.thinking.type,'disabled');
+ assert.equal(requestOptions({...config,reviewThinking:true,sponsoredCall:()=>{}},[],options).body.thinking.type,'enabled');
  const previous=process.env.WHO_TALK_PIPELINE;process.env.WHO_TALK_PIPELINE='contracts';
  try{
   await assert.rejects(()=>require('../ai-talk').generateTalk(source,'x.js',{}, {...config,sponsoredCall:async()=>({usage:{prompt_tokens:11,completion_tokens:13,total_tokens:24},choices:[{finish_reason:'length',message:{content:'private incomplete model content'}}]})}),error=>{
@@ -136,19 +140,19 @@ test('contract reasoning is bounded and provider-specific, and failed calls reta
 
 
 
-test('release default uses the exact accepted two-stage options without evaluation setup',async()=>{
+test('B rollback uses the source, composition and final review options without evaluation setup',async()=>{
  const previous=process.env.WHO_TALK_PIPELINE;delete process.env.WHO_TALK_PIPELINE;
  try{
   for(const locale of ['zh-CN','en'])for(const audience of ['beginner','peer','review']){
    const requests=[];
    for(const explicit of [false,true]){
     const calls=[];
-    const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{
+    const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
      calls.push(body);return {choices:[{finish_reason:'stop',message:{content:JSON.stringify(calls.length===1?ledger():{title:'Result',sections:[{title:'Result',text:'Unchanged model prose.'}],questions:[]})}}]};
     }};
     const options={locale,readingMode:'beginner',...(explicit?{introComposition:'purpose-first',asyncFocusRules:true}:{})};
     const result=await require('../ai-talk').generateTalk(source,'sample.js',{audience,detail:'standard'},config,options);
-    assert.equal(calls.length,2);assert.equal(result.sections[0].text,'Unchanged model prose.');
+    assert.equal(calls.length,3);assert.equal(result.sections[0].text,'Unchanged model prose.');
     assert.equal(result.evaluationContracts,undefined);
     for(const call of calls)assert.equal(JSON.parse(call.messages.find(m=>m.role==='user').content).source,source);
     requests.push(calls);

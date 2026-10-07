@@ -1,3 +1,6 @@
+// These cases retain coverage of the B rollback prompt; E is covered by ai-integration.test.js.
+process.env.WHO_TALK_COMPOSITION="B";
+const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {applies,instruction}=require('../ai-talk-async');
 test('return guidance is syntax-scoped and does not infer async behavior from comments, strings, or another language',()=>{
@@ -13,11 +16,11 @@ test('opt-in async guidance leaves the analysis call, source bytes, other audien
   for(const locale of ['en','zh-CN'])for(const audience of ['beginner','peer','review']){
    const variants=[];
    for(const asyncFocusRules of [false,true]){
-    const calls=[],config={base:'https://example.org',model:'test',sponsoredCall:async payload=>{
+    const calls=[],config={base:'https://example.org',model:'test',sponsoredCall:async payload=>{const audit=mockFinalAudit(payload);if(audit)return audit;
      calls.push(payload);return {choices:[{finish_reason:'stop',message:{content:JSON.stringify(calls.length===1?ledger:{title:'Result',sections:[{title:'Value',text:'Unmodified model text.'}],questions:[]})}}]};
     }};
     const result=await require('../ai-talk').generateTalk(source,'job.ts',{audience,detail:'brief'},config,{locale,readingMode:'beginner',introComposition:'purpose-first',asyncFocusRules});
-    assert.equal(calls.length,2);assert.equal(result.sections[0].text,'Unmodified model text.');
+    assert.equal(calls.length,3);assert.equal(result.sections[0].text,'Unmodified model text.');
     for(const c of calls)assert.equal(JSON.parse(c.messages.find(m=>m.role==='user').content).source,source);
     variants.push(calls);
    }

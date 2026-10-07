@@ -1,3 +1,4 @@
+const {mockFinalAudit}=require('./final-audit-mock.cjs');
 // Legacy direct pipeline regression; the release default is tested separately.
 process.env.WHO_TALK_PIPELINE='direct';
 const {test}=require('node:test'),assert=require('node:assert/strict');
@@ -7,7 +8,7 @@ const {java}=require('../parsers/java');
 
 test('review compares the original source and draft, and only returns the reviewed result',async()=>{
  const source='if value is not None:\n    saved = value',seen=[];
- const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{
+ const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
   seen.push(body);return {choices:[{finish_reason:'stop',message:{content:seen.length===1?'Wrong draft':'Save value only when it is not None.'}}]};
  }};
  const text=await modelCall(config,[{role:'system',content:'Explain the source.'},{role:'user',content:JSON.stringify({source})}],{explanation:true,locale:'en',readingMode:'beginner'});
@@ -23,7 +24,7 @@ test('review compares the original source and draft, and only returns the review
 test('flow requests carry exact node source and missing annotations remain explicit',async()=>{
  const source='setup();\nfunction f(x) {\n  return x + 1;\n}',seen=[];
  const result={language:'JavaScript',blocks:[{title:'f',start:2,end:4,controlFlow:[{kind:'return',start:3,end:3}]}]};
- const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{seen.push(body);return {choices:[{message:{content:JSON.stringify({summary:'Return the incremented value.',nodes:[]})}}]};}};
+ const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;seen.push(body);return {choices:[{message:{content:JSON.stringify({summary:'Return the incremented value.',nodes:[]})}}]};}};
  const output=await explainFlow(result,source,2,config,{locale:'en'});
  const payload=JSON.parse(seen[0].messages[1].content);
  assert.equal(payload.graph.nodes[0].source,'  return x + 1;');
@@ -43,7 +44,7 @@ test('main functions outrank imports and nested conditions without changing bloc
 test('overview carries source slices and token context includes the guarded assignment',async()=>{
  const source='// outside\nfunction f() {\n return 1;\n}',seen=[];
  const result={blocks:[{kind:'function',title:'f',start:2,end:4}]};
- await explainOverview(result,source,'f.js',{base:'https://example.org',model:'mock',sponsoredCall:async body=>{
+ await explainOverview(result,source,'f.js',{base:'https://example.org',model:'mock',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
   seen.push(body);return {choices:[{message:{content:JSON.stringify({summary:'Return one.',blocks:[{index:0,purpose:'Return one.'}]})}}]};
  }},{locale:'en'});
  assert.equal(JSON.parse(seen[0].messages[1].content).blocks[0].source,'function f() {\n return 1;\n}');
@@ -82,12 +83,12 @@ test('source-grounding checks reach both generation and review across tasks and 
  const source='async function read(load) { const raw = await load(); try { return JSON.parse(raw); } catch { return null; } }';
  for(const locale of ['en','zh-CN'])for(const task of ['flow','talk','knowledge','overview','ask']){
   const seen=[];
-  const config={base:'https://example.org',model:'mock',sponsoredCall:async body=>{
-   seen.push(body);return {choices:[{message:{content:seen.length===1?'{"summary":"Candidate"}':'{"corrections":[]}'}}]};
+  const config={base:'https://example.org',model:'mock',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
+   seen.push(body);return {choices:[{message:{content:seen.length===1?(task==='talk'?'{"title":"Candidate","sections":[{"title":"Result","text":"Read the value."}],"questions":[]}':'{"summary":"Candidate"}'):'{"corrections":[]}'}}]};
   }};
-  await modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:source}],{locale,task,json:true,explanation:true});
+  await modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:JSON.stringify({source})}],{locale,task,json:true,explanation:true});
   for(const body of seen){
-   assert.equal(body.messages[1].content,source);
+   assert.equal(JSON.parse(body.messages[1].content).source,source);
    assert.match(body.messages[0].content,locale==='en'?/ERROR BOUNDARIES: Inspect each function separately/:/异常范围：逐个函数/);
    assert.match(body.messages[0].content,locale==='en'?/including a throw before the first await/:/包括第一个await之前的throw/);
    assert.match(body.messages[0].content,locale==='en'?/not restricted to boolean true/:/真值不限于布尔true/);
@@ -98,6 +99,7 @@ test('source-grounding checks reach both generation and review across tasks and 
 test('official DeepSeek uses direct walkthrough drafts and reasoning reviews without changing source',async()=>{
  const previous=global.fetch,seen=[];
  global.fetch=async(url,options)=>{
+  const audit=mockFinalAudit(JSON.parse(options.body));if(audit)return Response.json(audit);
   seen.push(JSON.parse(options.body));
   return Response.json({choices:[{finish_reason:'stop',message:{content:seen.length%2===1?'{"title":"Check","sections":[{"title":"Use","text":"Check the value."}],"questions":[]}':'{"corrections":[]}'}}]});
  };

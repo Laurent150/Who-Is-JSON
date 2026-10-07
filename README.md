@@ -2,7 +2,7 @@
 
 [简体中文](README.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-当前正在准备 FIMI 1.2.0 Windows 发布候选，GitHub 已发布安装包仍是 Who Is JSON 1.1.0。开发版支持中英文，并将结构资料归并到代码工作台；新增 AI 输入／输出、随解释模式变化的步骤总结及选区追问。新版安装器已进入本地安装验收，尚未发布；未签名状态和安装排查见 [Windows 安装说明](docs/WINDOWS_INSTALL.md)。详见 [最新分级与复测结论](docs/BILINGUAL_FOCUSED_FOLLOWUP.md) 和 [验证记录](VALIDATION.md)。
+当前正在准备 FIMI 1.2.1 Windows 发布候选，GitHub 已发布安装包仍是 Who Is JSON 1.1.0。开发版支持中英文，并将结构资料归并到代码工作台；新增 AI 输入／输出、随解释模式变化的步骤总结及选区追问。新版安装器已进入本地安装验收，尚未发布；未签名状态和安装排查见 [Windows 安装说明](docs/WINDOWS_INSTALL.md)。详见 [最新分级与复测结论](docs/BILINGUAL_FOCUSED_FOLLOWUP.md) 和 [验证记录](VALIDATION.md)。
 
 **看懂自己找到的代码，并从中学习。**
 

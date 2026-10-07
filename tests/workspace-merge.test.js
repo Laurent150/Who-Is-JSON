@@ -1,3 +1,4 @@
+const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const {analyze}=require('../analyzer'),flow=require('../ai-flow'),patches=require('../ai-review-patches');
 const publicFlow=require('../public/flow-model');
@@ -32,7 +33,7 @@ test('shared local/AI flow and IO annotations preserve source, Unicode positions
 test('AI IO is generated and reviewed in both interface languages and explanation modes',async()=>{
  const source='function twice(value) { return value * 2; }',parsed=analyze(source,'twice.js'),calls=[];
  for(const locale of ['zh-CN','en'])for(const readingMode of ['beginner','standard']){
-  const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{
+  const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
    calls.push(body);const input=JSON.parse(body.messages[1].content);assert.equal(input.source,source);assert.equal(input.selectedFunction.source,source);
    if(body.messages.some(m=>m.role==='assistant'))return {choices:[{message:{content:JSON.stringify({corrections:[{path:['output'],value:'Reviewed output.'}]})}}]};
    return {choices:[{message:{content:JSON.stringify({summary:'Double.',input:'A number.',output:'Draft output.',nodes:[{id:'n1',title:'Double the number',explanation:'Multiply by two.'}]})}}]};
@@ -49,7 +50,7 @@ test('flow prompts carry exact confirmed callees but exclude shadowed names',asy
  for(const shadowed of [false,true]){
   const code=shadowed?source.replace('order(n)','order(n, twice)'):source;
   const parsed=analyze(code,'order.js');
-  const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{
+  const config={base:'https://example.org',model:'test',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
    const payload=JSON.parse(body.messages[1].content);
    assert.deepEqual(payload.knownCallees,shadowed?[]:[{name:'twice',start:1,end:1,source:source.split('\n')[0]}]);
    if(body.messages.some(m=>m.role==='assistant')){
@@ -76,7 +77,7 @@ function workspace(api){
  const nodes=new Map(),get=id=>{if(!nodes.has(id))nodes.set(id,new Node());return nodes.get(id);};
  const ctx=vm.createContext({api,AbortController,AbortSignal,Error,Map,Set,setInterval,clearInterval,innerWidth:1200,innerHeight:800,
   config:{},current:{language:'JavaScript',blocks:[]},analyzedSource:'const 商品 = "😀";\nreturn 商品;',fileName:'test.js',sourceOffset:7,
-  WhoReading:require('../public/reading-model'),WhoFlowModel:publicFlow,beginnerMode:()=>true,connected:()=>true,
+  WhoReading:require('../public/reading-model'),WhoFlowModel:publicFlow,beginnerMode:()=>true,beginnerSelectionQuestion:()=> '请解释选中的代码段，让一个没有编程背景的成年人能看懂。',connected:()=>true,
   element:(tag,text='',cls='')=>new Node(tag,text,cls),document:{addEventListener(){},createTextNode:text=>new Node('text',text)},window:{addEventListener(){}},$:get,
   appendAITerms(){},appendExplanationSave(){},appendBuiltinReference(){},explanationSource:s=>s,toast(){},settings(){},
  });
@@ -85,6 +86,24 @@ function workspace(api){
  return {ctx,get,run:s=>vm.runInContext(s,ctx)};
 }
 const deferred=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};};
+
+test('generated workspace titles follow the UI language without translating source-defined names',()=>{
+ const app=workspace(async()=>{});
+ app.ctx.current.language='Python';
+ app.ctx.uiText=text=>({'文件入口':'Entry point','文件中的说明':'File notes','忽略与例外规则':'Ignore rules and exceptions'}[text]||text);
+ const before=app.ctx.analyzedSource;
+ app.run("studioShowFunction({role:'script-entry',kind:'module',title:'文件开始时的准备',start:1,end:2},null)");
+ assert.equal(app.get('studioExplain').children[0].textContent,'Entry point');
+ app.run("studioShowFunction({role:'script-entry',kind:'module',title:'文件开始时的准备',start:1,end:2},{summary:'Source summary',input:'None',output:'Text'})");
+ assert.equal(app.get('studioExplain').children[0].textContent,'Entry point');
+ assert.equal(app.run("studioBlockTitle({kind:'module',title:'文件中的说明'})"),'File notes');
+ assert.equal(app.run("studioBlockTitle({kind:'function',title:'文件中的说明'})"),'文件中的说明');
+ app.ctx.current.language='Gitignore';
+ assert.equal(app.run("studioBlockTitle({kind:'config',title:'忽略与例外规则'})"),'Ignore rules and exceptions');
+ app.ctx.uiText=text=>text;
+ assert.equal(app.run("studioBlockTitle({role:'script-entry',title:'文件开始时的准备'})"),'文件入口');
+ assert.equal(app.ctx.analyzedSource,before);
+});
 
 test('line and token clicks remain separate; Shift extends lines and original source is unchanged',async()=>{
  const seen=[],app=workspace(async(route,data)=>{seen.push(data);return {answer:'Explanation'};});

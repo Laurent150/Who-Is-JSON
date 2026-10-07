@@ -1,4 +1,5 @@
 function savedSourceName(source){return source.unnamed?uiText('代码片段'):source.file;}
+var uiError = globalThis.WhoI18n?.error || (error=>uiText(error?.message || String(error || '请求未完成。')));
 function explanationSaveLabel(on){return globalThis.WhoI18n?.locale==='en'?(on?'Saved':'Save'):(on?'已收藏':'收藏');}
 function explanationSource(range,extra={}){
  const full=typeof analyzedFullSource==='string'&&analyzedFullSource?analyzedFullSource:analyzedSource;
@@ -24,7 +25,7 @@ function appendExplanationSave(host,answer,source,title,origin='ai'){
    const items=knowledgeSaved(),exists=items.some(x=>x.id===item.id),next=exists?items.filter(x=>x.id!==item.id):[item,...items];
    if(next.length>500||new TextEncoder().encode(JSON.stringify({knowledge:next,cards:saved()})).length>1900000)throw Error(uiText('收藏空间不足，请先整理收藏后重试'));
    WhoLibraryStore.setItem(KNOWLEDGE_KEY,JSON.stringify(next));refreshExplanationSaves();
-  }catch(error){toast(error.name==='QuotaExceededError'?uiText('收藏空间不足，请先整理收藏后重试'):error.message);}};
+  }catch(error){toast(error.name==='QuotaExceededError'?uiText('收藏空间不足，请先整理收藏后重试'):uiError(error));}};
  }).catch(()=>{button.remove();toast(uiText('未能准备收藏，请重新打开这段解释'));});
 }
 function appendBuiltinReference(host,range,token){

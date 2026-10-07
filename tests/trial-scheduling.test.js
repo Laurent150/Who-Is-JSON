@@ -2,6 +2,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {createCloudAccount}=require('../cloud-account');
 const {modelCall}=require('../ai-client');
+const {mockFinalAudit}=require('./final-audit-mock.cjs');
 async function setup(respond){
  let time=10000,last=-Infinity,active=0,maxActive=0;
  const calls=[],waits=[];
@@ -18,17 +19,17 @@ async function setup(respond){
     await new Promise(resolve=>setImmediate(resolve));
     if(respond)return await respond(call,calls.length);
     if(time-last<5000)return Response.json({error:'请稍后再试。'},{status:429});
-    last=time;return Response.json({choices:[{message:{content:'This creates a name for the value.'}}]});
+    last=time;return Response.json(mockFinalAudit(call.body)||{choices:[{message:{content:'This creates a name for the value.'}}]});
    }finally{active--;}
   }});
  async function login(){const req={headers:{host:'127.0.0.1:43127'}};const flow=await account.handle(req,'github-start');const params=new URL(new URL(flow.url).searchParams.get('redirect_to')).searchParams;params.set('code','test');await account.callback(params);req.headers['x-who-session']=(await account.handle(req,'github-poll',{ticket:flow.ticket})).session;return req;}
  const req=await login();
  return {account,req,login,calls,waits,get maxActive(){return maxActive;},config:account.trialConfig(req)};
 }
-test('trial explanation draft and review honor the deployed five-second reservation interval',async()=>{
+test('trial draft, review and final audit all honor the deployed five-second reservation interval',async()=>{
  const s=await setup();
- const answer=await modelCall(s.config,[{role:'system',content:'Explain'},{role:'user',content:'const n=1;'}],{explanation:true,locale:'en',maxTokens:100});
- assert.match(answer,/creates a name/);assert.equal(s.calls.length,2);assert.ok(s.calls[1].time-s.calls[0].time>=5000);assert.equal(s.maxActive,1);
+ const answer=await modelCall(s.config,[{role:'system',content:'Explain'},{role:'user',content:JSON.stringify({source:'const n=1;'})}],{explanation:true,locale:'en',maxTokens:100});
+ assert.match(answer,/creates a name/);assert.equal(s.calls.length,3);assert.ok(s.calls[1].time-s.calls[0].time>=5000);assert.ok(s.calls[2].time-s.calls[1].time>=5000);assert.equal(s.maxActive,1);
 });
 test('separate requests and local sessions for one account share a serial trial queue',async()=>{
  const s=await setup(),second=s.account.trialConfig(await s.login());
