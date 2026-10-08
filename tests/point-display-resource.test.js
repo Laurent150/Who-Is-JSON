@@ -9,8 +9,8 @@ test('production HTTP serves the point display script as executable browser-glob
   assert.ok(ready,'isolated production server started');
   const response=await fetch(base+'/point-display.js');assert.equal(response.status,200);assert.match(response.headers.get('content-type'),/javascript/);
   const script=await response.text();assert.equal(script,fs.readFileSync(path.join(root,'public/point-display.js'),'utf8'));
-  const browser=vm.createContext({});vm.runInContext(script,browser,{timeout:1000});assert.equal(typeof browser.WhoPointDisplay?.text,'function');
-  assert.equal(browser.WhoPointDisplay.text('Read `value`.'),"Read 'value'.");
+  const browser=vm.createContext({});vm.runInContext(script,browser,{timeout:1000});assert.equal(typeof browser.WhoPointDisplay?.render,'function');
+  assert.equal(browser.WhoPointDisplay.text('Read `value`.'),"Read value.");
   assert.equal(browser.WhoPointDisplay.text('```js\nconst text = `x`;\n```'),'const text = `x`;\n');
  }finally{
   if(app.exitCode===null){const exited=new Promise(resolve=>app.once('exit',resolve));app.kill();await exited;}

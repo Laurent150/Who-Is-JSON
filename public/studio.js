@@ -136,7 +136,7 @@ async function studioFollowup(question,selection,pointReading=false){
  content.querySelector('.studio-followup-answer')?.remove();
  const response=element('div',undefined,'studio-followup-answer');response.append(element('p',uiText("AI 正在解释选中的原文…")));content.append(response);
  try{const result=await studioApi('ask',{selection,question,...(pointReading?{pointReading:true}:{})});if(version!==studioVersion||id!==studioRequest)return;
-  response.replaceChildren(element('p',globalThis.WhoPointDisplay?.text(result.answer)??result.answer));appendAITerms(response,result.answer);appendExplanationSave(response,result.answer,explanationSource(selection));
+  response.replaceChildren(globalThis.WhoPointDisplay?.paragraph(result.answer,current?.language)??element('p',result.answer));appendAITerms(response,result.answer);appendExplanationSave(response,result.answer,explanationSource(selection));
  }catch(error){if(version===studioVersion&&id===studioRequest)response.replaceChildren(element('p',uiError(error),'studio-error'));}
 }
 function studioNodeEnd(node){return Math.max(node.end,...node.branches.flatMap(b=>b.nodes.map(studioNodeEnd)));}
@@ -218,7 +218,7 @@ async function studioExplainSelection(){
  const selection={...studioSelected};studioIdentity();studioSelected=selection;const version=studioVersion,id=++studioRequest,key='line:'+selection.start+':'+selection.end;
  $('studioExplain').replaceChildren(element('p',uiText("AI 正在解释选中的原文…"),'studio-empty'));
  try{let answer=studioAnswers.get(key);if(!answer){answer=(await studioApi('ask',{selection,pointReading:true,question:selectionQuestion()})).answer;if(version!==studioVersion)return;studioAnswers.set(key,answer);}
-  if(version===studioVersion&&id===studioRequest){$('studioExplain').replaceChildren(element('span',uiText("AI 解释 · 请对照源码核对"),'studio-provenance'),element('p',globalThis.WhoPointDisplay?.text(answer)??answer));appendAITerms($('studioExplain'),answer);appendExplanationSave($('studioExplain'),answer,explanationSource(selection));appendBuiltinReference($('studioExplain'),selection);studioAppendFollowups($('studioExplain'),selection);}
+  if(version===studioVersion&&id===studioRequest){$('studioExplain').replaceChildren(element('span',uiText("AI 解释 · 请对照源码核对"),'studio-provenance'),globalThis.WhoPointDisplay?.paragraph(answer,current?.language)??element('p',answer));appendAITerms($('studioExplain'),answer);appendExplanationSave($('studioExplain'),answer,explanationSource(selection));appendBuiltinReference($('studioExplain'),selection);studioAppendFollowups($('studioExplain'),selection);}
  }catch(e){if(version===studioVersion&&id===studioRequest)$('studioExplain').replaceChildren(element('p',uiError(e),'studio-error'));}
 }
 function closeStudioToken(){studioTokenRequest++;studioActiveToken?.classList.remove('selected-token');studioActiveToken=null;const p=$('studioTokenPopup');if(p)p.hidden=true;}
@@ -239,7 +239,7 @@ async function openStudioToken(anchor,token){
  const key='token:'+token.line+':'+token.startColumn+':'+token.endColumn;
  try{let response=studioAnswers.get(key);if(!response){response=await studioApi('ask',{selection:{start:token.line,end:token.line},token,knowledge:true,question:uiText("解释选中词语；简单定义不需要知识卡。")});if(version!==studioVersion)return;studioAnswers.set(key,response);}
   if(id===studioTokenRequest&&version===studioVersion){
-   $('studioTokenText').textContent=globalThis.WhoPointDisplay?.text(response.answer)??response.answer;appendAITerms($('studioTokenText'),response.answer);
+   if(globalThis.WhoPointDisplay)WhoPointDisplay.render($('studioTokenText'),response.answer,current?.language);else $('studioTokenText').textContent=response.answer;appendAITerms($('studioTokenText'),response.answer);
    appendExplanationSave($('studioTokenLesson'),response.answer,explanationSource({start:token.line,end:token.line},{startColumn:token.startColumn,endColumn:token.endColumn}),token.text);appendBuiltinReference($('studioTokenLesson'),{start:token.line,end:token.line},token);
    positionStudioToken();
   }

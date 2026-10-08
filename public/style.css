@@ -366,3 +366,9 @@ html[lang="en"] #empty{padding:32px 28px}html[lang="en"] #empty h2{white-space:p
 .walkthrough-export-menu button{display:block;width:100%;border:0;border-radius:9px;background:transparent;text-align:left;padding:12px 14px;color:#35482e;line-height:20px;white-space:nowrap;font-size:13px}
 .walkthrough-export-menu button:hover,.walkthrough-export-menu button:focus-visible{background:#edf3e7;outline:2px solid #789762;outline-offset:-2px}
 @media(max-width:520px){.speech-head{flex-wrap:wrap}.speech-head .speech-kicker{flex:1 1 120px}.walkthrough-export-trigger{font-size:12px;gap:10px;padding:9px 12px}}
+
+/* Explanation-only code styling; source editor colors and real literal quotes stay intact. */
+.point-code{font-family:Consolas,'Cascadia Code',monospace;font-size:.96em;background:#edf2f5;color:#164c78;border-radius:3px;padding:0 .18em;white-space:pre-wrap;overflow-wrap:anywhere;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.point-code-block{display:block;margin:.35em 0;padding:.55em .7em;border-left:2px solid #c4d2dc;line-height:1.7}
+.point-code .token-keyword{color:#69419a}.point-code .token-name{color:#164c78}.point-code .token-string,.point-code .token-docstring{color:#805119}.point-code .token-number{color:#14696b}.point-code .token-comment{color:#486250}.point-code .token-symbol{color:#515760}
+@media(forced-colors:active){.point-code,.point-code [class^="token-"]{color:CanvasText;background:Canvas}.point-code{outline:1px solid CanvasText}}
