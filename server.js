@@ -194,6 +194,7 @@ const server = http.createServer(async (req, res) => {
         routes['/walkthrough-docx.js']='walkthrough-docx.js';
         routes['/walkthrough-export.js']='walkthrough-export.js';
         routes['/reading-mode.js']='reading-mode.js';
+        routes['/point-display.js']='point-display.js';
         for(const name of ['saved-explanations','saved-explanations-ui','ai-glossary','locale-en','i18n','language-ui','language-switch','knowledge/en','knowledge-localization']) routes['/'+name+'.js']=name+'.js';
         routes['/library-store.js']='library-store.js';
         routes['/account.js']='account.js';

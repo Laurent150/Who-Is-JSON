@@ -21,7 +21,8 @@ for(const locale of ['zh-CN','en'])for(const readingMode of ['beginner','standar
  }
  if(readingMode==='standard')assert.deepEqual(JSON.parse(bodies[1].messages[1].content).draftParagraphs,[{id:'p1',text:draft}]);
  assert.match(bodies[0].messages[0].content,/FIMI_POINT_READING_V2/);
- assert.match(bodies[0].messages[0].content,locale==='en'?/source-based example/:/源码例子/);
+ assert.match(bodies[0].messages[0].content,locale==='en'?/Prefer actual source data for a small example/:/小例子优先使用源码已有数据/);
+ assert.match(bodies[0].messages[0].content,locale==='en'?/explicitly label invented data as hypothetical/:/自拟数据明确标为假设/);
  assert.doesNotMatch(bodies[0].messages[0].content,/Role first|先说明它是什么角色|35 words|50个中文字/);
 
 });

@@ -105,7 +105,7 @@ $('lineAiBtn').onclick = async () => {
         const response = await api('ask',{code:analyzedSource,config,selection:{start:selection.start,end:selection.end},
             pointReading:true,question:selectionQuestion()});
         if (request!==lineReadingRequest || sourceRevision!==revision || result!==current) return;
-        target.replaceChildren(element('span',uiText("AI 解释 · 请对照源码核对"),'line-badge'),element('p',response.answer));
+        target.replaceChildren(element('span',uiText("AI 解释 · 请对照源码核对"),'line-badge'),element('p',globalThis.WhoPointDisplay?.text(response.answer)??response.answer));
         appendExplanationSave(target,response.answer,explanationSource(selection));appendBuiltinReference(target,selection);$('lineLocal').before(target);$('lineLocal').open=false;
         target.hidden = false;
     } catch (error) {
