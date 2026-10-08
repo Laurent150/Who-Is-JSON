@@ -125,17 +125,17 @@ function studioShowFunction(block,graph){
 function studioAppendFollowups(host,selection){
  const actions=element('div',undefined,'studio-followups');
  for(const [label,question] of [[uiText("再简单一点"),uiText("请用更简单的日常语言解释选中的代码，保留关键条件。")],[uiText("举个例子"),uiText("请用一组具体输入推演选中代码，标明是假设示例，没有实际运行。")]]){
-  const button=element('button',label);button.onclick=()=>studioFollowup(question,selection);actions.append(button);
+  const button=element('button',label);button.onclick=()=>studioFollowup(question,selection,true);actions.append(button);
  }
  const form=element('form',undefined,'studio-followup-form'),input=element('input');input.placeholder=uiText("针对选中代码继续提问…");input.setAttribute('aria-label',uiText("针对选中代码继续提问"));input.maxLength=1800;
  const send=element('button',uiText("发送"));send.type='submit';form.append(input,send);form.onsubmit=e=>{e.preventDefault();if(input.value.trim())studioFollowup(input.value.trim(),selection);};host.append(actions,form);
 }
-async function studioFollowup(question,selection){
+async function studioFollowup(question,selection,pointReading=false){
  if(!connected()){settings();return;}if(!studioSelected)return;
  const version=studioVersion,id=++studioRequest,content=$('studioExplain');
  content.querySelector('.studio-followup-answer')?.remove();
  const response=element('div',undefined,'studio-followup-answer');response.append(element('p',uiText("AI 正在解释选中的原文…")));content.append(response);
- try{const result=await studioApi('ask',{selection,question});if(version!==studioVersion||id!==studioRequest)return;
+ try{const result=await studioApi('ask',{selection,question,...(pointReading?{pointReading:true}:{})});if(version!==studioVersion||id!==studioRequest)return;
   response.replaceChildren(element('p',result.answer));appendAITerms(response,result.answer);appendExplanationSave(response,result.answer,explanationSource(selection));
  }catch(error){if(version===studioVersion&&id===studioRequest)response.replaceChildren(element('p',uiError(error),'studio-error'));}
 }
@@ -217,24 +217,33 @@ async function studioExplainSelection(){
  if(studioSelectionKind==='function'){const block=current.blocks.find(b=>b.start===studioSelected.start&&b.end===studioSelected.end);if(block){studioShowFunction(block,studioCache.get(block.start));$('studioExplain').querySelector('.studio-generate')?.click();return;}}
  const selection={...studioSelected};studioIdentity();studioSelected=selection;const version=studioVersion,id=++studioRequest,key='line:'+selection.start+':'+selection.end;
  $('studioExplain').replaceChildren(element('p',uiText("AI 正在解释选中的原文…"),'studio-empty'));
- try{let answer=studioAnswers.get(key);if(!answer){answer=(await studioApi('ask',{selection,question:beginnerMode()?beginnerSelectionQuestion():uiText("请只解释 selectedSource：先说这一步做什么，再用很小的假设输入说明数据变化，最后说明下一步。术语就地用日常中文解释，不猜作者动机。")})).answer;if(version!==studioVersion)return;studioAnswers.set(key,answer);}
+ try{let answer=studioAnswers.get(key);if(!answer){answer=(await studioApi('ask',{selection,pointReading:true,question:selectionQuestion()})).answer;if(version!==studioVersion)return;studioAnswers.set(key,answer);}
   if(version===studioVersion&&id===studioRequest){$('studioExplain').replaceChildren(element('span',uiText("AI 解释 · 请对照源码核对"),'studio-provenance'),element('p',answer));appendAITerms($('studioExplain'),answer);appendExplanationSave($('studioExplain'),answer,explanationSource(selection));appendBuiltinReference($('studioExplain'),selection);studioAppendFollowups($('studioExplain'),selection);}
  }catch(e){if(version===studioVersion&&id===studioRequest)$('studioExplain').replaceChildren(element('p',uiError(e),'studio-error'));}
 }
 function closeStudioToken(){studioTokenRequest++;studioActiveToken?.classList.remove('selected-token');studioActiveToken=null;const p=$('studioTokenPopup');if(p)p.hidden=true;}
+function positionStudioToken(){
+ const popup=$('studioTokenPopup');if(popup.hidden||!studioTokenAnchor)return;
+ const box=studioTokenAnchor.getBoundingClientRect(),width=Math.min(360,innerWidth-24);
+ popup.style.width=width+'px';popup.style.maxHeight=Math.max(1,innerHeight-24)+'px';
+ popup.style.left=Math.max(12,Math.min(box.left,innerWidth-width-12))+'px';
+ const height=popup.getBoundingClientRect().height;
+ popup.style.top=Math.max(12,Math.min(box.bottom+8,innerHeight-height-12))+'px';
+}
 async function openStudioToken(anchor,token){
  studioIdentity();studioTokenAnchor=anchor;studioActiveToken=anchor;anchor.classList.add('selected-token');const id=++studioTokenRequest,version=studioVersion,popup=$('studioTokenPopup');
  $('studioTokenLesson').replaceChildren();
  $('studioTokenTitle').textContent=token.text;$('studioTokenText').textContent=connected()?uiText("AI 正在结合这一行解释…"):uiText("请先连接 AI，然后再次点击这个词语。");popup.hidden=false;
- const box=anchor.getBoundingClientRect(),width=Math.min(360,innerWidth-24);popup.style.width=width+'px';popup.style.left=Math.max(12,Math.min(box.left,innerWidth-width-12))+'px';popup.style.top=Math.max(12,Math.min(box.bottom+8,innerHeight-310))+'px';$('studioTokenClose').focus({preventScroll:true});
+ popup.scrollTop=0;positionStudioToken();$('studioTokenClose').focus({preventScroll:true});
  if(!connected())return;
  const key='token:'+token.line+':'+token.startColumn+':'+token.endColumn;
  try{let response=studioAnswers.get(key);if(!response){response=await studioApi('ask',{selection:{start:token.line,end:token.line},token,knowledge:true,question:uiText("解释选中词语；简单定义不需要知识卡。")});if(version!==studioVersion)return;studioAnswers.set(key,response);}
   if(id===studioTokenRequest&&version===studioVersion){
    $('studioTokenText').textContent=response.answer;appendAITerms($('studioTokenText'),response.answer);
    appendExplanationSave($('studioTokenLesson'),response.answer,explanationSource({start:token.line,end:token.line},{startColumn:token.startColumn,endColumn:token.endColumn}),token.text);appendBuiltinReference($('studioTokenLesson'),{start:token.line,end:token.line},token);
+   positionStudioToken();
   }
- }catch(e){if(id===studioTokenRequest&&version===studioVersion)$('studioTokenText').textContent=uiError(e);}
+ }catch(e){if(id===studioTokenRequest&&version===studioVersion){$('studioTokenText').textContent=uiError(e);positionStudioToken();}}
 }
 $('studioTokenClose').onclick=()=>{closeStudioToken();studioTokenAnchor?.focus({preventScroll:true});};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('studioTokenPopup').hidden){closeStudioToken();studioTokenAnchor?.focus({preventScroll:true});}});

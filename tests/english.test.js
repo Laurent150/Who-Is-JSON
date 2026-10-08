@@ -52,6 +52,12 @@ test('beginner term notes are bilingual, language-scoped and never rewrite AI te
  assert.match(en[0].meaning,/value on success or an error on failure/);assert.match(zh[0].meaning,/成功/);
  assert.deepEqual(glossary.forText(text,'Python','en'),[]);assert.deepEqual(glossary.forText('promised results','JavaScript','en'),[]);
  assert.equal(text,'The caller receives a Promise. If getUser rejects, the call fails.');
+ for(const [language,locale,text]of [['JavaScript','en','objects'],['TypeScript','zh-CN','对象']]){
+  const notes=glossary.forText(text,language,locale);assert.equal(notes.length,1);assert.equal(notes[0].name,'object');
+  assert.match(notes[0].meaning,/\{ name: value \}/);assert.match(notes[0].meaning,locale==='en'?/does not automatically read one piece or copy/:/不是自动取出其中一项，也不是复制/);
+ }
+ assert.deepEqual(glossary.forText('{ name: value }','JavaScript','en'),[]);
+ assert.deepEqual(glossary.forText('object 对象','Python','en'),[]);
 });
 test('English teaching prompts preserve source and task contracts in both reading modes',()=>{
  const source='// 中文注释\nconst 用户 = await getUser();';

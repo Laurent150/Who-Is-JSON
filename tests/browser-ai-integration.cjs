@@ -35,7 +35,7 @@ const reply=content=>({choices:[{finish_reason:'stop',message:{content:typeof co
      if(data.selectedToken){assert.equal(data.selectedToken.context,undefined);assert.equal(data.question,'请解释选中的 value，让一个没有编程背景的成年人能看懂。');}
      else assert.equal(data.question,'请解释选中的代码段，让一个没有编程背景的成年人能看懂。');
     }
-    const en=(data?.settings?.locale||data?.reviewContext?.settings.locale)==='en'||system.startsWith('You are writing a FIMI explanation')||system.startsWith('FIMI_TOKEN_HOVER_V1:')||system.startsWith('FIMI_TOKEN_HOVER_V1 / FIMI_BEGINNER_HOVER_V3:');let response;
+    const en=(data?.settings?.locale||data?.reviewContext?.settings.locale)==='en'||system.startsWith('You are writing a FIMI explanation')||system.startsWith('FIMI_TOKEN_HOVER_V1:')||system.startsWith('FIMI_TOKEN_HOVER_V1 / FIMI_BEGINNER_HOVER_V3:')||system.startsWith('FIMI_POINT_READING_V2:')||system.startsWith('FIMI_TOKEN_HOVER_V1 / FIMI_POINT_READING_V2:');let response;
     if(system.startsWith('Build a compact source-contract ledger')){events.push('contracts');assert.equal(data.source,source);response=reply(ledger);}
     else if(data?.sourceContracts&&data?.settings){
      events.push('composition');assert.equal(body.messages.length,2);assert.equal(data.source,source);assert.deepEqual(data.sourceContracts,ledger);

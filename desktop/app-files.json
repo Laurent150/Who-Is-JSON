@@ -18,6 +18,7 @@
   "ai-point-prompts-en.js",
   "ai-token-prompts.js",
   "ai-point.js",
+  "ai-point-contract.js",
   "ai-language.js",
   "ai-logic-policy.js",
   "ai-source-returns.js",

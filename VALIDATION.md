@@ -1,5 +1,18 @@
 # 验证记录
 
+## 2026-10-08 点读局部单次成稿与有限80项验收
+
+候选7 build d0712581ecb97029：官方Flash标准line high，其余line/token/passage low，单call、max6000；无新增模型复核层。独立固定集合80/80内容通过，无未解决事实硬错或质量阻塞。32项使用历史完整effective body和必要新版UI组合，实际来源为Round3 22、Round4.1 6、Round6 3、此前单项high实验1；全部messages/model/thinking/effort/max/format等依赖匹配，不是32次新生成。48项新调用全部完成、每项1call、0retry，累计60310tokens（input36621、output23689含reasoning18877；cached input23296不重复相加），样本墙钟合计189.390秒含UI。无unknown/sourcechanged/pageerror/长文滚动失败。
+
+覆盖为20选择×2模式×2解释locale、四范围各5选择，16格均5/5。精确不同源码文本Python14、JavaScript6，部分主题相近；16公开选择与4留出选择不等于80独立程序。源码只用于解释与校验，未执行样本。结果不保证所有语言、大型项目或后续随机输出；未实测CloudBase网关、其他模型／服务、安装器或部署。
+
+工程检查来源：Round3实际526/526完整测试与19/19发布样本通过；新增点读浏览器8检查／37mock与既有集成22检查／78mock通过，0paid。后续有限decoder、profile、mode和popup改动完成影响范围内检查与完整body比较；Round7局部33项通过，未重复声称最终全套运行。有限metadata decoder实测原raw经新管线/UI回放保留完整answer；模拟与回放验证工程行为，真实正文另由独立评审判断。
+
+JS/TS零基础object／Promise同页说明配合真实正文独立目视通过。390×844窄窗浮层top217/bottom832，异步内容增长后内部scrollTop675能读至Terms与Save；合成长文机械回放0API，源码滚动关闭与过期保护保留。明确object／对象触发说明，不从无术语的对象字面量猜类型。截图与全文报告在本地审阅记录可查，未作为公共仓库附件发布。
+
+既有集成mock英文识别器仅1行逻辑修正，保留locale assertions；恢复原行尾后忽略行尾内容与已测版相同。desktop新模块一次、testpreload排除；provider配置ignored且未读取内容。本次没有构建安装器或部署。最终文档修改不改变已验收代码字节，不触发重复模型、UI或全套检查。
+
+
 ## 2026-10-07 新零基础单词提示融合
 
 最终516项自动测试全部通过，19份发布样本无失败。初轮一项HTTP测试桩依赖旧英文开头而误回中文，已更新识别且保留语言断言。当前43193本地服务重启加载构建`635fdd1e489d3495`，健康检查确认；内存登录需重新建立。未打包安装器或部署云端。

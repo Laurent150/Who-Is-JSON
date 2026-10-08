@@ -1,5 +1,6 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.WhoAIGlossary=api;})(globalThis,function(){
  const terms=[
+  {name:'object',pattern:/\bobjects?\b|对象/i,en:'An object is one value that groups pieces of content by name. In the general notation { name: value }, name labels a piece and value is its content. Assigning an object to a variable lets that variable refer to the whole object; it does not automatically read one piece or copy the object.',zh:'对象是把多项内容按名字组织在一起的一个值。一般示意 { name: value } 中，name 是一项的名字，value 是对应内容。把对象赋给变量，是让变量记住整个对象，不是自动取出其中一项，也不是复制对象。'},
   {name:'Promise',pattern:/\bpromises?\b/i,en:'A JavaScript value that represents an outcome: a value on success or an error on failure. The outcome may already be known or arrive later.',zh:'JavaScript 中表示处理结果的值：成功时得到一个值，失败时得到一个错误。结果可能已经确定，也可能稍后才确定。'},
   {name:'thenable',pattern:/\bthenables?\b/i,en:'A value with a callable then property. JavaScript can use that method to wait for its eventual outcome.',zh:'带有可调用的 then 属性的值。JavaScript 可以通过这个方法等待它的处理结果。'},
   {name:'rejection',pattern:/\breject(?:s|ed|ion|ions)?\b/i,en:'A promise failing with an error. Awaiting a rejected promise throws that error at the await expression.',zh:'Promise 以错误告终。await 等待这样的 Promise 时，会在 await 所在位置抛出该错误。'},
