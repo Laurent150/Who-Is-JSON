@@ -5,7 +5,7 @@
  function t(key,...values){const text=locale==='en'?(root.WhoEnglish?.[key]??key):key;return String(text).replace(/\{(\d+)\}/g,(match,n)=>n<values.length?String(values[n]):match);}
  // Error details are not source or AI prose. Only display recognized messages;
  // unknown provider/browser text gets a localized fallback in either language.
- function error(value){
+ function errorText(value){
   const message=typeof value==='string'?value:value?.message;
   const dictionary=root.WhoEnglish||{};
   const key=typeof message==='string'&&(Object.hasOwn(dictionary,message)?message:Object.keys(dictionary).find(key=>dictionary[key]===message));
@@ -14,6 +14,20 @@
   if(value?.name==='AbortError')return t('请求已取消。');
   if(value?.name==='TypeError'&&/^(Failed to fetch|NetworkError when attempting to fetch resource\.?|Load failed|fetch failed)$/i.test(message||''))return t('网络连接失败，请检查网络后重试。');
   return t('请求未完成。');
+ }
+ function error(value){
+  let text=errorText(value);
+  const refund=value?.trialRefund || value?.diagnostics?.settlement;
+  if(refund==='refunded'&&!text.includes(t('本次使用的试用额度已返还。')))text+=' '+t('本次使用的试用额度已返还。');
+  if(refund==='refund_pending'&&!text.includes(t('额度返还尚未确认，请稍后重新查询额度。')))text+=' '+t('额度返还尚未确认，请稍后重新查询额度。');
+  // This guard covers missing or incorrect dictionary entries and raw upstream
+  // failures. It applies only to errors, never to source or generated prose.
+  if(locale==='en'&&/[\u3400-\u9fff]/u.test(text)){
+   text='The request could not be completed.';
+   if(refund==='refunded')text+=' The trial credits used for this operation have been returned.';
+   if(refund==='refund_pending')text+=' The credit return is not yet confirmed. Please check your allowance again later.';
+  }
+  return text;
  }
  function set(value){locale=normalize(value);try{root.localStorage?.setItem('whoisjson.locale',locale);}catch{}return locale;}
  return {t,error,set,normalize,get locale(){return locale;}};

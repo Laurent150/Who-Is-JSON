@@ -4,6 +4,7 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  const reservation=http.createServer();await new Promise(r=>reservation.listen(0,'127.0.0.1',r));const port=reservation.address().port;await new Promise(r=>reservation.close(r));const base='http://127.0.0.1:'+port;let token='',calls=[];
  const mock=http.createServer(async(req,res)=>{let data='';for await(const c of req)data+=c;const b=JSON.parse(data);const audit=mockFinalAudit(b);if(audit){res.writeHead(200,{'Content-Type':'application/json'});return res.end(JSON.stringify(audit));}calls.push(b);let content;
  if(b.model==='bad-json')content='not json';else if(b.model==='bad-lines')content=JSON.stringify({blocks:[{start:99,end:100,title:'bad'}]});
+ else if(b.messages[0].content.includes('"related"')){const input=JSON.parse(b.messages[1].content);content=JSON.stringify({related:true,answer:b.messages[0].content.startsWith('You answer')?'The function returns the supplied value.':'这是模拟服务的追问答复。',evidence:[input.source.slice(0,240)]});}
  else if(b.messages[0].content.startsWith('Build a compact source-contract ledger')){const source=JSON.parse(b.messages[1].content).source;content=JSON.stringify({units:[{name:'f',anchor:source,accepts:'x',returns:'x',timing:'synchronous',paths:[{when:'called',does:'return x',completion:'x',failure:'none shown',anchor:source}],unknowns:[]}]});}
  else if(b.messages[0].content.startsWith('Write a coherent, source-grounded walkthrough')||b.messages[0].content.startsWith('为指定读者写一份连贯'))content=JSON.stringify({title:'Return',sections:[{title:'Result',text:b.messages[0].content.startsWith('Write a coherent')?'Return the supplied value.':'这个函数把传入的值原样交回。'}],questions:[]});
  else if(b.messages[0].content.startsWith('FIMI_TOKEN_HOVER_V1'))content=JSON.stringify(JSON.parse(b.messages[1].content).draftParagraphs?{corrections:[]}:{kind:'definition',answer:/Explain (?:only|selectedToken)/.test(b.messages[0].content)?'x is the value supplied to f.':'x 是传入函数的参数名。'});
@@ -69,14 +70,14 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  assert.equal((await fetch(base+'/api/repair',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:'x'})})).status,403);
  for(const mode of ['beginner','standard']){
   const common={code:'function f(x){return x}',name:'x.js',config:{base:mockBase,model:'good'},readingMode:mode};
-  for(const [route,extra]of [['analyze',{ai:true}],['flow',{start:1}],['talk',{}],['ask',{question:'解释',selection:{start:1,end:1}}],['ask',{question:'解释',knowledge:true,token:{line:1,startColumn:11,endColumn:12}}]]){
+  for(const [route,extra]of [['analyze',{ai:true}],['flow',{start:1}],['talk',{}],['ask',{pointReading:true,question:'只解释选中代码，需要时用一个小例子帮助理解。',selection:{start:1,end:1}}],['ask',{question:'解释',knowledge:true,token:{line:1,startColumn:11,endColumn:12}}]]){
    const response=await post(route,{...common,...extra});assert.equal(response.status,200);
    assert.match(calls.at(-1).messages[0].content,extra.knowledge?/FIMI_TOKEN_HOVER_V1/:mode==='beginner'?(route==='ask'?/方法3复核候选V1/:/当前为零基础友好模式/):/当前为标准模式/);
   }
  }
  for(const mode of ['beginner','standard']){
   const common={code:'function f(x){return x}',name:'x.js',locale:'en',config:{base:mockBase,model:'good'},readingMode:mode};
-  for(const [route,extra]of [['analyze',{ai:true}],['flow',{start:1}],['talk',{}],['ask',{question:'Explain this line',selection:{start:1,end:1}}],['ask',{question:'Explain x',knowledge:true,token:{line:1,startColumn:11,endColumn:12}}]]){
+  for(const [route,extra]of [['analyze',{ai:true}],['flow',{start:1}],['talk',{}],['ask',{pointReading:true,question:'Explain only the selected code, using a small example when it helps.',selection:{start:1,end:1}}],['ask',{question:'Explain x',knowledge:true,token:{line:1,startColumn:11,endColumn:12}}]]){
    const response=await post(route,{...common,...extra});assert.equal(response.status,200,JSON.stringify(response.body));
    const request=calls.at(-1);assert.match(request.messages[0].content,extra.knowledge?/FIMI_TOKEN_HOVER_V1/:mode==='beginner'?(route==='ask'?/FIMI_METHOD3_PARAGRAPH_REVIEW_V1/:/BEGINNER MODE/):/STANDARD MODE/);
    assert.equal(JSON.parse(request.messages[1].content).source,common.code);

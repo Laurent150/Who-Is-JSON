@@ -11,9 +11,10 @@ function setup({ existing = false, library = false, uid = 'user-1', trial = fals
       const route = new URL(url).pathname, body = options.body ? JSON.parse(options.body) : undefined;
       calls.push({ url, route, body, options });
       if (url === 'https://trial.example/trial') {
+        if(mode==='trial-once'){mode='';throw Error('interrupted gateway body');}
         if (mode === 'trial-offline') throw Error('private network detail');
         if (mode === 'trial-error') return Response.json({ error: 'private upstream detail' }, { status: 502 });
-        if (body.action === 'quota') return Response.json({enabled:true,remaining:2000000,held:0,grant:2000000,poolRemaining:null,unlimitedPool:true,currency:'CNY',unit:1000000});
+        if (body.action === 'quota') return Response.json({enabled:true,remaining:2000000,held:0,grant:2000000,poolRemaining:null,unlimitedPool:true,currency:'CNY',unit:1000000,...(mode==='trial-current'?{billingVersion:'failure-refund-v1',directReadingProfile:'direct-reading-v1'}:{})});
         return Response.json({choices:[{message:{content:'ok'}}]});
       }
       if (mode === 'offline') throw Error('private network detail');
@@ -157,4 +158,14 @@ test('CloudBase console origins resolve to the gateway route and quota outages d
     await assert.rejects(s.account.handle(s.req,'trial-quota'),{status:503,message:'额度服务暂时不可用。'});
     await assert.rejects(s.account.trialConfig(s.req).sponsoredCall({}),{status:503,message:'AI 调用未完成，预留额度待核对，请勿反复重试。'});
   }
+});
+
+test('quota retries once after an interrupted read, and hosted direct capability is confirmed before routing',async()=>{
+ const s=setup({trial:true});await s.login();s.mode('trial-once');
+ const before=s.calls.length;assert.equal((await s.account.handle(s.req,'trial-quota')).remaining,2000000);
+ assert.equal(s.calls.slice(before).filter(c=>c.body?.action==='quota').length,2);
+ const old=s.account.trialConfig(s.req,{refundFailures:true});await assert.rejects(old.prepareTrial(),/尚未启用失败返还/);assert.equal(old.directReadingProfile,undefined);
+ s.mode('trial-current');const config=s.account.trialConfig(s.req,{refundFailures:true}),at=s.calls.length;
+ assert.equal(config.directReadingProfile,undefined);await config.prepareTrial();await config.prepareTrial();
+ assert.equal(config.directReadingProfile,'direct-reading-v1');assert.equal(s.calls.slice(at).filter(c=>c.body?.action==='quota').length,1);
 });

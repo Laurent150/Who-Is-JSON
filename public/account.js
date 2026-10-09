@@ -92,7 +92,7 @@ var uiError = globalThis.WhoI18n?.error || (error=>uiText(error?.message || Stri
   async function call(route, data = {}) {
     const response = await fetch('/api/account/' + route, { method: 'POST', headers: {
       'Content-Type': 'application/json', 'X-CodeLingo-Token': window.APP_TOKEN, 'X-Who-Session': session
-    }, body: JSON.stringify(data), signal: AbortSignal.timeout(20000) });
+    }, body: JSON.stringify(data), signal: AbortSignal.timeout(route==='trial-quota'?40000:20000) });
     const body = await response.json();
     if (!response.ok) { const e = Error(body.error || uiText("账户操作未完成。")); e.status = response.status; throw e; }
     return body;
@@ -104,7 +104,7 @@ var uiError = globalThis.WhoI18n?.error || (error=>uiText(error?.message || Stri
     $('accountSync').hidden = !capabilities.libraryEnabled;
     $('accountLoginTitle').textContent = uiText(cloudBase() ? '登录 FIMI 账户' : '登录后，直接用 AI 读代码');
     $('accountCloudbaseNotice').hidden = !cloudBase();
-    $('accountCloudbaseNotice').textContent = uiText(capabilities.trialEnabled ? '可使用 AI 试用，也可自行配置服务。' : 'CloudBase 邮箱登录测试。试用额度尚未启用，可连接自己的 AI 服务。');
+    $('accountCloudbaseNotice').textContent = uiText(capabilities.trialEnabled ? '登录赠送AI试用额度，也可自行配置服务' : 'CloudBase 邮箱登录测试。试用额度尚未启用，可连接自己的 AI 服务。');
     $('accountGithubIntro').hidden = cloudBase();
     $('accountLegacyHint').hidden = cloudBase();
     $('accountEmailHint').hidden = cloudBase();
@@ -176,7 +176,6 @@ var uiError = globalThis.WhoI18n?.error || (error=>uiText(error?.message || Stri
     if (user) void trialQuota();
   };
   $('accountClose').onclick = dismiss;
-  $('accountSkip').onclick = dismiss;
   $('account').oncancel = () => { stopEmail(); try { localStorage.setItem('who.welcome.seen', '1'); } catch {} };
   let emailAttempt = null;
   function stopEmail() {
@@ -303,8 +302,8 @@ var uiError = globalThis.WhoI18n?.error || (error=>uiText(error?.message || Stri
     $('accountGithub').title = result.enabled ? '' : uiText("云服务尚未启用");
     if (!result.enabled) return note('');
     note('');
-    if (session) { try { await enter(); } catch (error) { fail(error); } }
-    else { try { if (!localStorage.getItem('who.welcome.seen')) $('account').showModal(); } catch {} }
+    if (session) { try { await enter(); } catch (error) { fail(error); if (!user) $('account').showModal(); } }
+    else $('account').showModal();
   }).catch(fail);
   refresh();
 })();

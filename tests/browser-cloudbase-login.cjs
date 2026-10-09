@@ -34,7 +34,7 @@ fs.mkdirSync(out,{recursive:true});
   await page.goto(url);await page.locator('#account[open]').waitFor();
   assert.doesNotMatch(await page.locator('#accountLogin').innerText(),/[\u4e00-\u9fff]/);
   assert.equal(await page.locator('#accountGithub').isVisible(),false);
-  await page.locator('#accountSkip').click();
+  await page.locator('#accountClose').click();
   await page.evaluate(()=>{localStorage.setItem('codelingo.cards',JSON.stringify([{id:1,title:'guest',code:'unchanged'}]));localStorage.setItem('whoisjson.account-library.v1.old',JSON.stringify({payload:{knowledge:[],cards:[]},revision:4,dirty:true,sequence:1}));});
   const saved=await page.evaluate(()=>[localStorage.getItem('codelingo.cards'),localStorage.getItem('whoisjson.account-library.v1.old')]);
   const source='// 保留原文\nconst 名字 = "中文";';await page.locator('#source').fill(source);

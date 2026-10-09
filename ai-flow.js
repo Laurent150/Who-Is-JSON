@@ -9,7 +9,7 @@ function attach(graph,text,locale='zh-CN'){
  return {...graph,summary:clean(data.summary,800),input:clean(data.input,1000),output:clean(data.output,1000),nodes:walk(graph.nodes),origin:'ai'};
 }
 async function explainFlow(result,source,start,config,options={}){
- const graph=scaffold(result,start,options.locale);
+ const graph=scaffold(result,start,options.locale,(options.end!==undefined||options.role!==undefined||options.blockId!==undefined)?{end:options.end,role:options.role,blockId:options.blockId}:undefined);
  const lines=source.split('\n');
  const anchor=nodes=>nodes.map(n=>({...n,source:lines.slice(n.start-1,n.end).join('\n'),branches:n.branches.map(b=>({...b,nodes:anchor(b.nodes)}))}));
  const groundedGraph={...graph,nodes:anchor(graph.nodes)};

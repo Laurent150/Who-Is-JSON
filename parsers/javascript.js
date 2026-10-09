@@ -62,7 +62,7 @@ function javascript(code,name,language){
   while((token=scanner.scan())!==ts.SyntaxKind.EndOfFileToken){const word=scanner.getTokenText();if(keywordHelp[word]&&token>=ts.SyntaxKind.FirstKeyword&&token<=ts.SyntaxKind.LastKeyword)put(word,'语言固定写法',keywordHelp[word],'作为语法使用时不能换成自起的名字。');}
   return [...map.values()].slice(0,35);
  }
- let blocks=[];function add(n,kind,title,purpose,extra={}){blocks.push(block(code,n.getStart(source),n.end,kind,title,purpose,{symbols:symbols(n),learning:require('./learning').learningFor(n,source,checker),...extra}));}
+ let blocks=[];function add(n,kind,title,purpose,extra={}){blocks.push(block(code,n.getStart(source),n.end,kind,title,purpose,{blockId:'syntax:'+n.getStart(source)+':'+n.end+':'+kind,...(['class','type','import'].includes(kind)?{role:'file-declaration'}:{}),symbols:symbols(n),learning:require('./learning').learningFor(n,source,checker),...extra}));}
  function ownReturns(n){let found=[];function walk(x){if(x!==n&&(ts.isFunctionLike(x)||ts.isClassDeclaration(x)))return;if(ts.isReturnStatement(x))found.push(x);ts.forEachChild(x,walk);}walk(n);return found;}
  function short(n){const s=expr(n);return s.length>180?s.slice(0,177)+'…（表达式较长，请对照源码）':s;}
  function steps(nodes,depth=0){
@@ -113,10 +113,24 @@ function javascript(code,name,language){
   else if(ts.isInterfaceDeclaration(n)||ts.isTypeAliasDeclaration(n))add(n,'type','约定数据形状：'+text(n.name),'用 TypeScript 描述允许的数据类型，帮助开发时检查；类型描述本身不会变成运行时的数据验证。',{usage:'查看字段名、冒号后面的类型，以及 ? 标记的可选字段。'});
   else if(ts.isClassDeclaration(n))add(n,'class','组织相关数据和操作：'+text(n.name),'把一类对象需要的数据和方法放在一起。展开下面的方法可以看各自做什么。');
   else if(ts.isImportDeclaration(n))add(n,'import','引入工具：'+text(n.moduleSpecifier),'让当前文件可以使用其他文件或包导出的内容。没有读到对方源码时，不推断它的完整业务行为。');
+  else if(ts.isExportDeclaration(n))add(n,'module','导出文件中的内容','声明供其他文件使用的内容；不把它当作函数体执行。',{role:'file-declaration'});
   ts.forEachChild(n,visit);
  }visit(source);
  const warnings=source.parseDiagnostics.map(d=>`第 ${source.getLineAndCharacterOfPosition(d.start||0).line+1} 行：${ts.flattenDiagnosticMessageText(d.messageText,' ')}`).slice(0,8);
- if(!blocks.length&&source.statements.length)for(const n of source.statements.slice(0,12))add(n,'module','文件里的操作',ts.isVariableStatement(n)?'准备有名字的数据：'+text(n).slice(0,350):'这条语句是：'+text(n).slice(0,350));
+ // File execution is separate from function/type/import declarations. Original AST
+ // statements own ranges; no user code is executed and function bodies stay local.
+ const executionGroups=[];let execution=[];
+ const flush=()=>{if(execution.length){executionGroups.push(execution);execution=[];}};
+ for(const n of source.statements){
+  const declaration=ts.isFunctionDeclaration(n)||ts.isClassDeclaration(n)||ts.isInterfaceDeclaration(n)||ts.isTypeAliasDeclaration(n)||ts.isImportDeclaration(n)||ts.isImportEqualsDeclaration(n)||ts.isExportDeclaration(n)||ts.isEmptyStatement(n)||!!n.modifiers?.some(m=>m.kind===ts.SyntaxKind.DeclareKeyword);
+  const functionBinding=ts.isVariableStatement(n)&&n.declarationList.declarations.every(d=>d.initializer&&ts.isFunctionLike(d.initializer));
+  if(declaration||functionBinding){flush();continue;}execution.push(n);
+ }flush();
+ for(const statements of executionGroups){
+  const first=statements[0],last=statements.at(-1),body=ts.factory.createBlock(statements,false);
+  const meaning=require('./meaning').meaningOf(body,source,checker);
+  blocks.push(block(code,first.getStart(source),last.end,'module','文件入口','按源码顺序准备顶层数据并执行可见操作；函数体只在调用时进入。',{role:'script-entry',blockId:'entry:'+first.getStart(source)+':'+last.end,symbols:statements.flatMap(symbols),learning:[],controlFlow:require('./flow').flowOf(body,source,meaning.statement,meaning.condition,meaning.value)}));
+ }
  const unexplained=[];
  if(source.parseDiagnostics.length){
   const safe=[];

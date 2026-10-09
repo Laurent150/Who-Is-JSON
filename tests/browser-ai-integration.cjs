@@ -64,8 +64,8 @@ const reply=content=>({choices:[{finish_reason:'stop',message:{content:typeof co
   app=spawn(process.execPath,['server.js'],{cwd:root,env:{...process.env,CODELINGO_PORT:String(port),WHO_CLOUD_DISABLED:'1',WHO_TALK_PIPELINE:'contracts',WHO_TALK_COMPOSITION:''},windowsHide:true,stdio:'ignore'});
   let ready=false;for(let i=0;i<100;i++){try{ready=(await fetch(url+'/health')).ok;if(ready)break;}catch{}await new Promise(r=>setTimeout(r,100));}assert.ok(ready);
   browser=await chromium.launch({channel:'msedge',headless:true});const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
-  page.on('pageerror',e=>errors.push(e.message));await page.goto(url);if(await page.locator('#accountSkip').isVisible())await page.locator('#accountSkip').click();
-  await page.evaluate(async({source,modelPort})=>{setCode(source,'echo.js');$('useAI').checked=false;await run();config={base:'http://127.0.0.1:'+modelPort,model:'mock'};connection();setMode('talk');},{source,modelPort});
+  page.on('pageerror',e=>errors.push(e.message));await page.goto(url);if(await page.locator('#accountClose').isVisible())await page.locator('#accountClose').click();
+  await page.evaluate(async({source,modelPort})=>{setCode(source,'echo.js');await run();config={base:'http://127.0.0.1:'+modelPort,model:'mock'};connection();setMode('talk');},{source,modelPort});
   for(const locale of ['en','zh-CN'])for(const readingMode of ['beginner','standard']){
    await page.evaluate(({locale,readingMode})=>{changeInterfaceLanguage(locale);changeReadingMode(readingMode);setMode('talk');}, {locale,readingMode});
    for(const audience of ['beginner','peer','review']){

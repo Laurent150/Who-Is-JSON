@@ -15,8 +15,8 @@ function sample(locale){const en=locale==='en';return {title:en?'Understanding a
  let ready=false;for(let i=0;i<80;i++){try{ready=(await fetch(url+'/health')).ok;if(ready)break;}catch{}await new Promise(r=>setTimeout(r,100));}assert.ok(ready);
  browser=await chromium.launch({channel:'msedge',headless:true});const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];let calls=0,locale='en';
  page.on('pageerror',e=>errors.push(e.message));await page.route('**/api/talk',r=>{calls++;return r.fulfill({contentType:'application/json',body:JSON.stringify(sample(locale))});});
- await page.goto(url);if(await page.locator('#accountSkip').isVisible())await page.locator('#accountSkip').click();
- await page.evaluate(async()=>{setCode('def greet(name):\n    return name','greet.py');$('useAI').checked=false;await run();setMode('talk');config={base:'https://example.invalid',model:'mock'};});
+ await page.goto(url);if(await page.locator('#accountClose').isVisible())await page.locator('#accountClose').click();
+ await page.evaluate(async()=>{setCode('def greet(name):\n    return name','greet.py');await run();setMode('talk');config={base:'https://example.invalid',model:'mock',key:'local-mock-only'};});
  for(locale of ['en','zh-CN']){
   await page.evaluate(l=>{changeInterfaceLanguage(l);renderTalk();},locale);assert.equal(await page.locator('#exportTalk').count(),0);
   await page.locator('#generateTalk').click();try{await page.locator('#exportTalk').waitFor({timeout:5000});}catch(e){throw Error(JSON.stringify({errors,calls,status:await page.locator('#talkStatus').innerText(),body:await page.locator('#speech').innerText()}));}assert.equal(await page.locator('#exportTalk').count(),1);

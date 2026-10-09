@@ -79,4 +79,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           version=$(node -p 'require("./package.json").version')
-          gh release create "v$version" release-assets/*Setup.exe release-assets/SHA256SUMS.txt --target "$GITHUB_SHA" --title "FIMI v$version · Windows 桌面版" --notes-file "docs/releases/v$version.md" --draft
+          gh release create "v$version" release-assets/*Setup.exe release-assets/SHA256SUMS.txt --target "$GITHUB_SHA" --title "FIMI v$version · Windows Desktop" --notes-file "docs/releases/v$version.md" --draft

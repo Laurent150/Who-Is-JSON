@@ -776,3 +776,111 @@ A test-page error was reproducibly overwritten by polling; persistent error and 
 当前试用不可用截图对应服务记录中的两次 `trial_gateway_response`（约30.5秒、15.3秒）；公开健康检查成功。仅能定位到额度响应读取失败，不能据此认定余额耗尽、账户失效或具体云端根因。浏览器账户请求自身20秒超时此前落入通用“试用暂不可用”提示。
 
 新增明确的查询超时/失败提示和手动“重新查询额度”，支持中英文和查询中防重复点击；保持真实零余额、占用额度、登录错误及乱序响应的原有保护。不自动重试AI、不变更余额或模型流程。12项账户UI测试与30项翻译/云端账户/安全诊断检查通过。现有本地服务直接读取更新后的静态页面，无需重启或清除登录；没有新增付费请求。浏览器控制连接超时，尚未完成真实账户重查及浏览器视觉验收，不能宣称云端故障已消除。
+
+## 模块短标题有限验证
+
+本次候选 build 3f535b5779171f20：固定 Node、pnpm 10.15.1 和 Python 3.12 的完整同一测试集合以并发 2 通过 582/582，耗时 75701 毫秒；发布样本 19/19 通过。后续仅追加父地图离屏时标题完成的测试，相关 UI 文件 24/24 通过，产品代码字节未变，未重复完整集合。初次相关 focused 检查 43/43 通过，覆盖可选标题、旧协议和正文 IO 原字符保留；首次失败和各轮日志保留。
+
+独立核对既有 121 点读有效模型请求全部相同；8 个模块设置的标题传输说明改变，不能沿用请求完全相同的证明，原段读 foundation、正文与 IO 职责、用户输入和模型参数保持。两个真实中英文模块样本各一次请求，观察到短功能标题、自然段正文和同框两项 IO，独立评审通过并保留非阻断备注。这仅是两个样本的有限结果，不保证随机输出、其他模块或所有服务；没有单独标题调用或模型复核。真实生成等待约 9.738 秒和 5.395 秒，不据此推断一般延迟变化。
+
+## 自动模块标签与分支焦点有限验证
+
+当前 build d6838433b12d451c 只改 UI 和相关测试，44 项 focused 全部通过，覆盖首次展开单请求、缓存／pending 去重、断开不请求、取消／失败手动重试、父级失败返回和旧响应保护。自动响应替换正在聚焦的分支 summary 首次复现失败，修复后重名及嵌套分支的展开、焦点和滚动检查通过，原失败证据保留。后端、模型提示、请求协议、解析器和显示格式模块字节与父候选相同，复用其 582/582 完整工程、19/19 发布样本及独立 121 点读／8 模块请求依赖证据；没有把这些历史检查写作本次重新运行。
+
+两个复杂非调用样本分别用一次真实模块请求，JavaScript 提供的 16 个节点、Python 提供的 11 个节点均取得标题，正文和 IO 布局保留，独立评审通过并记录非阻断备注。另一次正常预览交付请求确认 16 节点、同框两项 IO 和旧按钮移除；该次 token／时间未单独记录，不计入前两次 12400 token 的统计。最终免费页面及受控回放确认迟回时 summary 焦点与展开状态保留。类／static 示例只作免费能力边界检查，unknown 提示准确，不代表完整内部解析或该类代码的模型质量通过。这是有限样本的验收，不保证全部复杂源码、所有语言或一般延迟。
+
+## 2026-10-09 代码引用显示窄修
+
+显示构建 aee5df00ed94ee13：显式代码引用沿用安全 DOM 渲染，改为源码区同套深绿背景、浅绿文字及 Consolas。仅模块正文与输入输出可使用本模块选区的词法索引，保守识别中文邻接的实际名称、中文参数标签及源码中确切表达式；普通英文同名词、未知假设名、源字符串或注释不据此识别。索引只说明源码成员关系，不证明类型、绑定或业务行为。超过匹配边界或不支持的片段保持普通文字，显式标记仍可展示；未改模型提示、调用、解析器或保存原文。
+
+39项相关工程检查有效通过，包含实际 HTTP 资源加载、模块三段共享一次选区索引及原保存内容检查。初次局部测试失败输出仅从工具返回的部分内容恢复并明确标注，原完整日志未保留，不冒称原始记录。独立免费实际页面复用既有回答：JavaScript 正文26、输入7、输出12处代码引用；代码背景、文字、字体及字重与源码区一致，正文逐字符和自然段保持，输入输出仍一框两块；390宽窗无根页面横向溢出。既有行解释引用文字保持，Python 英文标准正文两段及完整请求相同。此次0新增模型调用，不表示重新生成或重验固定80项内容。
+
+
+## 2026-10-09 发布前输入与账户界面检查
+
+构建 `60a41809bf8ebcbf`：登录提示改为“登录赠送AI试用额度，也可自行配置服务”，去掉句号；邮箱发送及验证按钮靠右；移除“先用本地模式”和“AI 总览”入口。无法使用试用且没有有效本机连接配置时，显示用户确认的常驻本地模式提醒。远端仅保存地址、刷新后内存密钥缺失时，不再误显示已经接入 AI；本机无密钥服务和可用平台试用保留原支持。
+
+“AI 总览”只移除整份源码的可选额外概述请求，本地结构解析、独立语言识别、点读、模块段读与流程标签继续使用已有入口。旧开关同时控制视觉识别的耦合已拆开：默认“识别代码”走本地 OCR，图片区另保留“用 AI 识别”，沿用原视觉接口，提示需要支持图片的模型。没有修改后端、模型提示、分析器、原 CloudBase 配置或依赖文件。
+
+固定 pnpm 10.15.1、Python 3.12 下最终 597/597 自动测试、19/19 发布样本通过。实际本地页面的 10 项输入检查通过：1440/390 宽度验证码按钮对齐；中英本地提示、缺失密钥与断开状态；原始文件导入保留中文、完整源码、文件名与全部行；编辑框选区按原文件完整第 3—9 行分析，未选内容时不发送请求；PNG 拖入和粘贴均经真实本地 OCR，固定样本代码逐字符一致且可进入结构工作区。独立 AI 识图按钮的缺失连接保护、原图和配置传输及结果写回用模拟响应验证，不证明真实视觉模型质量。操作系统级拖放和截图剪贴板未实测，浏览器输入使用承载实际 PNG File 的 drop/paste 事件。
+
+点读浏览器另通过 8 项检查、37 次本地模拟模型调用，覆盖中英两模式下词语、单行、段落、快捷/自由追问隔离及取消迟回；CloudBase 和备用邮箱登录页面检查通过，均为模拟云服务。真实邮件登录、额度扣减、云收藏同步、全部历史浏览器脚本、安装包及 Windows GUI 集成未在本轮验收。全轮 0 次付费模型调用、0 封真实验证码邮件，不属于新一轮模型内容质量评测。
+
+第一次全量检查 596/597，失败来自已删除总览入口的旧断言，已改为仍存在的语言辅助识别双语错误/不确定结果检查，保留本地源码与结构验证。旧点读浏览器脚本在修改前基线也超时，其模拟响应与当前 await 语义协议及标准行读参数不符；仅更新测试模拟协议和严格参数断言，未调整生成逻辑。两次输入浏览器早期失败为旧选择器，随后改用真实“修改源码”按钮。默认沙箱执行器不可用，改为获准本地执行；误用的新版 pnpm 拒绝共享依赖 junction，没有安装或重写依赖。以上首次日志与最终结果保留于忽略目录 `.browser-artifacts/release-inputs/`，没有覆盖失败记录。
+
+
+### 2026-10-09 输入面板留白与对齐
+
+按用户截图移除源码输入区按钮下方的三段可见说明，保留隐藏的范围状态供原讲解稿读取。初始双栏布局使用等高面板和可伸展源码框，随后按用户要求共同加高 24 CSS 像素；窄屏仍上下排列，分析后的阅读工作台布局未改。真实本地页面在 1100、1440、1920 宽度下左右面板底部坐标完全相同，390 宽度无横向溢出，中英文均检查，选区分析仍保留原行号。仅修改 HTML/CSS，未重复全量模型/后端测试，无模型请求。截图与测量记录在 `.browser-artifacts/release-inputs/panel-alignment/`；静态资源直接生效，未重启登录服务。
+
+
+随后用户明确要求只将外框底线下移。已撤销内容区加高，改为双栏面板统一增加 24px 底部内边距。1440、1920 宽度实际对照确认：源码框、选区按钮和右侧标题的位置及高度与调整前逐项相同，只有两侧外框底边下移 24px；390 窄屏不变。对照证据保存在 `.browser-artifacts/release-inputs/bottom-spacing/`。
+
+
+### 2026-10-09 发布标识与设置说明精简
+
+按用户发布准备要求，移除侧栏 PREVIEW 和页脚“开源试用版”，保留版本号及“本地运行”；删除 AI 设置中平台转发/密钥说明与本地 OCR 说明两个段落。中英文实际页面在 1440、390 宽度共 4 项检查通过，版本和页脚文本正确、两段说明不再存在、服务地址/模型/密钥及保存/断开控件仍可见，弹窗未超出屏幕。仅改 HTML 与对应页脚翻译，不改变连接或识别功能，0 次模型调用。记录在 `.browser-artifacts/release-inputs/settings-cleanup/`，尚未发布安装包或云服务。
+
+
+### 2026-10-09 暖色中性背景预览
+
+按用户确认，将页面底色改为 #F7F4EE、顶栏 #FCFAF6、源码输入框 #FCFAF7、顶栏两项下拉控件白色，相关中性边框改为 #E6E0D5。白色面板/侧栏及绿色品牌、主按钮、提示和选中态保留。1440、390 宽度实际浏览器前后对照通过，计算颜色符合目标，逐项尺寸与位置、阴影不变，未出现横向溢出或页面错误。仅 CSS 改动，未重跑模型或后端集合，0 次 AI 请求。前后截图与测量在 `.browser-artifacts/release-inputs/warm-palette/`。
+
+
+用户查看后要求撤回米白方案。已将 style.css 恢复为此次配色修改前的 ea7101a 版本，并核对无差异；原有面板布局、底部留白及此前文案清理保留。
+
+
+### 2026-10-09 暂停讲解稿页面入口
+
+按用户要求隐藏结果顶部“代码工作台/讲解稿”切换栏，默认直接使用代码工作台；通过 UI 开关 WALKTHROUGH_ENABLED=false 暂停讲解稿渲染、模式进入与生成触发，并禁用隐藏的生成按钮。首页与本地模式提醒同步移除对讲解稿功能的引导。原讲解稿后端、提示、导出实现仍保留供后续恢复，本次不删除或改变服务端 API。
+
+65 项相关测试通过；中英文、1440/390 宽度共 4 项真实页面检查确认切换栏隐藏、工作台可见、源码不变，即使调用旧模式入口和生成函数也不产生讲解稿请求。既有点读浏览器 8 项检查通过（37 次本地模拟响应），覆盖词语、单行、段读、追问隔离和取消迟回。0 次付费 AI 请求，未重跑全部后端/模型集合，亦未运行已暂停的讲解稿浏览器功能验收。证据在 `.browser-artifacts/release-inputs/paused-walkthrough/`、`paused-focused.log` 和 `point-walkthrough-paused/`。静态页面生效，无需重启 CloudBase 登录服务。
+
+
+讲解稿切换栏隐藏后，按用户要求将工作台工具栏上边距由 18px 缩为 6px，仅在切换栏隐藏时生效。1440、1100、390 宽度实际前后对照确认标题、修改源码按钮、工具栏及阅读网格统一上移 12px，宽高和横向位置不变，无页面错误或溢出；无模型请求。记录在 `.browser-artifacts/release-inputs/workspace-top-spacing/`。
+
+
+## 2026-10-09 额度故障诊断、失败返还及短追问候选
+
+移除“再简单一点”，举例和直接问使用单次短调用；直接问限定当前整份源码，明显越界本地零调用拒绝，其他结果按相关性和原文引用核对。共享追问策略同时用于云端结算前校验。新增英文错误最后兜底，未知错误和退款状态不泄露中文或原始服务错误。
+
+新增 CloudBase 失败返还候选迁移：云端确认失败才退整次操作，普通客户端不能伪报失败退成功费用。实际 PGlite 验证账本平衡、重复退款、晚结算、跨账户归属及角色权限；没有模拟多数据库连接压力。仍不能对本地专有最终校验失败和交付未知自动承诺退款，相关可信云端工作流尚未完成。迁移、云端部署、真实额度扣减/退回均未执行。
+
+610/610 自动测试、19/19 发布样本检查通过。后续权限收紧与如实退款状态的8项定向验证及最终SQL验证通过。举例/追问浏览器4项检查、4次模拟模型响应、0付费调用；最初仅按钮英文预期错误的失败证据已保留，未修改真实界面来迎合测试。账户诊断使用独立43130入口，原43129登录保持，真实额度故障等待登录后页面结果与诊断确认，不计通过。
+
+本地证据目录：.browser-artifacts/release-inputs/ 下 refund-followup-unit.log、refund-followup-release.log、refund-boundary-final.log、refund-sql-final.log、followups/result.json。早期尚未收紧信任边界的SQL结果与初次测试失败保留；当前结论以最终文件为准。没有额外真实模型质量循环、云端发布或安装包发布。
+
+### 2026-10-09 共享生成链路、云端部署与真实试用确认
+
+上述候选后续已完成并部署。构建 `fef89bcfa3fb4f14` 将试用与常规官方 DeepSeek Flash 的词语点读、单行、段读、模块正文/输入输出/节点标签接入同一套提示、源码范围、推理参数、输出上限与最终解析器，中英及零基础/标准模式保持原有规则。语言识别和复制格式修复也共享原有提示与解析器。请求一致性测试比较实际网关请求与常规请求，不把模型随机生成的文字逐字一致作为承诺。已暂停的讲解稿和没有界面调用的旧流程 API 不在新试用协议内。
+
+保留举例与直接问，移除“再简单一点”；两项追问均为单次短生成，没有增加复核或终审。直接问使用当前整份源码与可选选区焦点，明显无关问题本地拒绝，云端重建提示并校验相关性、格式和原文引用后再交付。相关性判断不能证明抵御任意语义伪装。英语错误信息有最终中文字符拦截兜底，不改变用户源码或生成正文。
+
+网关在返回正文前运行共享最终解析并完成结算，云端确认的生成、解析或结算失败按操作返还额度。普通客户端不能通过自报失败退成功请求；交付状态未知、成功后本地渲染失败、失败记录持久化前账本中断仍需核对，不虚报已退款。历史无操作关联的记录不会被自动改写。
+
+最终 622/622 自动测试、19/19 发布样本通过；另有 23/23 云端生成与请求一致性定向检查通过。两次早期全量测试的旧调用次数断言和测试配置字段替换错误已修正，仅修改测试夹具，初次失败记录保留。举例/直接问沿用本节前述 4 项浏览器检查和 4 次模拟响应，没有追加真实模型质量循环。证据为 `hosted-final-unit-3.log`、`hosted-final-release.log`、`hosted-parity-focused.log` 及 `followups/result.json`。
+
+经用户 CloudBase CLI 授权，已执行 `202610090001_trial_failure_refunds.sql` 并将现有试用服务更新为版本 006、100% 流量，保留 005 供回退。原密钥、路由、端口和扩缩容配置保留。首次指定角色不存在，迁移未执行；确认默认托管管理员权限后成功执行。实时健康检查返回 `failure-refund-v1` 与 `direct-reading-v1`。真实数据库事务验证预留、结算、失败、重复退款、余额恢复及角色权限均通过，随后完整回滚；没有调用模型或修改真实用户余额。原有平台/个人累计额度历史差异保留，以增量核对新扣费，没有重置额度。
+
+用户在最新 43131 页面重新邮箱登录并明确反馈“已登录，点读成功”。随后只读查询确认 1 次成功操作、0 未完成操作、0 待结算请求、0 预留额度，个人与平台扣费增量均与该操作记录一致。本轮新增真实模型调用仅此用户触发的 1 次成功生成；未人为制造付费生成失败。诊断页 43130 此前已恢复额度查询，但旧故障根因未被唯一定位，当前成功不等于未来上游永不故障。实际云端证据见 `cloud-live-health-after-promote.json`、`cloud-refund-transaction-check.json`、`cloud-real-generation-accounting.json`。新版后端日志无错误，安装包未发布，安装验收和 Windows GUI 集成未在本轮运行。
+
+### 2026-10-09 点读卡片定位、拖动、复用与启动登录
+
+按用户要求，词语/符号卡片不再因回答变长而向上覆盖源码；点击源码行也使用同一张卡片，原右侧说明与追问入口保留。卡片从点击目标下方展开，长内容内部滚动；目标靠近窗口底部时先滚入视野。标题可拖动，窗口边界限制防止丢失关闭入口。点击其他区域、Escape、滚动、调整窗口均不关闭卡片；显式关闭停止显示，换读其他位置更新同一张卡片，上下文重置清理旧内容。
+
+新增点读 pending 复用，连续点击同一词语坐标或行范围只发送一个请求；完成结果在本页面内复用，包括关闭后重开及临时试用额度不可用。失败/取消不缓存，旧上下文迟回不覆盖当前内容。文件、源码、显式配置、账户、语言、模式仍隔离缓存。默认英文已存在并验证保留，主动选择的语言继续记忆；未登录每次启动弹出登录提示，有效登录恢复时不打断，过期会话显示登录窗口。
+
+65/65 相关自动测试通过，涵盖取消、缓存、模块导航、语言与账户恢复。新增真实浏览器交互 12 项通过，使用 8 次拦截模拟响应，覆盖长词语解释、符号/整行、拖动与关闭、pending/成功缓存、失败重试、临时试用不可用、底部选词、源码滚出视野、390px 窗口与默认英文/登录。现有点读集成脚本另通过 8 项检查、25 次本地模拟模型响应，举例/直接问、参数、取消及迟回保护继续通过；没有新增真实付费生成。最初浏览器执行缺少显式依赖路径；随后两次测试的向下拖动期望忽略窗口限位、英文失败文本预期不符，均修正测试后通过，保留原始失败日志。
+
+证据为 `.browser-artifacts/release-inputs/point-card-focused-final.log`、`point-card-browser-final.log`、`point-card/result.json`、`point-card-direct.log` 及桌面/窄屏截图。只更新前端静态资源，现有 43131 后端和登录会话不重启；未更改模型生成参数、云端或安装包，未重复全量模型/解析器测试及安装器验收。
+
+
+### 2026-10-10 v1.2.2 release validation
+
+Updated the version to 1.2.2. All README files remain unchanged from upstream main. Final checks passed: 627/627 automated tests, 19/19 release samples, and 12 reading-card browser checks using 8 mock responses and no paid model calls. Two earlier workspace tests used a DOM mock without scrollIntoView and expected outside selection to dismiss a card. The mock and assertions now cover persistent cards and explicit-close late-response protection; focused and full reruns passed without changing application behavior to satisfy the tests.
+
+The final English Windows x64 installer includes Node 24.19.0 and Python 3.12.14, with 3879 inventoried payload files. Upgrade from 1.2.1, shortcut targets, installed Python analysis, CloudBase email/trial configuration, repeat installation, and safe uninstall passed in isolated TEST directories. Extra user files and logs were preserved. An earlier verification attempted to open the installer while compression was still running; that file-lock failure was retained and verification was repeated after the build completed. Signature status: NotSigned.
+
+Installer/uninstaller pages, version resources, the Start menu uninstall shortcut, desktop launcher messages, and USER_GUIDE.txt are in English. Exact old Chinese filenames remain only for upgrade cleanup. The package keeps the English README; source README files are unchanged. Another 26 packaging/account/language tests passed after these changes.
+
+Privacy checks cover new source, the explicit packaging manifest, and unpacked final installer contents. Local configuration, sessions, logs, and diagnostic screenshots are excluded. Example addresses and required third-party attribution are distinguished from personal information; OCR data matches the pinned public upstream hashes. Historical commit emails are outside the cleanup scope agreed with the user; public history is unchanged. Local evidence is under .browser-artifacts/release-1.2.2/ and is not published.

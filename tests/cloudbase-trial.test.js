@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 test('CloudBase trial verifies email identity, pins model and settles verified usage', async () => {
   const { createHandler } = await import('../cloudbase/functions/ai-trial/handler.mjs');
   let mode = ''; const calls = [];
-  const handle = createHandler({ env: { CLOUDBASE_ENV_ID: 'fimi-test-env', CLOUDBASE_SERVICE_ROLE_KEY: 'server-only', DEEPSEEK_API_KEY: 'model-only' },
+  const handle = createHandler({ env: { FIMI_ALLOW_LEGACY_RAW:'1', CLOUDBASE_ENV_ID: 'fimi-test-env', CLOUDBASE_SERVICE_ROLE_KEY: 'server-only', DEEPSEEK_API_KEY: 'model-only' },
     fetcher: async (url, options) => {
       const body = options.body ? JSON.parse(options.body) : null;
       calls.push({ url, options, body });
@@ -84,7 +84,7 @@ test('CloudBase accepts the observed authenticated profile with absent legacy fi
   ];
   for (const [profile, expected] of cases) {
     const calls = [];
-    const handle = createHandler({ env: { CLOUDBASE_ENV_ID: 'fimi-test-env', CLOUDBASE_SERVICE_ROLE_KEY: 'server-only', DEEPSEEK_API_KEY: 'model-only' },
+    const handle = createHandler({ env: { FIMI_ALLOW_LEGACY_RAW:'1', CLOUDBASE_ENV_ID: 'fimi-test-env', CLOUDBASE_SERVICE_ROLE_KEY: 'server-only', DEEPSEEK_API_KEY: 'model-only' },
       fetcher: async (url, options) => {
         calls.push(url);
         if (url.endsWith('/user/me')) return Response.json(profile);

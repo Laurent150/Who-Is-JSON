@@ -28,7 +28,7 @@ fs.mkdirSync(out,{recursive:true});
   });
   await page.goto(url);await page.locator('#account[open]').waitFor();
   assert.doesNotMatch(await page.locator('#accountLogin').innerText(),/[\u4e00-\u9fff]/);
-  await page.locator('#accountSkip').click();
+  await page.locator('#accountClose').click();
   const source='// 保留原文\nconst 名字 = "中文";';await page.locator('#source').fill(source);
   await page.locator('#accountBtn').click();await page.locator('#accountEmailAddress').fill('reader@example.com');await page.locator('#accountEmailSend').click();
   await page.locator('#accountEmailCode').waitFor();await page.locator('#accountEmailCode').fill('123456');await page.locator('#accountEmailConfirm').click();

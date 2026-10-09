@@ -1,8 +1,9 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const tick=()=>new Promise(r=>setImmediate(r));
-function setup({pollError,cloudbase=false,quotaProvider}={}){
+function setup({pollError,cloudbase=false,quotaProvider,storedSession='',welcomeSeen=false,sessionExpired=false}={}){
  // These tests exercise the explicitly selected Chinese UI, not first-run defaults.
  const nodes=new Map(),data=new Map([['whoisjson.locale','zh-CN']]),events=new Map(),calls=[],timers=[];let pendingSave,conflict=false,remote={revision:0,payload:{knowledge:[],cards:[]}};
+ if(storedSession)data.set('who.account.session',storedSession);if(welcomeSeen)data.set('who.welcome.seen','1');
  const node=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',value:'',hidden:false,open:false,showModal(){this.open=true},close(){this.open=false}});return nodes.get(id)};
  const storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};
  const context=vm.createContext({Event,AbortSignal,localStorage:storage,sessionStorage:storage,$:node,library(){},download(){},setTimeout:fn=>{timers.push(fn);return timers.length},clearTimeout(){},window:{open:()=>({opener:null,location:{},close(){}}),APP_TOKEN:'local-token',dispatchEvent:e=>events.get(e.type)?.(),addEventListener:(k,v)=>events.set(k,v)},fetch:async(url,options)=>{
@@ -10,7 +11,7 @@ function setup({pollError,cloudbase=false,quotaProvider}={}){
   if(route==='status')return Response.json({enabled:true,...(cloudbase?{provider:'cloudbase',libraryEnabled:true,trialEnabled:true}:{})});
   if(route==='github-start')return Response.json({ticket:'ticket',url:'https://example.supabase.co/auth/v1/authorize'});
   if(route==='github-poll')return pollError ? Response.json({error:pollError},{status:503}) : Response.json({session:'opaque'});
-  if(route==='library')return Response.json({user:{id:'a',email:'a@example.com'},...remote});
+  if(route==='library')return sessionExpired?Response.json({error:'登录已过期，请重新登录。'},{status:401}):Response.json({user:{id:'a',email:'a@example.com'},...remote});
   if(route==='trial-quota')return Response.json(quotaProvider?await quotaProvider():{enabled:true,remaining:1000000,held:0,poolRemaining:15000000});
   if(route==='save')return new Promise(resolve=>pendingSave=()=>{if(conflict)return resolve(Response.json({error:'收藏版本冲突'},{status:409}));const saved=JSON.parse(options.body);remote={revision:saved.revision+1,payload:saved.payload};resolve(Response.json({revision:remote.revision}));});
   return Response.json({ok:true});
@@ -60,9 +61,24 @@ test('refresh conflict retains dirty local favorites and offers an explicit choi
  assert.equal(s.calls.at(-1).route,'save');assert.equal(s.store.snapshot().dirty,true);assert.match(s.store.getItem('codelingo.cards'),/unsynced/);assert.equal(s.node('accountReplace').hidden,false);
 });
 test('first-use prompt can be dismissed and guest favorites are only offered for explicit import',async()=>{
- const s=setup();await tick();assert.equal(s.node('account').open,true);s.node('accountSkip').onclick();assert.equal(s.node('account').open,false);assert.equal(s.data.get('who.welcome.seen'),'1');
+ const s=setup();await tick();assert.equal(s.node('account').open,true);s.node('accountClose').onclick();assert.equal(s.node('account').open,false);assert.equal(s.data.get('who.welcome.seen'),'1');
  s.data.set('codelingo.cards','[{"id":5,"title":"guest","code":"x"}]');await s.login();assert.equal(s.node('accountGuest').hidden,false);assert.equal(s.store.snapshot().payload.cards.length,0);
  s.node('accountGuestSkip').onclick();assert.equal(s.node('accountGuest').hidden,true);
+});
+
+test('each unsigned startup prompts even when the old welcome was dismissed',async()=>{
+ const s=setup({welcomeSeen:true});await tick();assert.equal(s.node('account').open,true);
+ s.node('accountClose').onclick();assert.equal(s.node('account').open,false);
+});
+
+test('startup restores a valid account without asking it to log in again',async()=>{
+ const s=setup({storedSession:'opaque',welcomeSeen:true});await tick();
+ assert.equal(s.node('account').open,false);assert.equal(s.node('accountSignedIn').hidden,false);
+});
+
+test('an expired saved session shows the login prompt and its readable error',async()=>{
+ const s=setup({storedSession:'expired',welcomeSeen:true,sessionExpired:true});await tick();
+ assert.equal(s.node('account').open,true);assert.equal(s.node('accountSignedIn').hidden,true);assert.match(s.node('accountStatus').textContent,/登录已过期/);
 });
 
 const cloudQuota=(held=0,remaining=1000000)=>({enabled:true,remaining,held,poolRemaining:null,unlimitedPool:true,grant:2000000,currency:'CNY',unit:1000000});

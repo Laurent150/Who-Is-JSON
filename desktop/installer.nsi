@@ -17,16 +17,16 @@ RequestExecutionLevel user
 SetCompressor /SOLID lzma
 SetCompressorDictSize 32
 VIProductVersion "${APP_VERSION}.0"
-VIAddVersionKey /LANG=2052 "ProductName" "FIMI"
-VIAddVersionKey /LANG=2052 "FileDescription" "FIMI 离线安装包"
-VIAddVersionKey /LANG=2052 "FileVersion" "${APP_VERSION}.0"
-VIAddVersionKey /LANG=2052 "LegalCopyright" "FIMI contributors"
+VIAddVersionKey /LANG=1033 "ProductName" "FIMI"
+VIAddVersionKey /LANG=1033 "FileDescription" "FIMI Offline Installer"
+VIAddVersionKey /LANG=1033 "FileVersion" "${APP_VERSION}.0"
+VIAddVersionKey /LANG=1033 "LegalCopyright" "FIMI contributors"
 !define MUI_ICON "${PAYLOAD}\fimi.ico"
 !define MUI_UNICON "${PAYLOAD}\fimi.ico"
-!define MUI_WELCOMEPAGE_TITLE "安装 FIMI"
-!define MUI_WELCOMEPAGE_TEXT "从源码、流程和例子学习编程。$\r$\n$\r$\n安装包自带本地解析环境，无须另装 Node.js 或 Python。$\r$\n$\r$\n适用于 Windows 10 / 11 64 位。使用 Edge 打开独立窗口；未安装 Edge 时使用默认浏览器。"
+!define MUI_WELCOMEPAGE_TITLE "Install FIMI"
+!define MUI_WELCOMEPAGE_TEXT "Learn from source code, flow, and examples.$\r$\n$\r$\nNode.js and Python are included. No separate developer setup is needed.$\r$\n$\r$\nFor Windows 10 / 11 (64-bit). Opens in an Edge app window, or your default browser if Edge is unavailable."
 !define MUI_FINISHPAGE_RUN "$INSTDIR\WhoIsJSON.exe"
-!define MUI_FINISHPAGE_RUN_TEXT "启动 FIMI"
+!define MUI_FINISHPAGE_RUN_TEXT "Launch FIMI"
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "${PAYLOAD}\LICENSE.txt"
 !insertmacro MUI_PAGE_COMPONENTS
@@ -36,13 +36,13 @@ VIAddVersionKey /LANG=2052 "LegalCopyright" "FIMI contributors"
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_UNPAGE_FINISH
-!insertmacro MUI_LANGUAGE "SimpChinese"
+!insertmacro MUI_LANGUAGE "English"
 Var TestMode
 Var MenuDir
 Var DesktopDir
 Function .onInit
   ${IfNot} ${RunningX64}
-    MessageBox MB_OK "此安装包需要 64 位 Windows。"
+    MessageBox MB_OK "This installer requires 64-bit Windows."
     Abort
   ${EndIf}
   SetShellVarContext current
@@ -53,11 +53,13 @@ Function .onInit
     StrCpy $TestMode "yes"
   ${EndIf}
 FunctionEnd
-Section "程序与离线运行环境（必选）" SecMain
+Section "Application and offline runtime (required)" SecMain
   SectionIn RO
-  IfFileExists "$INSTDIR\desktop-install.marker" 0 +3
+  ${If} ${FileExists} "$INSTDIR\desktop-install.marker"
     ExecWait '$\"$INSTDIR\WhoIsJSON.exe$\" --stop'
     Sleep 3500
+    Delete "$INSTDIR\使用说明.txt"
+  ${EndIf}
   SetOutPath "$INSTDIR"
   File /r "${PAYLOAD}\*.*"
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -92,9 +94,10 @@ Section "程序与离线运行环境（必选）" SecMain
   Delete "$DesktopDir\Who Is JSON.lnk"
   CreateDirectory "$MenuDir"
   CreateShortcut "$MenuDir\FIMI.lnk" "$INSTDIR\WhoIsJSON.exe" "" "$INSTDIR\fimi.ico"
-  CreateShortcut "$MenuDir\卸载 FIMI.lnk" "$INSTDIR\Uninstall.exe"
+  Delete "$MenuDir\卸载 FIMI.lnk"
+  CreateShortcut "$MenuDir\Uninstall FIMI.lnk" "$INSTDIR\Uninstall.exe"
 SectionEnd
-Section "桌面快捷方式" SecDesktop
+Section "Desktop shortcut" SecDesktop
   CreateDirectory "$DesktopDir"
   CreateShortcut "$DesktopDir\FIMI.lnk" "$INSTDIR\WhoIsJSON.exe" "" "$INSTDIR\fimi.ico"
 SectionEnd
@@ -105,7 +108,7 @@ FunctionEnd
 Function un.onInit
   SetShellVarContext current
   IfFileExists "$INSTDIR\desktop-install.marker" +3 0
-    MessageBox MB_OK "未找到安装标记，已停止卸载以保护其他文件。"
+    MessageBox MB_OK "Installation marker not found. Uninstall stopped to protect other files."
     Abort
 FunctionEnd
 Section "Uninstall"
@@ -114,7 +117,7 @@ Section "Uninstall"
   IfFileExists "$INSTDIR\test-install.marker" 0 normal_uninstall
     Delete "$INSTDIR\test-shortcuts\Desktop\FIMI.lnk"
     Delete "$INSTDIR\test-shortcuts\StartMenu\FIMI.lnk"
-    Delete "$INSTDIR\test-shortcuts\StartMenu\卸载 FIMI.lnk"
+    Delete "$INSTDIR\test-shortcuts\StartMenu\Uninstall FIMI.lnk"
     RMDir "$INSTDIR\test-shortcuts\Desktop"
     RMDir "$INSTDIR\test-shortcuts\StartMenu"
     RMDir "$INSTDIR\test-shortcuts"
@@ -123,7 +126,7 @@ Section "Uninstall"
   normal_uninstall:
     Delete "$DESKTOP\FIMI.lnk"
     Delete "$SMPROGRAMS\FIMI\FIMI.lnk"
-    Delete "$SMPROGRAMS\FIMI\卸载 FIMI.lnk"
+    Delete "$SMPROGRAMS\FIMI\Uninstall FIMI.lnk"
     RMDir "$SMPROGRAMS\FIMI"
     DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\WhoIsJSON"
     DeleteRegKey HKCU "Software\WhoIsJSON"

@@ -81,7 +81,7 @@ test('cloud review limits require explicit deployment support, preserve accounti
  const {createHandler}=await import('../cloudbase/functions/ai-trial/handler.mjs');
  for(const enabled of [false,true]){
   const routes=[];
-  const handler=createHandler({env:{CLOUDBASE_ENV_ID:'fimi-test-env',CLOUDBASE_SERVICE_ROLE_KEY:'secret',DEEPSEEK_API_KEY:'secret',FIMI_CODE_REVIEW_LONG_REQUESTS:enabled?'1':'0'},fetcher:async(url,options)=>{
+  const handler=createHandler({env:{FIMI_ALLOW_LEGACY_RAW:'1', CLOUDBASE_ENV_ID:'fimi-test-env',CLOUDBASE_SERVICE_ROLE_KEY:'secret',DEEPSEEK_API_KEY:'secret',FIMI_CODE_REVIEW_LONG_REQUESTS:enabled?'1':'0'},fetcher:async(url,options)=>{
    routes.push(url);
    if(url.endsWith('/user/me'))return Response.json({sub:'user',email:'user@example.com'});
    if(url.endsWith('/fimi_ai_reserve')){assert.equal(JSON.parse(options.body).amount,prepared.reserved);return Response.json({ok:true});}
@@ -121,20 +121,21 @@ test('desktop verifies cloud capability before dispatch and forwards the profile
  }
 });
 
-test('browser review deadline accommodates bounded stages while other modes and cancellation stay unchanged',async()=>{
+test('paused walkthrough sends no request; retained generation deadlines and cancellation stay unchanged',async()=>{
  const script=fs.readFileSync(path.join(__dirname,'../public/talk.js'),'utf8');
- for(const audience of ['review','peer','beginner']){
+ for(const enabled of [false,true])for(const audience of ['review','peer','beginner']){
   const elements=new Map(),timeouts=[];let apiSignal;
   const element=id=>{
    if(!elements.has(id))elements.set(id,{value:id==='audience'?audience:id==='duration'?'180':'full',removeAttribute(){},setAttribute(){},append(){}});
    return elements.get(id);
   };
-  const context=vm.createContext({current:{},config:{},readingMode:'standard',analyzedSource:'source',fileName:'sample.js',sourceOffset:0,
+  const context=vm.createContext({WALKTHROUGH_ENABLED:enabled,current:{},config:{},readingMode:'standard',analyzedSource:'source',fileName:'sample.js',sourceOffset:0,
    $:element,connected:()=>true,settings(){},renderTalk(){},setInterval:()=>1,clearInterval(){},AbortController,
    AbortSignal:{timeout(ms){timeouts.push(ms);return new AbortController().signal;},any:signals=>AbortSignal.any(signals)},
    document:{querySelector:()=>({})},api:async(_route,_body,_method,signal)=>{apiSignal=signal;element('cancelTalk').onclick();return {title:'Cancelled result'};}
   });
   vm.runInContext(script,context);await vm.runInContext('generateTalk()',context);
+  if(!enabled){assert.deepEqual(timeouts,[]);assert.equal(apiSignal,undefined);assert.equal(element('generateTalk').disabled,true);continue;}
   assert.deepEqual(timeouts,[audience==='review'?4200000:1140000]);
   assert.equal(apiSignal.aborted,true);assert.equal(vm.runInContext('talkResult',context),null);
   assert.equal(element('generateTalk').disabled,false);

@@ -15,7 +15,7 @@ const source='# 中文注释保持原样\ndef greet(name):\n    return f"Hello, 
   const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(url);
-  if(await page.locator('#accountSkip').isVisible())await page.locator('#accountSkip').click();
+  if(await page.locator('#accountClose').isVisible())await page.locator('#accountClose').click();
   await page.locator('#fileInput').setInputFiles({name:'greeting.py',mimeType:'text/plain',buffer:Buffer.from(source)});
   await page.locator('#analyzeBtn').click();
   await page.locator('#studioPanel').waitFor({state:'visible'});
