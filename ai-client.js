@@ -10,6 +10,7 @@ function requestOptions(config, messages, options = {}) {
         ? require('./ai-reading-style').tokenPrompt(options.locale)
         : require('./ai-reading-style').prompt(options.readingMode);
     const preparedMessages=options.explanation ? messages.map(m=>m.role==='system'&&typeof m.content==='string'?{...m,content:options.locale==='en'?require('./ai-english').prompt(options.task,options.readingMode):m.content+(options.task==='talk'?'':'\n'+require('./ai-explanation-rules')+'\n'+readingStyle)}:{...m}) : messages.map(m=>({...m}));
+    if(require('./ai-point-contract').selection(messages,options))for(const message of preparedMessages)if(message.role==='system')message.content=require('./ai-point-contract').profile(options.locale,options.readingMode,require('./ai-point-contract').selectedScope(messages))+(options.locale==='en'?'\nReturn only the explanation as plain text.':'\n只返回解释正文。');
     if(options.explanation)for(const message of preparedMessages)if(message.role==='system'&&typeof message.content==='string')message.content+='\n'+require('./ai-grounding-checks')[options.task==='talk'&&['beginner','nontechnical',undefined].includes(options.audience)?'walkthrough':'instruction'](options.locale);
     if(options.explanation&&options.task==='talk')for(const message of preparedMessages)if(message.role==='system'&&typeof message.content==='string')message.content+='\n'+require('./ai-talk-policy').draft(options.locale,options.readingMode,options.audience,options.detail,options.coverage);
     if(options.explanation)for(const message of preparedMessages)if(message.role==='system'&&typeof message.content==='string')message.content+='\n'+require('./ai-logic-policy').instruction(options.locale);
@@ -21,10 +22,13 @@ function requestOptions(config, messages, options = {}) {
     // Provider-specific options must not leak to other compatible services.
     if (url.hostname === 'api.deepseek.com') {
         const comparison=options.evaluationModelComparison===true&&process.env.WHO_TALK_EVAL_TRACE==='1'&&process.env.WHO_CLOUD_DISABLED==='1'&&config.model==='deepseek-v4-pro';
+        const pointLow=options.pointDraftLow===true&&require('./ai-point').supportsLow(config);
+        const pointHigh=options.pointDraftHigh===true&&require('./ai-point').supportsLow(config);
         const reviewing = options.reviewReasoning && (config.model === 'deepseek-flash'||comparison)
             && (typeof config.sponsoredCall !== 'function'||config.reviewThinking===true);
-        body.thinking = {type:reviewing?'enabled':'disabled'};
-        if(reviewing){const contracts=['contracts','contract-repair'].includes(options.usagePhase);body.reasoning_effort=contracts?'low':'high';body.max_tokens=contracts?16384:options.task==='talk'?24576:16384;}
+        body.thinking = {type:pointLow||pointHigh||reviewing?'enabled':'disabled'};
+        if(pointLow||pointHigh){body.reasoning_effort=pointHigh?'high':'low';body.max_tokens=6000;}
+        else if(reviewing){const contracts=['contracts','contract-repair'].includes(options.usagePhase);body.reasoning_effort=contracts?'low':'high';body.max_tokens=contracts?16384:options.task==='talk'?24576:16384;}
         if (options.json) {
             body.response_format = {type:'json_object'};
             // DeepSeek requires an explicit JSON instruction in a system/user
@@ -111,7 +115,7 @@ async function rawModelCall(config, messages, options = {}) {
 }
 
 async function modelCall(config, messages, options = {}) {
-    const point=require('./ai-point'),selection=point.route(messages,options);
+    const point=require('./ai-point'),selection=point.route(messages,options,config);
     if(selection)return point.run(rawModelCall,config,selection,options);
     if(options.explanation||options.reviewFoundation){
         const foundation=require('./ai-review-context');
@@ -135,7 +139,8 @@ async function reviewModelResponse(config, prepared, draft, options = {}) {
     const foundation=require('./ai-review-context');
     options={...options,reviewFoundation:options.reviewFoundation||await foundation.create(prepared,options)};
     prepared=foundation.attach(prepared,options.reviewFoundation);
-    const review = options.task==='talk'?require('./ai-talk-policy').review(options.locale,options.readingMode,options.audience,options.detail,options.coverage):require('./ai-review').instruction(options.locale, options.readingMode);
+    const localSelection=require('./ai-point-contract').selection(prepared,{...options,explanation:true});
+    const review = localSelection?require('./ai-point-contract').reviewInstruction(options.locale):options.task==='talk'?require('./ai-talk-policy').review(options.locale,options.readingMode,options.audience,options.detail,options.coverage):require('./ai-review').instruction(options.locale, options.readingMode);
     const patches=require('./ai-review-patches');
     const structured=options.json?patches.parseDraft(draft):null;
     // Beginner walkthroughs never show follow-up questions. Normalize before

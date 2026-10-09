@@ -77,7 +77,7 @@ function workspace(api){
  const nodes=new Map(),get=id=>{if(!nodes.has(id))nodes.set(id,new Node());return nodes.get(id);};
  const ctx=vm.createContext({api,AbortController,AbortSignal,Error,Map,Set,setInterval,clearInterval,innerWidth:1200,innerHeight:800,
   config:{},current:{language:'JavaScript',blocks:[]},analyzedSource:'const 商品 = "😀";\nreturn 商品;',fileName:'test.js',sourceOffset:7,
-  WhoReading:require('../public/reading-model'),WhoFlowModel:publicFlow,beginnerMode:()=>true,beginnerSelectionQuestion:()=> '请解释选中的代码段，让一个没有编程背景的成年人能看懂。',connected:()=>true,
+  WhoReading:require('../public/reading-model'),WhoFlowModel:publicFlow,beginnerMode:()=>true,selectionQuestion:()=> '请解释选中的代码段，让一个没有编程背景的成年人能看懂。',connected:()=>true,
   element:(tag,text='',cls='')=>new Node(tag,text,cls),document:{addEventListener(){},createTextNode:text=>new Node('text',text)},window:{addEventListener(){}},$:get,
   appendAITerms(){},appendExplanationSave(){},appendBuiltinReference(){},explanationSource:s=>s,toast(){},settings(){},
  });

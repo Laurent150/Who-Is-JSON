@@ -1,5 +1,15 @@
 # Who Is JSON 架构说明
 
+2026-10-08 当前点读：仅精确官方HTTPS DeepSeek Flash个人配置的词／符号、明确pointReading意图的行／段与快捷追问使用一次局部成稿，两种阅读模式均适用。标准单行high，其余low；保留用户model，max_tokens=6000包含思考余量，timeout120秒。不追加泛用输入输出义务、模型复核、终审或自动重试。源码、UTF16选区和实际问题核验后原样传入；普通自由问题、其他provider／model及网关保留既有路线，不从静态标记推定已部署能力。
+
+官方direct词符使用严格definition/effect及可选details字段；已验证的JS/TS零基础单行调用-await-标识符保存也使用此局部结构，交付完整纯文本，其他行／段仍为纯文本。字段原字符以空行连接，不做语义删句。仅有限兼容实测且键集合精确的type=json_object回显；未知字段／kind／type、空或错误类型、无效JSON和截断拒绝，不自动修复。词符2400字符保护保留，行解释不套此上限，legacy协议不扩为新shape。
+
+局部风格入口只决定表达职责，不证明绑定或运行类型。调用名称说明可见调用而不从译名猜业务；简单Python参数连接数据含义、当前运算及实参，复杂声明保守回退；标准Python复合赋值保留实际两侧条件。JS/TS选中if/else中的null检查与同来源属性赋值按既有AST选择窄职责，说明取名称对应内容并保存，条件不保证另一分支任何值都可读取。段落以实际选区描述范围、成功条件和捕获类别，不强制类型或异常教程。源码不执行，未增加解析进程或依赖。
+
+public/point-display.js将配对行内格式标记显示为等宽code DOM，用浅色面板高对比语法配色区分名称、关键字、字符串和数字，不另加装饰性引号。代码围栏隐藏但内部字符串引号及模板字符保留；只用安全文本节点，未标记的普通引号不猜测或删除，不改源码。词法类别仅用于视觉，不证明类型或绑定。两档按自然语义分段，不固定段数。JS/TS零基础同页object、undefined、true/false、null等语言概念卡不推断当前同名变量类型；标准模式不显示教学卡。浮层异步内容增长后重新定位、限制视口并可内部滚动，源码滚动关闭与取消／过期响应保护保留。canonical answer和source保留；收藏输入仍是原answer加已有零基础术语说明，展示DOM及颜色不会写入存储；因术语说明存在，不声称所有收藏plain等于provider原始字节。
+
+最终有限验收：原80项重新核准为46项无备注通过、34项带非阻断备注通过、0必修未解决；新32、手动4、额外分支4和行内异常1在完整有效请求及必要UI证据上通过。原候选7统一80/80结论已撤回，历史记录保留。结果不保证随机输出、全部语言或全软件质量。CloudBase／其他服务模型、安装器和部署未同条件验证；样本源码未执行。用户要求本轮完成后暂停其他语言测试，等待新指令。工程来源见VALIDATION。
+
 2026-10-07 已选代码评审成稿接入：默认成稿按受众选择非技术M4、同事M2、代码评审CR2（`ai-talk-code-review.js`）。CR2中文保留已测融合成稿提示，英文按同一评审要求独立撰写。用户选择保留原版复核，不接入新融合复核。三类讲解稿默认均为源码约定分析→成稿→现有复核→本地校验交付，不追加模型终审；既有有限格式修复、失败拦截及受控离线终审保持可用。中文两份保存响应通过正式入口回放，成稿提示、原版复核请求与最终正文均一致。英文通过工程链路检查，未新增真实模型质量验收。以下日期相同但更早的“代码评审E／保留终审”说明是历史状态。
 
 2026-10-07 代码评审输出保护额度：官方 DeepSeek Flash 的 `talk/review` 受众各阶段上限为65536（含思考），本地单次等待上限420秒；其他受众和服务配置不变。源码分析现在接收已校验的受众设置，避免漏用该额度。CloudBase使用独立的`code-review-64k-v1`能力标记，部署后仅在确认实际网关支持长请求并启用环境开关时开放；提供方360秒、网关客户端400秒，旧云端在扣费前阻止不兼容的大额度请求。浏览器代码评审整条链路上限70分钟，覆盖既有最多9次有界请求及队列余量，可随时取消；这不是通常生成时长。额度调整不改提示、思考强度、成稿版本、自动重试或计费算法，不构成真实可靠性验证。见[云端部署说明](cloudbase/AI_TRIAL_DEPLOYMENT.md)。
@@ -173,7 +183,9 @@ Walkthrough delivery recovery now permits one local edit after a valid, narrowly
 
 The walkthrough schema drops only empty, unknown metadata after strict JSON parsing. It does not coerce required fields, discard populated extras, accept duplicate/reserved keys, or bypass either content check. This compatibility repair costs no model request. Saved failures and offline/browser results are recorded separately from any paid model evidence; see `docs/AI_INTEGRATION.md`.
 
-## Beginner point reading: method 3 and paragraph review
+## Beginner point reading: method 3 and paragraph review（历史legacy说明）
+
+以下记录旧方法3；官方Flash明确点读两档已由顶部单次局部成稿覆盖。其他配置保留各自既有路线，不将本节两阶段说明视为当前统一策略。
 
 `ai-point.js` routes Chinese and English beginner word explanations (`knowledge` with a verified token) and plain-text selected-line/passage explanations (`ask`) through the method 3 draft and paragraph reviewer. `ai-point-prompts.js` preserves the tested Chinese instructions verbatim. `ai-point-prompts-en.js` adapts the teaching goals and editing boundaries into natural English for nontechnical adults; it does not impose Chinese character quotas or require four headings. The draft receives the complete source and exact selection without legacy writing rules or syntax context. The review receives the same source/selection, locally generated review context and the original draft paragraph catalogue. Redundant token-neighborhood metadata is omitted; exact UTF-16 positions and source lines remain unchanged. Explicit follow-up questions are preserved. Both selection buttons use the appropriate language's default request instead of the former one/two-sentence constraint.
 
@@ -190,8 +202,8 @@ Standard reading mode, unselected questions, function-flow explanations and walk
 
 复核沿用已选的局部纠错原则，同时允许为卡片压缩无关扩写与重复。整张卡片以p1交给复核，确保多段坏初稿能在一次请求内改成单段；行读/段读继续按原段落编号处理，方法3提示保持字节不变。零基础点读仍两次调用；标准点读保留原有独立终审，不在本次写作调整中隐式取消。无新增自动重试、无机械按字数截断，已有2400字符显示边界保护保留。
 
-## 当前单词点读：零基础 V3，单次成稿（2026-10-07）
+## 单词点读：零基础 V3，单次成稿（2026-10-07，历史legacy说明）
 
-本节取代上面的历史单词链路描述。按用户最新选择，`ai-token-prompts.js` 的 `FIMI_BEGINNER_HOVER_V3` 以准确角色优先，再解释当前含义和最近一层作用。保留必要基础术语并就地简释，不再强制作用先于角色或每卡最多一个术语；通常两句、简单一句、复杂最多三句，中文通常70—110字以内，英文自然适配为70词以内。字数为写作指导，不凑下限也不机械截断。完整源码只用于判断当前对象，不扩写整段流程，不依据名称编造行为。
+本节记录当时对历史单词链路的调整；当前官方Flash明确点读以顶部为准。按用户最新选择，`ai-token-prompts.js` 的 `FIMI_BEGINNER_HOVER_V3` 以准确角色优先，再解释当前含义和最近一层作用。保留必要基础术语并就地简释，不再强制作用先于角色或每卡最多一个术语；通常两句、简单一句、复杂最多三句，中文通常70—110字以内，英文自然适配为70词以内。字数为写作指导，不凑下限也不机械截断。完整源码只用于判断当前对象，不扩写整段流程，不依据名称编造行为。
 
 中英文零基础单词现在只调用一次初稿，保留精确选区核验、JSON协议、非空正文、取消、上游截断和2400字符显示保护；不生成复核上下文，不调用AI复核、终审或自动重试。初稿调用仍使用原2200 token及非思考设置。标准单词仍为初稿加复核、无终审，提示保持原样；零基础行读/段读仍为方法3加段落复核，讲解稿不变。本地校验只证明可交付格式，不证明内容事实正确或可读性达标。

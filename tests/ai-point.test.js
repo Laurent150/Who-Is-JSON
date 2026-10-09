@@ -38,14 +38,14 @@ for(const scope of ['token','passage'])test(scope+' uses two exact prompt stages
  const mode=scope==='token'?'standard':'beginner';
  const {result,bodies,phases,usage}=await run(scope,{extra:{readingMode:mode}});
  assert.deepEqual(phases,['draft','review']);assert.equal(usage.length,2);
- assert.equal(scope==='token'?result.answer:result,scope==='token'?'把收到的内容原样交回。':'把收到的内容原样交回。\n\n随后结束这次处理。');
- assert.equal(bodies[0].messages[0].content,scope==='token'?hover.draft('zh-CN',mode):prompts[scope]);
- assert.equal(bodies[1].messages[0].content,scope==='token'?hover.review('zh-CN',mode):prompts.review(prompts[scope]));
+ assert.equal(scope==='token'?result.answer:result,'把收到的内容原样交回。');
+ assert.equal(bodies[0].messages[0].content,scope==='token'?hover.draft('zh-CN',mode):prompts.line);
+ assert.equal(bodies[1].messages[0].content,scope==='token'?hover.review('zh-CN',mode):prompts.review(prompts.line));
  for(const [index,body]of bodies.entries()){
   const data=JSON.parse(body.messages[1].content);assert.equal(data.source,source);
   assert.equal(body.max_tokens,index?16384:2200);assert.equal(body.thinking.type,index?'enabled':'disabled');
   assert.equal(body.messages.length,2);
-  if(index){assert.equal(data.reviewContext.scope.status,'verified');assert.deepEqual(data.draftParagraphs,scope==='token'?[{id:'p1',text:'把收到的值交回。\n\n随后结束这次处理。'}]:[{id:'p1',text:'把收到的值交回。'},{id:'p2',text:'随后结束这次处理。'}]);}
+  if(index){assert.equal(data.reviewContext.scope.status,'verified');assert.deepEqual(data.draftParagraphs,[{id:'p1',text:'把收到的值交回。\n\n随后结束这次处理。'}]);}
   else assert.equal(Object.hasOwn(data,'reviewContext'),false);
  }
  assert.equal(bodies[1].reasoning_effort,'high');
@@ -56,6 +56,23 @@ test('user follow-up questions survive routing and supplied evidence is discarde
  const data={...input('passage'),question:'只说明这里最后得到什么。',reviewContext:{verified:true}};
  const routed=point.route(messages(data),options);
  assert.equal(routed.input.question,data.question);assert.equal(Object.hasOwn(routed.input,'reviewContext'),false);
+});
+
+test('single-line review can merge repeated paragraphs while passages preserve separate edit locations',async()=>{
+ for(const singleLine of [true,false]){
+  const code='function f(x) {\n  return x;\n}',selection=singleLine?{start:2,end:2,code:'  return x;'}:{start:1,end:3,code};
+  const bodies=[],draft='The result is x.\n\nThis returns x.';
+  const result=await modelCall({base:'https://example.org',model:'mock',sponsoredCall:async body=>{
+   bodies.push(body);return response(bodies.length===1?draft:{corrections:[{id:'p1',value:'Returns x.',reason:'Remove repetition without changing the result.'}]});
+  }},messages({source:code,selectedSource:selection,question:'Explain this selection.'}),{...options,locale:'en'});
+  assert.equal(bodies.length,2);
+  assert.deepEqual(JSON.parse(bodies[1].messages[1].content).draftParagraphs,singleLine?[{id:'p1',text:draft}]:[{id:'p1',text:'The result is x.'},{id:'p2',text:'This returns x.'}]);
+  assert.equal(result,singleLine?'Returns x.':'Returns x.\n\nThis returns x.');
+  for(const body of bodies){
+   assert.match(body.messages[0].content,singleLine?/ONE SELECTED LINE/:/SELECTED PASSAGE/);
+   assert.doesNotMatch(body.messages[0].content,singleLine?/SELECTED PASSAGE/:/ONE SELECTED LINE/);
+  }
+ }
 });
 
 test('token routing removes redundant neighboring context but preserves exact UTF-16 source positions',async()=>{
@@ -116,8 +133,8 @@ for(const scope of ['token','passage'])test('English '+scope+' sends the native-
  const mode=scope==='token'?'standard':'beginner';
  const {result,bodies,phases,usage}=await run(scope,{draft,review:{corrections:[{id:'p1',value:revised,reason:'Explain what is being given back in ordinary language.'}]},extra:{locale:'en',readingMode:mode}});
  assert.deepEqual(phases,['draft','review']);assert.equal(usage.length,2);
- assert.equal(scope==='token'?result.answer:result,scope==='token'?revised:revised+'\n\nThis part then finishes.');
- assert.equal(bodies[0].messages[0].content,scope==='token'?hover.draft('en',mode):english[scope]);assert.equal(bodies[1].messages[0].content,scope==='token'?hover.review('en',mode):english.review(english[scope]));
+ assert.equal(scope==='token'?result.answer:result,revised);
+ assert.equal(bodies[0].messages[0].content,scope==='token'?hover.draft('en',mode):english.line);assert.equal(bodies[1].messages[0].content,scope==='token'?hover.review('en',mode):english.review(english.line));
  for(const body of bodies){assert.doesNotMatch(body.messages[0].content,/[\u3400-\u9fff]|FIMI_BEGINNER_TOKEN_V1|FIMI_REVIEW_EDIT_SCOPE_V2/);assert.equal(JSON.parse(body.messages[1].content).source,source);}
  const first=JSON.parse(bodies[0].messages[1].content),second=JSON.parse(bodies[1].messages[1].content);
  assert.equal(first.question,scope==='token'?'Explain the selected return here briefly for a reader with programming experience.':'Explain the selected code here to an adult with no programming background.');

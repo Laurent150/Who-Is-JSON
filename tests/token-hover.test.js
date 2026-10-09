@@ -20,13 +20,11 @@ for(const locale of ['zh-CN','en'])for(const readingMode of ['beginner','standar
   if(locale==='en')assert.doesNotMatch(body.messages[0].content,/[\u3400-\u9fff]/);
  }
  if(readingMode==='standard')assert.deepEqual(JSON.parse(bodies[1].messages[1].content).draftParagraphs,[{id:'p1',text:draft}]);
- assert.match(bodies[0].messages[0].content,locale==='en'?(readingMode==='beginner'?/70 words/:/35 words/):(readingMode==='beginner'?/70～110个中文字/:/50个中文字/));
- if(readingMode==='beginner')for(const body of bodies){
-  assert.match(body.messages[0].content,/FIMI_BEGINNER_HOVER_V3/);
-  assert.match(body.messages[0].content,locale==='en'?/Role first, then local meaning/:/先说明它是什么角色/);
-  assert.match(body.messages[0].content,locale==='en'?/at most its nearest useful relationship/:/最多延伸最近一层/);
-  assert.doesNotMatch(body.messages[0].content,/FIMI_BEGINNER_HOVER_V2|at most one new formal programming term|每张卡片最多引入一个新的正式/);
- }
+ assert.match(bodies[0].messages[0].content,/FIMI_POINT_READING_V2/);
+ assert.match(bodies[0].messages[0].content,locale==='en'?/Prefer actual source data for a small example/:/小例子优先使用源码已有数据/);
+ assert.match(bodies[0].messages[0].content,locale==='en'?/explicitly label invented data as hypothetical/:/自拟数据明确标为假设/);
+ assert.doesNotMatch(bodies[0].messages[0].content,/Role first|先说明它是什么角色|35 words|50个中文字/);
+
 });
 
 test('beginner draft-only still validates format, display bounds, cancellation and exact token scope',async()=>{

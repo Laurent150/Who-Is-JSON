@@ -7,6 +7,11 @@ function beginnerSelectionQuestion(){
   ?'Explain the selected code here to an adult with no programming background.'
   :'请解释选中的代码段，让一个没有编程背景的成年人能看懂。';
 }
+function selectionQuestion(){
+ return globalThis.WhoI18n?.locale==='en'
+  ? 'Explain only the selected code, using a small example when it helps.'
+  : '只解释选中代码，需要时用一个小例子帮助理解。';
+}
 function applyReadingMode(){
  $('readingMode').value=readingMode;
  document.body.dataset.readingMode=readingMode;

@@ -11,7 +11,7 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
  else if(b.messages[0].content.startsWith('You are writing a FIMI explanation'))content=b.messages[0].content.includes('(selectedToken)')?JSON.stringify({kind:'definition',answer:'x is the value supplied to f.'}):'The function returns the supplied value.';
  else if(b.messages[0].content.startsWith('你正在为 FIMI 生成中文词语点读初稿'))content=JSON.stringify({kind:'definition',answer:'x 是传入函数的参数名。'});
  else if(/REVIEW OUTPUT CONTRACT|本次复核输出约定（仅在复核时/.test(b.messages[0].content))content=JSON.stringify({corrections:[]});
- else if(b.messages[0].content.includes('Write all explanations in natural English')){
+ else if((b.messages[0].content.includes('Write all explanations in natural English')||b.messages[0].content.startsWith('FIMI_POINT_READING_V2:'))){
   const prompt=b.messages[0].content,input=JSON.parse(b.messages[1].content);
   if(prompt.startsWith('Explain the purpose'))content=JSON.stringify({summary:'Return the supplied value.',blocks:[{index:0,purpose:'Return the supplied value.'}]});
   else if(prompt.startsWith('Explain the supplied graph'))content=JSON.stringify({summary:'Return the value.',nodes:input.graph.nodes.map(n=>({id:n.id,title:'Return the value',explanation:'Pass the value back to the caller.'}))});
@@ -85,11 +85,11 @@ test('HTTP API handles local content, AI failures, vision input and authorizatio
   }
  }
  r=await post('repair',{code:'def f():\nreturn 1',name:'x.py',locale:'en',config:{base:mockBase,model:'good'}});assert.equal(r.status,200);assert.match(calls.at(-1).messages[0].content,/Write changes and uncertainty in natural English/);assert.equal(JSON.parse(calls.at(-1).messages[1].content).source,'def f():\nreturn 1');
- const teaching=['整份代码的用途','给定 graph','为指定读者写一份连贯','面向零基础者','FIMI_TOKEN_HOVER_V1'];
+ const teaching=['整份代码的用途','给定 graph','为指定读者写一份连贯','FIMI_POINT_READING_V2','FIMI_TOKEN_HOVER_V1'];
  for(const marker of teaching){
   const requests=calls.filter(c=>c.messages[0].content.includes(marker));
   assert.ok(requests.length,'missing explanation route: '+marker);
-  for(const request of requests)assert.match(request.messages[0].content,marker==='FIMI_TOKEN_HOVER_V1'?/selectedToken/:marker==='为指定读者写一份连贯'?/独立写作示例/:/async 声明使函数每次调用返回 Promise/);
+  for(const request of requests)assert.match(request.messages[0].content,marker==='FIMI_TOKEN_HOVER_V1'?/WORD \/ SYMBOL|词语／符号/:marker==='FIMI_POINT_READING_V2'?/当前|selected occurrence/:marker==='为指定读者写一份连贯'?/独立写作示例/:/async 声明使函数每次调用返回 Promise/);
  }
  for(const request of calls.filter(c=>/只判断源码|复制格式修复建议|只转录图片/.test(c.messages[0].content)))assert.ok(!request.messages[0].content.includes('async 声明使函数每次调用返回 Promise'));
  }finally{child.kill();await new Promise(r=>mock.close(r));}
