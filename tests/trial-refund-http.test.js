@@ -4,6 +4,7 @@ test('HTTP boundary reports only cloud-confirmed refunds and leaves local-only f
  const socket=http.createServer();await new Promise(r=>socket.listen(0,'127.0.0.1',r));const port=socket.address().port;await new Promise(r=>socket.close(r));
  const bootstrap=`
   global.fetch=async()=>{throw Error('Unexpected external request');};
+  process.on('message',message=>{if(message==='flush-test-events')process.send({eventsFlushed:true});});
   require(${JSON.stringify(require.resolve('../cloud-account'))}).createCloudAccount=()=>({trialConfig(req,options){
    if(options.refundFailures!==true)throw Error('Missing operation boundary');
    const mode=req.headers['x-test-outcome'];let spent=0;
@@ -31,7 +32,12 @@ test('HTTP boundary reports only cloud-confirmed refunds and leaves local-only f
    if(mode==='ok')assert.equal(body.answer,'valid code explanation');
    else assert.equal(body.trialRefund,mode==='cloud-failure'?'refunded':'refund_pending');
   }
-  await new Promise(r=>setImmediate(r));
+  // HTTP and IPC use separate channels; wait for a FIFO IPC barrier before checking events.
+  await new Promise((resolve,reject)=>{
+   const receive=event=>{if(event.eventsFlushed){clearTimeout(timer);child.off('message',receive);resolve();}};
+   const timer=setTimeout(()=>{child.off('message',receive);reject(Error('test event flush timeout'));},5000);
+   child.on('message',receive);child.send('flush-test-events');
+  });
   assert.ok(events.some(e=>e.mode==='ok'&&e.spent===10));
   assert.ok(events.some(e=>e.mode==='cloud-failure'&&e.spent===0));
   for(const mode of ['invalid','commit-loss'])assert.ok(!events.some(e=>e.mode===mode&&e.spent===0));
