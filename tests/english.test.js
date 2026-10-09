@@ -29,20 +29,23 @@ test('experimental source-contract failures have an English UI message',()=>{
  const message=ctx.WhoI18n.t('AI 函数约定格式或源码依据不完整，请重试。');
  assert.match(message,/source-contract analysis/);assert.doesNotMatch(message,/[\u4e00-\u9fff]/);
 });
-test('overview failure banners translate both HTTP errors and partial-success errors',async()=>{
+test('language assistance reports translated failures while preserving local structure',async()=>{
  const error='应用进程没有访问 AI 服务的网络权限。请从正常终端启动应用，并检查防火墙或运行环境限制。';
  const source=fs.readFileSync(require.resolve('../public/app'),'utf8');
  const run=source.slice(source.indexOf('function languageHelpNotice('),source.indexOf("$('cancelAnalysis').onclick"));
- for(const locale of ['en','zh-CN'])for(const partial of [true,false]){
+ for(const locale of ['en','zh-CN'])for(const uncertain of [true,false]){
   const nodes=new Map();let calls=0;
-  const ctx=vm.createContext({AbortController,AbortSignal,setInterval:()=>1,clearInterval(){},revision:0,fileName:'sample.js',config:{},activeStructure:null,lineReadingSelection:null,flowReadingStep:null,WhoStructure:{modules:()=>[]},task:async(btn,fn)=>fn(),ensureAI(){},connected:()=>true,render(){},updateFormatHint(){},$:id=>{if(!nodes.has(id))nodes.set(id,{value:'function f(){}',checked:true});return nodes.get(id);},api:async()=>{if(calls++===0)return {language:'JavaScript',blocks:[]};if(!partial)throw Error(error);return {language:'JavaScript',blocks:[],aiOverviewError:error};}});
+  const local={language:'未确定',status:'unsupported',blocks:[],needsLanguageHelp:true};
+  const ctx=vm.createContext({AbortController,AbortSignal,setInterval:()=>1,clearInterval(){},revision:0,fileName:'sample.txt',config:{},activeStructure:null,lineReadingSelection:null,flowReadingStep:null,WhoStructure:{modules:()=>[]},task:async(btn,fn)=>fn(),connected:()=>true,render(){},updateFormatHint(){},$:id=>{if(!nodes.has(id))nodes.set(id,{value:'function f(){}'});return nodes.get(id);},api:async(route,body)=>{assert.equal(route,'analyze');assert.equal(body.ai,false);if(calls++===0)return local;assert.equal(body.identifyLanguage,true);if(!uncertain)throw Error(error);return {...local,languageIdentification:{status:'uncertain',language:'unknown'}};}});
   vm.runInContext(fs.readFileSync(require.resolve('../public/locale-en'),'utf8'),ctx);
   vm.runInContext(fs.readFileSync(require.resolve('../public/i18n'),'utf8'),ctx);
   ctx.WhoI18n.set(locale);ctx.uiText=ctx.WhoI18n.t;ctx.uiError=ctx.WhoI18n.error;
   vm.runInContext(run,ctx);await ctx.run();
   const message=nodes.get('aiProgressText').textContent;
-  if(locale==='en'){assert.match(message,/cannot access the AI service/);assert.doesNotMatch(message,/[\u4e00-\u9fff]/);}
-  else assert.match(message,/应用进程没有访问/);
+  assert.equal(calls,2);assert.equal(nodes.get('cancelAnalysis').hidden,true);
+  assert.equal(ctx.current.blocks,local.blocks);assert.equal(ctx.analyzedSource,'function f(){}');
+  if(locale==='en'){assert.match(message,uncertain?/local result/i:/cannot access the AI service/);assert.doesNotMatch(message,/[\u4e00-\u9fff]/);}
+  else assert.match(message,uncertain?/保留本地结果/:/应用进程没有访问/);
  }
 });
 test('beginner term notes are bilingual, language-scoped and never rewrite AI text',()=>{

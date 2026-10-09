@@ -6,7 +6,7 @@ function resetTalk(){
  talkController?.abort();talkController=null;clearInterval(talkTimer);talkResult=null;talkIdentity='';
  $('exportTalk')?.closest?.('.walkthrough-export')?.remove();
  $('talkStatus').removeAttribute('data-ready');
- $('generateTalk').disabled=false;$('cancelTalk').hidden=true;$('talkStatus').textContent='';
+ $('generateTalk').disabled=!WALKTHROUGH_ENABLED;$('cancelTalk').hidden=true;$('talkStatus').textContent='';
 }
 function talkDraft(){
  const key=talkKey();
@@ -15,7 +15,7 @@ function talkDraft(){
  return talkResult||{title:uiText("选择阅读基础、详略和范围，生成帮助理解代码的解释稿。"),name:fileName,sections:[],questions:[],note:uiText("点击生成会将本次分析的源码发送到你配置的 AI 服务。讲稿由 AI 完整撰写。")};
 }
 async function generateTalk(){
- if(!current)return;
+ if(!WALKTHROUGH_ENABLED||!current)return;
  if(!connected()){settings();return;}
  talkDraft();talkController?.abort();const controller=new AbortController();talkController=controller;
  const key=talkKey(),usedConfig=config,started=Date.now();
@@ -31,6 +31,7 @@ async function generateTalk(){
  finally{if(controller===talkController){clearInterval(talkTimer);talkController=null;$('generateTalk').disabled=false;$('cancelTalk').hidden=true;}}
 }
 $('generateTalk').onclick=generateTalk;
+$('generateTalk').disabled=!WALKTHROUGH_ENABLED;
 $('cancelTalk').onclick=()=>talkController?.abort();
 // Settings live next to the result, so they remain usable after source is folded.
 $('talkControls').append(document.querySelector('.brief-controls'));

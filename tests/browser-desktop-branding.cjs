@@ -35,7 +35,7 @@ fs.mkdirSync(out,{recursive:true});
    await page.screenshot({path:path.join(out,'login-'+viewport.width+'.png')});
   }
   await page.setViewportSize({width:1440,height:900});
-  await page.locator('#accountSkip').click();
+  await page.locator('#accountClose').click();
   const source='// 中文 source must stay unchanged\nconst value = "原文";';
   await page.locator('#source').fill(source);
   await page.evaluate(()=>changeInterfaceLanguage('zh-CN'));

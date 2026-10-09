@@ -29,6 +29,11 @@ if ($PreviousInstaller) {
   if ((Get-Content (Join-Path $target 'previous-user-note.txt') -Raw) -ne 'preserve-across-version') { throw 'Upgrade changed previous user data' }
   if (Test-Path (Join-Path $target 'test-shortcuts/Desktop/Who Is JSON.lnk')) { throw 'Upgrade left the old shortcut' }
 }
+$guide = Get-Content (Join-Path $target 'USER_GUIDE.txt') -Raw
+if ($guide -match '[\p{IsCJKUnifiedIdeographs}]' -or $guide -notmatch 'Email sign-in') { throw 'Expected an English installation guide' }
+if (Test-Path (Join-Path $target '使用说明.txt')) { throw 'Upgrade retained the old installation guide' }
+$uninstallShortcut = Join-Path $target 'test-shortcuts/StartMenu/Uninstall FIMI.lnk'
+if (-not (Test-Path $uninstallShortcut) -or (Test-Path (Join-Path $target 'test-shortcuts/StartMenu/卸载 FIMI.lnk'))) { throw 'Expected only the English uninstall shortcut' }
 $setupVersion = (Get-Item -LiteralPath $setup).VersionInfo.FileVersion
 if ($setupVersion -ne "$version.0") { throw 'Installer version mismatch' }
 $launcherVersion = [Reflection.AssemblyName]::GetAssemblyName((Join-Path $target 'WhoIsJSON.exe')).Version.ToString(3)
@@ -61,6 +66,6 @@ if ((Get-Content $note -Raw) -ne 'preserve-user-file') { throw 'Upgrade changed 
 Run-Checked (Join-Path $target 'Uninstall.exe') "/S _?=$target"
 if (Test-Path (Join-Path $target 'WhoIsJSON.exe')) { throw 'Uninstall left launcher behind' }
 if ((Get-Content $note -Raw) -ne 'preserve-user-file' -or -not (Test-Path (Join-Path $target 'data/self-test.json'))) { throw 'Uninstall removed user file or logs' }
-if (Test-Path (Join-Path $target 'test-shortcuts/Desktop/FIMI.lnk')) { throw 'Uninstall left shortcut behind' }
-@{pass=$true;version=$version;previousVersion=$previousVersion;signatureStatus=$signing.status;installedFiles=@($manifest.PSObject.Properties).Count;selfTest=$test;upgrade=$true;uninstall=$true;userFilesPreserved=$true} | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $root 'installer-verification.json') -Encoding utf8
+if ((Test-Path $uninstallShortcut) -or (Test-Path (Join-Path $target 'test-shortcuts/Desktop/FIMI.lnk'))) { throw 'Uninstall left shortcut behind' }
+@{pass=$true;version=$version;previousVersion=$previousVersion;installerLanguage='en-US';signatureStatus=$signing.status;installedFiles=@($manifest.PSObject.Properties).Count;selfTest=$test;upgrade=$true;uninstall=$true;userFilesPreserved=$true} | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $root 'installer-verification.json') -Encoding utf8
 Write-Output 'Installation, bundled runtime, cloud config, upgrade and safe uninstall passed.'

@@ -147,10 +147,22 @@ function createCloudBaseAccount({ env = process.env, fetcher = fetch, now = Date
     throw failure(404, '未找到账户操作。');
   }
   async function trialRequest(data, current) {
+    // Quota reads are idempotent. A cold or interrupted gateway gets one fresh
+    // attempt; model dispatch and settlement are never replayed here.
+    if(data.action==='quota'){
+      try { return await trialRequestOnce(data,current); }
+      catch(error){
+        if(error.status!==503)throw error;
+        return trialRequestOnce(data,current);
+      }
+    }
+    return trialRequestOnce(data,current);
+  }
+  async function trialRequestOnce(data, current) {
     let res, result, stage = 'gateway-request';
     const started = now();
     try {
-      res = await fetcher(trialUrl, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(data.request_profile==='code-review-64k-v1'?400000:140000),
+      res = await fetcher(trialUrl, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(data.action ? 18000 : data.request_profile==='code-review-64k-v1'?400000:data.reading_context||data.followup_context?160000:140000),
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + current.access }, body: JSON.stringify(data) });
       stage = 'gateway-response';
       result = await res.json();
@@ -158,7 +170,10 @@ function createCloudBaseAccount({ env = process.env, fetcher = fetch, now = Date
       const timeout = error.name === 'TimeoutError' || error.name === 'AbortError';
       throw require('./ai-diagnostics').attach(failure(503, data.action === 'quota' ? '额度服务暂时不可用。' : 'AI 调用未完成，预留额度待核对，请勿反复重试。'), {
         code: timeout ? 'trial_gateway_timeout' : stage === 'gateway-response' ? 'trial_gateway_response' : 'trial_gateway_connection',
-        stage, elapsedMs: now() - started, ...(data.action === 'quota' ? {} : {settlement:'unknown'})
+        stage, elapsedMs: now() - started, gatewayStatus:res?.status,
+        ...(res ? {responseType:res.headers?.get('content-type')?.includes('json')?'json':res.headers?.get('content-type')?.includes('html')?'html':'other'} : {}),
+        transportCode:error?.cause?.code || error?.code,
+        ...(data.action === 'quota' ? {} : {settlement:'unknown'})
       });
     }
     if (!res.ok) {
@@ -173,18 +188,45 @@ function createCloudBaseAccount({ env = process.env, fetcher = fetch, now = Date
         trial_settlement_failed: '已收到 AI 响应，但试用额度结算未确认，请勿连续重试。',
         trial_invalid_content: '云端返回格式不正确。'
       };
+      messages.trial_followup_scope = '请只询问当前代码的含义、执行过程或问题；与这份代码无关的请求不予回答。';
       known.push('云端尚未启用代码评审的大额度请求，请更新试用服务或使用个人 API。');
-      const error = require('./ai-diagnostics').attach(failure(res.status, messages[diagnostics.code] || (known.includes(result?.error) ? result.error : '额度服务暂时不可用。')), diagnostics);
+      known.push('额度返还尚未确认，请稍后重新查询额度。','AI 请求已取消。');
+      known.push('试用模式仅支持当前代码阅读请求，请更新应用。');
+      const refundMessage = diagnostics.settlement === 'refunded' ? 'AI 生成失败，本次使用的试用额度已返还。'
+        : diagnostics.settlement === 'refund_pending' ? 'AI 生成失败，额度返还尚未确认，请稍后重新查询额度。' : null;
+      const error = require('./ai-diagnostics').attach(failure(res.status,
+        (diagnostics.code==='trial_followup_scope' ? messages.trial_followup_scope : refundMessage) || messages[diagnostics.code] || (known.includes(result?.error) ? result.error : '额度服务暂时不可用。')), diagnostics);
       error.trialRateLimited = res.status === 429 && result?.code === 'rate';
       throw error;
     }
     return result;
   }
-  function trialConfig(req) {
+  function trialConfig(req, { refundFailures = false } = {}) {
     const current = session(req);
     if (!trialEnabled) throw failure(403, unavailable);
     let codeReviewReady=false;
-    return { base: 'https://api.deepseek.com', model: 'deepseek-flash', reviewThinking: true, sponsoredCall(data, { signal, requestProfile } = {}) {
+    const operation = refundFailures ? require('./trial-operation').createTrialOperation(data=>trialRequest(data,current)) : null;
+    const config = { base: 'https://api.deepseek.com', model: 'deepseek-flash', reviewThinking: true,
+      ...(operation ? {async prepareTrial(){
+        const quota=await operation.prepare();
+        if(quota.directReadingProfile!=='direct-reading-v1')throw failure(503,'云端尚未启用当前点读模式，请更新试用服务或使用个人 API。');
+        config.directReadingProfile=quota.directReadingProfile;
+      }} : {}),
+      ...(operation ? {finishTrial:success=>operation.finish(success)} : {}),
+      sponsoredCall(data, { signal, requestProfile, followupContext, readingContext } = {}) {
+      if(readingContext){
+        const input=readingContext.input, selected=input?.selectedSource, token=input?.selectedToken;
+        data={...data,messages:undefined,reading_context:{...readingContext,input:{...input,
+          ...(selected?{selectedSource:{start:selected.start,end:selected.end}}:{}),
+          ...(token?{selectedToken:{line:token.line,startColumn:token.startColumn,endColumn:token.endColumn}}:{})}}};
+      }
+      if(followupContext){
+        const input=followupContext.input, selected=input?.selectedSource;
+        // Send source once; the gateway reconstructs both the selected excerpt
+        // and the fixed system prompt instead of accepting client instructions.
+        data={...data,messages:undefined,followup_context:{...followupContext,input:{...input,
+          ...(selected?{selectedSource:{start:selected.start,end:selected.end}}:{})}}};
+      }
       for (const [id, queue] of trialQueues) if (!queue.pending && queue.next <= now()) trialQueues.delete(id);
       let queue = trialQueues.get(current.uid);
       if (!queue) { queue = { tail: Promise.resolve(), pending: 0, next: 0 }; trialQueues.set(current.uid, queue); }
@@ -205,13 +247,14 @@ function createCloudBaseAccount({ env = process.env, fetcher = fetch, now = Date
             data={...data,request_profile:requestProfile};
           }
           queue.next = now() + 5100;
-          try { return await trialRequest(data, current); }
+          try { return await (operation ? operation.call(data) : trialRequest(data, current)); }
           catch (error) { if (!error.trialRateLimited || attempt) throw error; }
         }
       });
       queue.tail = work.catch(() => {}).finally(() => { queue.pending--; });
       return work;
     } };
+    return config;
   }
   return { handle, callback: async () => { throw failure(400, 'GitHub 登录未完成，请重试。'); }, trialConfig };
 }

@@ -32,8 +32,8 @@ function functionLinks(source,checker,blocks){
   const symbol=checker.getSymbolAtLocation(node.expression),declarations=symbol?.declarations;
   if(!declarations||declarations.length!==1||writes.has(symbol)||propertyWrites.has(node.expression.text))return [];
   const target=declarations[0];if(!ts.isFunctionDeclaration(target)||!target.body||target.getSourceFile()!==source)return [];
-  const to=find(target),from=owner&&find(owner);if(!to||!from)return [];
-  return [{name:node.expression.text,fromStart:from.start,toStart:to.start,line:line(node)}];
+  const to=find(target),from=owner&&find(owner);if(!to||(owner&&!from))return [];
+  return [{name:node.expression.text,fromStart:from?.start||0,toStart:to.start,line:line(node)}];
  });
 }
 module.exports={functionLinks};

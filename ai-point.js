@@ -7,7 +7,7 @@ const foundation=require('./ai-review-context');
 
 // A hosted adapter's static reviewThinking flag is not deployed low support.
 function supportsLow(config={}) {
-    if(config.model!=='deepseek-flash'||typeof config.sponsoredCall==='function')return false;
+    if(config.model!=='deepseek-flash'||typeof config.sponsoredCall==='function'&&config.directReadingProfile!==require('./ai-direct-reading').PROFILE)return false;
     try {return new URL(config.base).origin==='https://api.deepseek.com';}catch{return false;}
 }
 function route(messages,options={},config={}) {
@@ -38,29 +38,7 @@ function protocolError(phase) {
     return require('./ai-diagnostics').attach(Object.assign(Error(phase==='draft'?'AI 词语解释格式不完整，请再次点击重试。':'AI 复核格式不完整，请重试。'),{code:'AI_REVIEW_PROTOCOL'}),{aiPhase:phase});
 }
 function draftAnswer(raw,scope,transportType=false,semantic=false) {
-    if(scope!=='token'&&!semantic)return raw;
-    let value;
-    try {value=JSON.parse(raw.trim().replace(/^```(?:json)?\s*\n/,'').replace(/\n```$/,''));}catch{throw protocolError('draft');}
-    if(!value||Array.isArray(value))throw protocolError('draft');
-    const keys=Object.keys(value).sort().join();
-    if(semantic) {
-        const echo=value.type==='json_object',baseKeys=echo?Object.keys(value).filter(k=>k!=='type').sort().join():keys;
-        if(transportType&&['effect,kind','details,effect,kind'].includes(baseKeys)&&value.kind==='definition'
-            &&typeof value.effect==='string'&&value.effect.trim()
-            &&(!Object.hasOwn(value,'details')||typeof value.details==='string'&&value.details.trim()))
-            return value.effect+(Object.hasOwn(value,'details')?'\n\n'+value.details:'');
-        throw protocolError('draft');
-    }
-
-    if(transportType&&(keys==='kind,paragraphs'||keys==='kind,paragraphs,type'&&value.type==='json_object')&&value.kind==='definition'
-        &&Array.isArray(value.paragraphs)&&value.paragraphs.length
-        &&value.paragraphs.every(paragraph=>typeof paragraph==='string'&&paragraph.trim()))return value.paragraphs.join('\n\n');
-    if(typeof value.answer!=='string'||!value.answer.trim())throw protocolError('draft');
-    // One observed transport-label echo, only on the direct definition route.
-    // deliver() supplies the fixed app kind; never repair or rewrite the answer.
-    if(!(keys==='answer,kind'&&value.kind==='definition')
-        &&!(transportType&&keys==='answer,type'&&value.type==='json_object'))throw protocolError('draft');
-    return value.answer;
+    return require('./ai-direct-reading').draftAnswer(raw,scope,transportType,semantic);
 }
 
 async function run(call,config,selection,options={}) {
@@ -72,20 +50,15 @@ async function run(call,config,selection,options={}) {
     const tokenPrompts=require('./ai-token-prompts');
     const localScope=scope==='token'?'token':require('./ai-point-contract').scopeFor(input);
     if(selection.direct&&supportsLow(config)) {
-        // Only the local contract is sent. Generic review obligations would
-        // turn a selected line into an async/input/output tutorial.
-        const awaitScope=['line','token'].includes(localScope)?require('./ai-point-await-line').classify(input,options.readingMode):null;
-        const awaitScene=awaitScope==='line';
-        const semantic=awaitScope?require('./ai-point-await-line').prompt(options.locale,options.readingMode,awaitScope):scope==='token'?tokenPrompts.semanticDraft(input,options.locale,options.readingMode,true):null;
-        const prompt=semantic|| (scope==='token'?tokenPrompts.draft(options.locale,options.readingMode,true)
-            :require('./ai-point-contract').profile(options.locale,options.readingMode,localScope,undefined,true,input)
-                +(options.locale==='en'?'\nReturn only the explanation as plain text.':'\n只返回解释正文，不使用JSON包装。'));
-        const raw=await call(config,[{role:'system',content:prompt},{role:'user',content:JSON.stringify(input)}],
+        const direct=require('./ai-direct-reading'),prepared=direct.prepare(input,options);
+        const raw=await call(config,prepared.messages,
             {...options,explanation:false,reviewFoundation:null,reviewDraft:false,reviewReasoning:false,
-                pointDraftLow:localScope!=='line'||options.readingMode==='beginner',pointDraftHigh:localScope==='line'&&options.readingMode!=='beginner',usagePhase:'draft',maxTokens:6000,json:scope==='token'||awaitScene});
+                readingContext:direct.context(input,options),
+                pointDraftLow:prepared.reasoningEffort==='low',pointDraftHigh:prepared.reasoningEffort==='high',usagePhase:'draft',maxTokens:6000,json:prepared.json});
         if(options.signal?.aborted)throw Error('AI 请求已取消。');
-        return deliver(draftAnswer(raw,scope,true,Boolean(semantic)),scope,'draft',true);
+        return direct.decode(raw,prepared);
     }
+
     const wholeExplanation=localScope==='token'||localScope==='line';
     const draftPrompt=scope==='token'?tokenPrompts.draft(options.locale,options.readingMode):prompts[localScope];
     const reviewPrompt=scope==='token'?tokenPrompts.review(options.locale,options.readingMode):prompts.review(prompts[localScope]);

@@ -31,20 +31,20 @@ static class DesktopHost {
  public static Dictionary<string,object> Health(){try{return Json.Deserialize<Dictionary<string,object>>(Request("/health",null,null));}catch{return null;}}
  static bool IsProduct(Dictionary<string,object> h){return h!=null&&h.ContainsKey("app")&&Convert.ToString(h["app"])=="CodeLingo"&&h.ContainsKey("product")&&(Convert.ToString(h["product"])=="Who Is JSON"||Convert.ToString(h["product"])=="FIMI");}
  public static bool IsOurs(Dictionary<string,object> h){return IsProduct(h)&&h.ContainsKey("desktopId")&&Convert.ToString(h["desktopId"])==Id;}
- static string Token(){var c=Request("/config.js",null,null);var m=System.Text.RegularExpressions.Regex.Match(c,"window.APP_TOKEN=\"([a-f0-9]{48})\"");if(!m.Success)throw new Exception("无法连接本地程序，请重新启动。");return m.Groups[1].Value;}
+ static string Token(){var c=Request("/config.js",null,null);var m=System.Text.RegularExpressions.Regex.Match(c,"window.APP_TOKEN=\"([a-f0-9]{48})\"");if(!m.Success)throw new Exception("Cannot connect to the local application. Please restart FIMI.");return m.Groups[1].Value;}
  public static void Stop(){try{if(IsOurs(Health()))Request("/api/quit","{}",Token());}catch{}if(server!=null){try{if(!server.WaitForExit(3000))server.Kill();}catch{}}}
  public static void Start(){
   Directory.CreateDirectory(Data);var h=Health();if(IsOurs(h))return;
   // Keep the same origin when moving from the development launch to the installed edition.
   if(selfTesting&&h!=null)throw new Exception("Self-test port became occupied; retry.");
-  if(IsProduct(h)){Request("/api/quit","{}",Token());Thread.Sleep(800);}else if(h!=null)throw new Exception("启动位置已被其他程序使用，请关闭占用本地 43127 端口的程序后再试。");
+  if(IsProduct(h)){Request("/api/quit","{}",Token());Thread.Sleep(800);}else if(h!=null)throw new Exception("Local port 43127 is in use by another application. Close that application and try again.");
   var node=Path.Combine(Root,"runtime","node","node.exe");var py=Path.Combine(Root,"runtime","python","python.exe");var app=Path.Combine(Root,"app");
-  if(!File.Exists(node)||!File.Exists(py)||!File.Exists(Path.Combine(app,"server.js")))throw new Exception("安装文件不完整，请重新安装 FIMI。");
+  if(!File.Exists(node)||!File.Exists(py)||!File.Exists(Path.Combine(app,"server.js")))throw new Exception("Installation files are incomplete. Please reinstall FIMI.");
   var info=new ProcessStartInfo(node,"\""+Path.Combine(app,"server.js")+"\"");info.WorkingDirectory=app;info.UseShellExecute=false;info.CreateNoWindow=true;info.RedirectStandardOutput=true;info.RedirectStandardError=true;
   info.EnvironmentVariables["CODELINGO_PORT"]=Port.ToString();info.EnvironmentVariables["CODELINGO_PYTHON"]=py;info.EnvironmentVariables["WHO_DESKTOP_ID"]=Id;info.EnvironmentVariables["PYTHONNOUSERSITE"]="1";info.EnvironmentVariables.Remove("PYTHONHOME");info.EnvironmentVariables.Remove("PYTHONPATH");
   server=new Process();server.StartInfo=info;server.OutputDataReceived+=(s,e)=>Log(e.Data);server.ErrorDataReceived+=(s,e)=>Log(e.Data);server.Start();server.BeginOutputReadLine();server.BeginErrorReadLine();
-  for(int i=0;i<50;i++){if(IsOurs(Health()))return;if(server.HasExited)throw new Exception("本地服务未能启动。请Open installation folder data\\desktop.log。");Thread.Sleep(250);}
-  Stop();throw new Exception("启动超时。请重试，或Open installation folder data\\desktop.log。");
+  for(int i=0;i<50;i++){if(IsOurs(Health()))return;if(server.HasExited)throw new Exception("The local service could not start. Check data\\desktop.log in the installation folder.");Thread.Sleep(250);}
+  Stop();throw new Exception("Startup timed out. Try again or check data\\desktop.log in the installation folder.");
  }
  static readonly object LogLock=new object();static void Log(string line){if(line==null)return;try{lock(LogLock){var file=Path.Combine(Data,"desktop.log");if(File.Exists(file)&&new FileInfo(file).Length>2000000)File.WriteAllText(file,"");File.AppendAllText(file,DateTime.Now.ToString("s")+" "+line+Environment.NewLine);}}catch{}}
  public static Rectangle InitialWindowBounds(Rectangle work){

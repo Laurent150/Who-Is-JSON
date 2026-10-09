@@ -67,8 +67,8 @@ test('flow prompts carry exact confirmed callees but exclude shadowed names',asy
 class Node {
  constructor(tag='div',text='',cls=''){this.tagName=tag.toUpperCase();this.text=text;this.className=cls;this.children=[];this.dataset={};this.style={};this.attributes={};this.hidden=false;this.classList={add:c=>{this.className+=' '+c;},remove:c=>{this.className=this.className.split(' ').filter(x=>x!==c).join(' ');},toggle:(c,on)=>{this.classList.remove(c);if(on)this.classList.add(c);},contains:c=>this.className.split(' ').includes(c)};}
  get textContent(){return this.text+this.children.map(c=>c.textContent).join('');} set textContent(v){this.text=String(v);this.children=[];}
- append(...items){for(const n of items){n.parent=this;this.children.push(n);}} replaceChildren(...items){this.text='';this.children=[];this.append(...items);}
- setAttribute(k,v){this.attributes[k]=String(v);} addEventListener(name,handler){(this.events??={})[name]=handler;} click(){return this.onclick?.();} focus(){} scrollTo(){} getBoundingClientRect(){return {top:0,bottom:10,left:0};}
+ append(...items){for(const n of items){n.parent=this;this.children.push(n);}} insertBefore(node,ref){node.parent=this;const i=this.children.indexOf(ref);this.children.splice(i<0?this.children.length:i,0,node);} replaceChildren(...items){this.text='';this.children=[];this.append(...items);}
+ setAttribute(k,v){this.attributes[k]=String(v);} addEventListener(name,handler){(this.events??={})[name]=handler;} click(){return this.onclick?.();} focus(){} contains(node){return this.children.some(child=>child===node||child.contains(node));} scrollTo(){} scrollIntoView(){} getBoundingClientRect(){return {top:0,bottom:10,left:0};}
  remove(){if(this.parent)this.parent.children=this.parent.children.filter(x=>x!==this);}
  querySelectorAll(selector){return this.children.flatMap(n=>[...(selector==='button'?n.tagName==='BUTTON':selector.startsWith('.')?n.classList.contains(selector.slice(1)):false)?[n]:[],...n.querySelectorAll(selector)]);}
  querySelector(selector){return this.querySelectorAll(selector)[0]||null;}
@@ -76,7 +76,7 @@ class Node {
 function workspace(api){
  const nodes=new Map(),get=id=>{if(!nodes.has(id))nodes.set(id,new Node());return nodes.get(id);};
  const ctx=vm.createContext({api,AbortController,AbortSignal,Error,Map,Set,setInterval,clearInterval,innerWidth:1200,innerHeight:800,
-  config:{},current:{language:'JavaScript',blocks:[]},analyzedSource:'const 商品 = "😀";\nreturn 商品;',fileName:'test.js',sourceOffset:7,
+  readingMode:'beginner',config:{},current:{language:'JavaScript',blocks:[]},analyzedSource:'const 商品 = "😀";\nreturn 商品;',fileName:'test.js',sourceOffset:7,
   WhoReading:require('../public/reading-model'),WhoFlowModel:publicFlow,beginnerMode:()=>true,selectionQuestion:()=> '请解释选中的代码段，让一个没有编程背景的成年人能看懂。',connected:()=>true,
   element:(tag,text='',cls='')=>new Node(tag,text,cls),document:{addEventListener(){},createTextNode:text=>new Node('text',text)},window:{addEventListener(){}},$:get,
   appendAITerms(){},appendExplanationSave(){},appendBuiltinReference(){},explanationSource:s=>s,toast(){},settings(){},
@@ -90,18 +90,18 @@ const deferred=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {
 test('generated workspace titles follow the UI language without translating source-defined names',()=>{
  const app=workspace(async()=>{});
  app.ctx.current.language='Python';
- app.ctx.uiText=text=>({'文件入口':'Entry point','文件中的说明':'File notes','忽略与例外规则':'Ignore rules and exceptions'}[text]||text);
+ app.ctx.uiText=text=>({'这段代码':'This section','文件中的说明':'File notes','忽略与例外规则':'Ignore rules and exceptions'}[text]||text);
  const before=app.ctx.analyzedSource;
  app.run("studioShowFunction({role:'script-entry',kind:'module',title:'文件开始时的准备',start:1,end:2},null)");
- assert.equal(app.get('studioExplain').children[0].textContent,'Entry point');
+ assert.equal(app.get('studioExplain').children[0].textContent,'This section');
  app.run("studioShowFunction({role:'script-entry',kind:'module',title:'文件开始时的准备',start:1,end:2},{summary:'Source summary',input:'None',output:'Text'})");
- assert.equal(app.get('studioExplain').children[0].textContent,'Entry point');
+ assert.equal(app.get('studioExplain').children[0].textContent,'This section');
  assert.equal(app.run("studioBlockTitle({kind:'module',title:'文件中的说明'})"),'File notes');
  assert.equal(app.run("studioBlockTitle({kind:'function',title:'文件中的说明'})"),'文件中的说明');
  app.ctx.current.language='Gitignore';
  assert.equal(app.run("studioBlockTitle({kind:'config',title:'忽略与例外规则'})"),'Ignore rules and exceptions');
  app.ctx.uiText=text=>text;
- assert.equal(app.run("studioBlockTitle({role:'script-entry',title:'文件开始时的准备'})"),'文件入口');
+ assert.equal(app.run("studioBlockTitle({role:'script-entry',title:'文件开始时的准备'})"),'这段代码');
  assert.equal(app.ctx.analyzedSource,before);
 });
 
@@ -115,7 +115,8 @@ test('line and token clicks remain separate; Shift extends lines and original so
  token.onclick({stopPropagation(){stopped=true;},shiftKey:false});await new Promise(setImmediate);
  assert.ok(stopped);assert.equal(seen.length,2);assert.equal(seen[1].token.text,'商品');assert.equal(seen[1].token.startColumn,6);assert.equal(seen[1].token.endColumn,8);assert.equal(app.get('studioTokenPopup').hidden,false);assert.ok(token.classList.contains('selected-token'));
  rows[1].onclick({shiftKey:true});await new Promise(setImmediate);
- assert.equal(app.get('studioTokenPopup').hidden,true);assert.equal(token.classList.contains('selected-token'),false);
+ assert.equal(app.get('studioTokenPopup').hidden,false);assert.equal(token.classList.contains('selected-token'),false);
+ assert.equal(app.get('studioTokenText').textContent,'Explanation');
  assert.deepEqual({...seen.at(-1).selection},{start:1,end:2});assert.match(app.get('studioRange').textContent,/选中代码段/);
  assert.equal(app.ctx.analyzedSource,'const 商品 = "😀";\nreturn 商品;');
 });
@@ -126,7 +127,7 @@ test('late line replies cannot overwrite a newer step, and late token replies st
  app.get('studioExplain').textContent='Current step';line.resolve({answer:'Old line'});await new Promise(setImmediate);
  assert.equal(app.get('studioExplain').textContent,'Current step');
  app.ctx.anchor=new Node('button');app.run("openStudioToken(anchor,{line:1,startColumn:6,endColumn:8,text:'商品'})");
- app.run("studioSelect(2,2,false,'function')");token.resolve({answer:'Old token'});await new Promise(setImmediate);
+ app.run("studioSelect(2,2,false,'function')");assert.equal(app.get('studioTokenPopup').hidden,false);app.run('closeStudioToken()');token.resolve({answer:'Old token'});await new Promise(setImmediate);
  assert.equal(app.get('studioTokenPopup').hidden,true);assert.doesNotMatch(app.get('studioTokenText').textContent,/Old token/);
 });
 
@@ -145,26 +146,12 @@ test('a follow-up belongs to its selection and cannot replace the next selected 
 });
 
 
-test('opening connected functions generates once, reuses cache and never eagerly expands callees',async()=>{
- let calls=0;const pending=deferred(),app=workspace(()=>{calls++;return pending.promise;});
- app.ctx.current.blocks=[{title:'total',start:1,end:2,kind:'function'}];
- const detail=app.run('studioFunction(current.blocks[0],[])');
- assert.equal(calls,0);detail.open=true;detail.events.toggle();assert.equal(calls,1);
- detail.open=false;detail.events.toggle();detail.open=true;detail.events.toggle();assert.equal(calls,1);
- pending.resolve({summary:'Total',input:'Values',output:'Number',nodes:[]});await new Promise(setImmediate);
- detail.events.toggle();assert.equal(calls,1);assert.match(detail.textContent,/AI 语义说明/);
- const second=app.run('studioFunction(current.blocks[0],[])');second.open=true;second.events.toggle();await new Promise(setImmediate);assert.equal(calls,1);
+test('expansion uses the single module route and never generates legacy detailed flow',async()=>{
+ const seen=[],pending=deferred(),app=workspace((route,body)=>{seen.push({route,body});return pending.promise;});app.ctx.WhoFlowModel={scaffold:()=>({nodes:[]})};app.ctx.current.blocks=[{title:'total',start:1,end:2,kind:'function'}];const card=app.run('studioFunction(current.blocks[0])');card.querySelector('.studio-map-expand').click();assert.equal(seen.length,1);assert.equal(seen[0].route,'module-reading');assert.equal(app.get('studioFlow').querySelector('.studio-detailed-flow'),null);pending.resolve({summary:'Total',input:'Values',output:'Number',nodes:[]});await new Promise(setImmediate);app.run('studioMapBack()');card.querySelector('.studio-map-expand').click();assert.equal(seen.length,1);
 });
-
-test('offline expansion makes no request and a failed automatic flow waits for explicit retry',async()=>{
- let calls=0;const app=workspace(async()=>{calls++;throw Error('Temporary failure');});
- app.ctx.current.blocks=[{title:'total',start:1,end:2,kind:'function'}];app.ctx.connected=()=>false;
- const offline=app.run('studioFunction(current.blocks[0],[])');offline.open=true;offline.events.toggle();assert.equal(calls,0);
- app.ctx.connected=()=>true;const online=app.run('studioFunction(current.blocks[0],[])');online.open=true;online.events.toggle();await new Promise(setImmediate);assert.equal(calls,1);
- online.open=false;online.events.toggle();online.open=true;online.events.toggle();assert.equal(calls,1);
- const retry=online.querySelector('.studio-generate');assert.equal(retry.disabled,false);assert.match(retry.textContent,/重试/);await retry.click();assert.equal(calls,2);
+test('offline map does not request; errors expose a manual retry without eager repetition',async()=>{
+ let calls=0;const app=workspace(async()=>{calls++;throw Error('Temporary failure');});app.ctx.WhoFlowModel={scaffold:()=>({nodes:[]})};app.ctx.current.blocks=[{title:'total',start:1,end:2,kind:'function'}];app.ctx.connected=()=>false;const card=app.run('studioFunction(current.blocks[0])');card.querySelector('.studio-map-expand').click();assert.equal(calls,0);app.ctx.connected=()=>true;app.get('studioFlow').querySelector('.studio-map-retry').click();await new Promise(setImmediate);assert.equal(calls,1);assert.match(app.get('studioFlow').textContent,/Temporary failure/);assert.ok(app.get('studioFlow').querySelector('.studio-map-retry'));app.get('studioFlow').querySelector('.studio-map-retry').click();await new Promise(setImmediate);assert.equal(calls,2);
 });
-
 
 test('unknown language heading is translated without changing analysis facts',()=>{
  const app=workspace(async()=>{throw Error('No AI request expected');});

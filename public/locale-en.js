@@ -1,5 +1,16 @@
 // Authored interface messages only; never used to translate source code or saved content.
 (function(root){root.WhoEnglish={
+  "针对当前代码提问…": "Ask about the current code…",
+  "针对当前代码提问": "Ask about the current code",
+  "正在回答与当前代码相关的问题…": "Answering your question about the current code…",
+  "请只询问当前代码的含义、执行过程或问题；与这份代码无关的请求不予回答。": "Please ask about the meaning, behavior, or problems of the current code. Requests unrelated to this code cannot be answered.",
+  "问题请控制在 500 字符以内，并只询问当前代码。": "Please keep your question within 500 characters and ask only about the current code.",
+  "AI 未返回可核对的代码回答，请重新提问。": "AI did not return a verifiable answer about the code. Please ask again.",
+  "AI 生成失败，本次使用的试用额度已返还。": "AI generation failed. The trial credits used for this operation have been returned.",
+  "本次使用的试用额度已返还。": "The trial credits used for this operation have been returned.",
+  "AI 生成失败，额度返还尚未确认，请稍后重新查询额度。": "AI generation failed. The credit return is not yet confirmed. Please check your allowance again later.",
+  "额度返还尚未确认，请稍后重新查询额度。": "The credit return is not yet confirmed. Please check your allowance again later.",
+  "云端尚未启用失败返还额度，请更新试用服务或使用个人 API。": "The trial service does not yet support failure refunds. Update the trial service or use your own API.",
   "AI 服务响应超时，本次调用及预留额度待核对，请勿连续重试。": "The AI service timed out. This request and its reserved allowance need to be checked. Please avoid repeated retries.",
   "与 AI 服务的连接中断，本次调用及预留额度待核对，请勿连续重试。": "The connection to the AI service was interrupted. This request and its reserved allowance need to be checked. Please avoid repeated retries.",
   "AI 服务返回错误，本次调用及预留额度待核对，请勿连续重试。": "The AI service returned an error. This request and its reserved allowance need to be checked. Please avoid repeated retries.",
@@ -579,7 +590,7 @@
   "讲稿目录": "Walkthrough contents",
   "如果被追问": "Follow-up questions",
   "WHO IS JSON / 看懂代码，讲清代码。": "WHO IS JSON / Understand code. Explain it clearly.",
-  "本地运行 · 开源试用版": "Runs locally · Open source",
+  "本地运行": "Runs locally",
   "核对修复建议": "Review repair suggestions",
   "关闭修复预览": "Close repair preview",
   "修复前的原文": "Original source before repair",
@@ -600,6 +611,7 @@
   "断开连接并清除配置": "Disconnect and clear settings",
   "本地收藏，仅保存在当前浏览器。": "Local items are stored only in this browser.",
   "关闭词语解释": "Close word explanation",
+  "关闭解释": "Close explanation",
   "AI 上下文解释": "AI explanation in context",
   "✓ 收藏已同步": "✓ Saved items synced",
   "我的账户": "My account",
@@ -887,3 +899,38 @@ Object.assign(WhoEnglish,{
 });
 
 Object.assign(globalThis.WhoEnglish, {"AI 最终复核格式不完整，请重试。":"The final AI check was incomplete. Please try again.","AI 最终复核未通过，请重试或缩小讲解范围。":"The explanation did not pass the final AI check. Please try again or select a smaller scope."});
+
+Object.assign(globalThis.WhoEnglish,{"模块正文及输入、输出将在生成后显示。":"The module explanation and input/output will appear after generation.","解释这个模块":"Explain this module","配置 AI 后解释模块":"Configure AI to explain this module","重试模块解释":"Retry module explanation","请选择有效的模块范围。":"Select a valid module range.","模块解释格式不完整，请重试。":"The module explanation format is incomplete. Please try again."});
+Object.assign(globalThis.WhoEnglish,{"生成详细 AI 流程（可选）":"Generate detailed AI flow (optional)"});
+
+Object.assign(globalThis.WhoEnglish,{"正在理解这个模块…":"Understanding this module…","类型约定":"Type definition","引入":"Import"});
+
+Object.assign(globalThis.WhoEnglish,{"函数外的代码":"Code outside functions","执行步骤":"Execution steps","选择一个模块读正文，展开流程，再点击步骤对照源码。":"Select a module to read, open its map, then select a step alongside the source.","点模块读正文；展开流程查看当前步骤。":"Select a module to read; open its map to inspect the steps.","此调用回到已在阅读路径中的模块。":"This call returns to a module already on your reading path.","其他模块":"Other modules","返回":"Back","从第 ":"From line "," 行调用处进入；这里展示函数定义。":" call site; this view shows the function definition.","查看调用的模块":"View called module","选择模块，逐步阅读":"Choose a module and read step by step"});
+
+Object.assign(WhoEnglish,{"返回语句":"Return"});
+
+Object.assign(WhoEnglish,{"这段代码":"This section","解释模块：{0}，第{1}行":"Explain module: {0}, lines {1}"});
+
+Object.assign(WhoEnglish,{"正在生成流程标题和模块解释…":"Generating flow labels and module explanation…","连接 AI 后可生成流程标题和模块解释。":"Connect AI to generate flow labels and the module explanation.","重试模块阅读":"Retry module reading","配置 AI 后生成流程标题":"Configure AI to generate flow labels"});
+
+Object.assign(WhoEnglish,{"这部分只定位到源码范围，内部流程尚未展开。":"Only the source range is identified here; its internal flow has not been expanded."});
+
+Object.assign(globalThis.WhoEnglish, {
+  "登录赠送AI试用额度，也可自行配置服务": "Sign in to receive AI trial credits, or configure your own service",
+  "当前为本地模式": "You are using local mode",
+  "仅能查看基础结构和识别图片中的文字，无法使用 AI 点读和模块解释。登录获取可用试用额度，或配置自己的 AI 服务，即可使用这些功能。": "Local mode provides basic structure viewing and text recognition from images. AI code explanations and module explanations are unavailable. Sign in for available trial credits or configure your own AI service to use these features.",
+  "邮箱登录": "Sign in with email",
+  "配置 AI": "Configure AI",
+  "在上方代码框中拖选文字，再点击此按钮；将查看所选内容所在的完整行。": "Select text in the code editor above, then click this button to explore the complete lines containing your selection.",
+  "默认查看整个文件。": "The whole file is selected by default.",
+  "请先登录获取可用试用额度，或在 AI 设置中配置服务。": "Sign in for available trial credits, or configure a service in AI settings.",
+  "服务地址已保存；尚未填写密钥，当前仍为本地模式。": "The service address is saved. No API key is entered, so local mode is still active."
+});
+
+Object.assign(globalThis.WhoEnglish, {"本地截图识别自带语言包，不需要 API 密钥。识别后请核对缩进、标点和变量名。": "Local screenshot recognition includes language data and needs no API key. Check indentation, punctuation and variable names after recognition."});
+
+Object.assign(globalThis.WhoEnglish,{"用 AI 识别":"Recognize with AI","需要连接支持图片的模型，会将图片发送给所用服务。":"Requires an image-capable model. Sends the image to your configured service."});
+Object.assign(globalThis.WhoEnglish, {
+ "云端尚未启用当前点读模式，请更新试用服务或使用个人 API。": "The trial service has not enabled the current reading mode. Update the service or use your own API.",
+ "试用模式仅支持当前代码阅读请求，请更新应用。": "The trial service supports current code-reading requests. Please update the app."
+});

@@ -1,5 +1,98 @@
 # CloudBase AI trial deployment
 
+## Deployed failure refunds and shared direct reading — 2026-10-09
+
+**Deployed as service version 006 with 100% traffic.** The failure-refund
+migration has been applied and the live health response advertises
+`failure-refund-v1` and `direct-reading-v1`. The owner signed in to the refreshed
+43131 preview and confirmed one successful trial point-reading generation.
+The live ledger recorded one succeeded operation, zero unfinished operations,
+zero unsettled requests and zero held credit. Wallet and campaign charge deltas
+both matched that operation's charge. The three existing configured secrets,
+route, port and scaling settings were preserved; version 005 remains available.
+
+Before deployment, the owner had already confirmed quota recovery in diagnostic
+page 43130. Inspection found version 005 healthy and no pending holds. Minimum
+replicas remains zero and log search remains disabled; cold start is a possible
+contributor, not a proven cause of the earlier incomplete gateway responses.
+The successful new generation establishes current availability, not a conclusive
+historical root cause or a guarantee against future upstream outages.
+
+Build a new deployment directory with
+`node cloudbase/build-trial.cjs .browser-artifacts/<new-directory>`.
+It copies an explicit manifest of shared source files and locked TypeScript 5.9.3,
+including its license, without installing product dependencies or copying keys.
+Do not deploy only the former six-file folder: the shared runtime is required.
+Apply `migrations/202610090001_trial_failure_refunds.sql` once after the existing
+ledger migration, then update the existing Cloud Run service from that build
+context. Preserve secrets, route, port and scaling. Never rerun the initial grant
+migration or reset wallet totals. Keep version 005 available for rollback.
+
+The migrated quota response must advertise both `failure-refund-v1` and
+`direct-reading-v1`. The desktop confirms these before routing a paid request.
+It does not infer support from health or a static review flag. Quota queries get
+at most one retry after a transient 503; paid generation is not retried.
+
+Words, single lines, passages and modules use the same shared direct-generation
+prompts, selected source, model, reasoning effort, token limit and decoders as
+ordinary official DeepSeek Flash. Standard single-line reading uses high;
+other direct reading uses low, with the existing 6000-token limit. English and
+Chinese, beginner and standard modes are retained. Module prose, IO and node
+labels remain one generation. Language identification and copy-format repair
+also share their original prompts and decoders. No new review or final audit is
+added. Provider limits match ordinary requests; extra hosted transport time is
+only for authentication and accounting.
+
+Examples/questions remain one short non-thinking request, 1100 tokens and a
+60-second provider limit. The whole current source is supplied, with an optional
+selected-code focus. Obvious unrelated requests are refused before dispatch;
+model responses must pass the shared relevance/format/source-quote checks.
+These checks do not mathematically prove resistance to every prompt injection.
+The default gateway rejects raw arbitrary-message requests. The explicit
+`FIMI_ALLOW_LEGACY_RAW=1` compatibility switch is for controlled legacy use and
+is not enabled in the deployed service. Paused manuscripts
+and the unused old flow API are not part of the new hosted reading protocol.
+
+The gateway rebuilds prompts from bounded source context, validates the actual
+provider output and completes accounting **before returning any generated
+content**. A failed response, usage record, final decoder or settlement triggers
+trusted failure marking and refund of the operation. Provider costs are borne
+by the platform; duplicate refunds and late settlement cannot increase customer
+credit or re-charge a refund. The database may retain provider cost for audit.
+A successful response carries its confirmed operation state, so the desktop
+does not make another success acknowledgement request.
+
+A public client's failure claim cannot change balances: `complete(false)` is
+read-only. Quota recovery only refunds durable cloud-observed failed records.
+Unknown network delivery, a desktop rendering error after cloud success, or a
+ledger outage before a failure marker is persisted is not proof of a refundable
+failure. Such cases report unconfirmed credit status and require reconciliation;
+never promise that arbitrary client-reported failure guarantees a refund.
+Earlier unscoped records are not automatically guessed or reset.
+
+Local verification passed 622 automated tests and 19 release samples. Shared
+request parity is checked against ordinary direct DeepSeek requests, including
+both languages and reading levels; this does not require identical stochastic
+model answers. Cloud refund SQL was also exercised in a real database transaction
+with a dedicated temporary subject: reserve, settle, fail, repeated refund,
+balance restoration and role restrictions passed, then the transaction rolled
+back. This test made no model call and changed no real account balance. The one
+new paid generation was the owner's successful trial check above; no paid
+failure was deliberately induced.
+
+The migration's first attempt used an unavailable role override and failed
+before applying changes. After checking the normal managed administrator role,
+the migration succeeded without that override. A pre-existing difference between
+campaign and aggregate wallet spending was preserved, not reset; validation
+compares post-deployment charge deltas against the original baselines. Historical
+campaign spending matched the request receipts.
+
+The refreshed preview runs build `fef89bcfa3fb4f14`; 43130 remains an older
+diagnostic session. Cloud deployment and the real signed-in trial check are
+complete. The installer was not published or revalidated, and Windows installer
+integration remains a separate release check. Subsequent sections retain earlier
+deployment history and must not replace the current shared-runtime build steps.
+
 ## Code-review output budget candidate — 2026-10-07
 
 The `code-review-64k-v1` profile raises the **code-review audience only** to
@@ -142,7 +235,7 @@ or stage failed. A current balance display alone is not a settlement audit.
    holds cleared, and another account's balance stayed unchanged. Repeated
    quota queries must not regrant money. Disable with `enabled = false` if needed.
 
-## Accounting and failure handling
+## Original accounting and failure handling (before the 2026-10-09 candidate)
 
 Reserve a conservative maximum before calling DeepSeek. Settle from validated
 provider usage; unused reservation is released. Retries of the same settlement

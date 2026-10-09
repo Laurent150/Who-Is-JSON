@@ -2,10 +2,10 @@
   "LICENSE",
   "OPEN_SOURCE_REFERENCES.md",
   "README.en.md",
-  "README.ja.md",
-  "README.ko.md",
-  "README.md",
   "ai-client.js",
+  "ai-followup.js",
+  "cloudbase/functions/ai-trial/followup.cjs",
+  "trial-operation.js",
   "ai-diagnostics.js",
   "ai-english.js",
   "ai-explanation-rules.js",
@@ -13,6 +13,7 @@
   "ai-grounding-checks.js",
   "ai-input-prompts.js",
   "ai-knowledge.js",
+  "ai-module-reading.js",
   "ai-point-paragraphs.js",
   "ai-point-prompts.js",
   "ai-point-prompts-en.js",
@@ -222,5 +223,10 @@
   "public/favicon.ico",
   "parsers/review-javascript.js",
   "parsers/review-python.py",
-  "parsers/review-syntax.js"
+  "parsers/review-syntax.js",
+  "ai-direct-reading.js",
+  "ai-module-reading-policy.js",
+  "ai-language-policy.js",
+  "cloudbase/functions/ai-trial/module-output.cjs",
+  "ai-repair-policy.js"
 ]

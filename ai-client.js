@@ -61,16 +61,20 @@ function networkMessage(error) {
 }
 
 async function rawModelCall(config, messages, options = {}) {
+    await config?.prepareTrial?.();
     if(options.signal?.aborted)throw Error('AI 请求已取消。');
     const {url, body, requestProfile, timeoutMs} = requestOptions(config, messages, options);
     // Explicit evaluation callback only; never include keys, headers or hidden reasoning.
     options.onModelRequest?.(structuredClone(body),options.usagePhase||'single');
-    const timeout = AbortSignal.timeout(timeoutMs);
+    // Hosted accounting needs transport time around the identical provider budget.
+    const timeout = AbortSignal.timeout(timeoutMs+(config.directReadingProfile==='direct-reading-v1'?40000:0));
     const signal = options.signal ? AbortSignal.any([timeout, options.signal]) : timeout;
     const started=Date.now();let stage=typeof config.sponsoredCall==='function'?'gateway-request':'provider-request',providerStatus;
     try {
         const response = typeof config.sponsoredCall === 'function'
-            ? Response.json(await config.sponsoredCall(body, { signal, requestProfile }))
+            ? Response.json(await config.sponsoredCall(body, { signal, requestProfile,
+                ...(options.task==='followup'&&options.followupContext?{followupContext:options.followupContext}:{}),
+                ...(options.readingContext?{readingContext:options.readingContext}:{}) }))
             : await fetch(url, {method:'POST', redirect:'error', headers:{'Content-Type':'application/json', ...(config.key ? {Authorization:'Bearer '+config.key} : {})}, body:JSON.stringify(body), signal});
         stage=typeof config.sponsoredCall==='function'?'gateway-response':'provider-response';providerStatus=response.status;
         if (signal.aborted) throw Error('AI 请求已取消。');
@@ -115,6 +119,7 @@ async function rawModelCall(config, messages, options = {}) {
 }
 
 async function modelCall(config, messages, options = {}) {
+    await config?.prepareTrial?.();
     const point=require('./ai-point'),selection=point.route(messages,options,config);
     if(selection)return point.run(rawModelCall,config,selection,options);
     if(options.explanation||options.reviewFoundation){
@@ -249,4 +254,5 @@ function selectedSource(source, selection) {
     if(!Number.isInteger(selection.start)||!Number.isInteger(selection.end)||selection.start<1||selection.end<selection.start||selection.end>lines.length)throw Error('选中源码范围无效，请重新选择。');
     return {start:selection.start,end:selection.end,code:lines.slice(selection.start-1,selection.end).join('\n')};
 }
-module.exports={overviewBlocks,selectedSource,modelCall,reviewModelResponse,explainOverview,mergeOverview,requestOptions,networkMessage};
+const explainFollowup=(config,input,options)=>require('./ai-followup').run(rawModelCall,config,input,options);
+module.exports={overviewBlocks,selectedSource,modelCall,reviewModelResponse,explainOverview,explainFollowup,mergeOverview,requestOptions,networkMessage};
