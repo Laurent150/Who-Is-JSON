@@ -1,7 +1,7 @@
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {generateTalk}=require('../ai-talk');
-const {requestOptions}=require('../ai-client');
+const {generateTalk}=require('../ai/ai-talk');
+const {requestOptions}=require('../ai/ai-client');
 const source='def rebate(amount, member, voucher):\r\n    discount = amount * 0.1 if member else 0\r\n    if voucher and amount >= 100:\r\n        discount += 5\r\n    return min(discount, amount)\r\n';
 const ledger={units:[{name:'rebate',anchor:'def rebate(amount, member, voucher):',accepts:'Amount, membership and voucher.',returns:'Capped discount.',timing:'Synchronous.',paths:[{when:'Voucher AND amount >= 100, independently of membership.',does:'Add 5.',completion:'Capped combined discount.',failure:'Unhandled failures escape.',anchor:'discount += 5'}],unknowns:[]}]};
 test('every walkthrough setting retains content review and its audience-specific audit policy',async()=>{
@@ -38,7 +38,7 @@ test('word explanations preserve source and token with draft-only beginner and r
  for(const locale of ['en','zh-CN'])for(const readingMode of ['beginner','standard']){
   const seen=[],token={text:'and',line:3,startColumn:15,endColumn:18,sourceLine:source.split('\n')[2]};
   const answer=locale==='en'?'Both a voucher and an amount of at least 100 are needed for this branch. Membership is checked separately.':'这个分支需要提供优惠券且金额至少100；会员条件另行判断。';
-  const result=await require('../ai-knowledge').explain(source,token,{base:'https://api.deepseek.com',model:'deepseek-flash',reviewThinking:true,sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
+  const result=await require('../ai/ai-knowledge').explain(source,token,{base:'https://api.deepseek.com',model:'deepseek-flash',reviewThinking:true,sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
    seen.push(body);return {choices:[{finish_reason:'stop',message:{content:JSON.stringify(seen.length===1?{kind:'definition',answer:readingMode==='beginner'?answer:'Either condition is enough.'}:{corrections:[{id:'p1',value:answer,reason:'Keep both required conditions.'}]})}}]};
   }},{locale,readingMode,name:'rebate.py'});
   assert.deepEqual(result,{answer});assert.equal(seen.length,readingMode==='beginner'?1:2);
@@ -77,7 +77,7 @@ test('quality evaluation plans bounded real-setting combinations and cannot sile
  assert.throws(()=>plan({...input,key:'must not enter reports'}),/Unknown evaluation setting/);
  assert.equal(plan({...input,task:'token',readingMode:'both'}).length,4);
  assert.match(selectionPrompt(),/selectedSource/);
- for(const c of require('./ai-quality-cases.cjs'))assert.ok(require('../ai-flow').tokenSource(c.source,c.token).text.trim());
+ for(const c of require('./ai-quality-cases.cjs'))assert.ok(require('../ai/ai-flow').tokenSource(c.source,c.token).text.trim());
 });
 test('quality evaluator defaults to 80 requests and permits only a bounded explicit limit',()=>{
  const {evaluationLimit}=require('./ai-quality-server.cjs');
@@ -85,7 +85,7 @@ test('quality evaluator defaults to 80 requests and permits only a bounded expli
  for(const value of ['not a number',0,-1,90.5,91,Infinity])assert.throws(()=>evaluationLimit(value),/integer from 1 to 90/);
 });
 test('selected-line explanations retain local scope and deciding conditions in both reading modes and languages',async()=>{
- const {modelCall,selectedSource}=require('../ai-client');
+ const {modelCall,selectedSource}=require('../ai/ai-client');
  for(const locale of ['en','zh-CN'])for(const readingMode of ['beginner','standard']){
   const selected=selectedSource(source,{start:3,end:4}),seen=[];
   const answer=locale==='en'?'Add 5 when a voucher is supplied AND amount is at least 100. This condition does not depend on membership.':'提供优惠券且金额至少100时增加5元优惠；这个判断不依赖会员条件。';
@@ -108,14 +108,14 @@ test('malformed fact notes get one source-preserving protocol repair and never b
  }
 });
 test('scope hints flag complete broad claims for review without deciding correctness or locally replacing model prose',()=>{
- const {claimHints}=require('../ai-review-patches');
+ const {claimHints}=require('../ai/ai-review-patches');
  const draft={title:'All inputs work',sections:[{title:'Limits',text:'Mixed-type inputs always fail.'},{title:'Action',text:'Add five to the subtotal.'}]};
  const before=JSON.stringify(draft),hint=claimHints(draft,{locale:'en'});
  assert.match(hint,/f0/);assert.match(hint,/f2/);assert.match(hint,/advisory, not proof of error/);assert.match(hint,/whole original field/);assert.equal(JSON.stringify(draft),before);
  assert.equal(claimHints({answer:'Add five.'},{locale:'en'}),'');
 });
 test('complete ledger responses may close only a missing unknowns delimiter, preserving every value and strict evidence checks',()=>{
- const {parse}=require('../ai-talk-contracts');
+ const {parse}=require('../ai/ai-talk-contracts');
  const unit={...ledger.units[0],unknowns:['A literal } and ] are not delimiters.','Quoted "text", newline\n and a backslash \\ stay exact.']};
  const value={units:[unit]},good=JSON.stringify(value),array=JSON.stringify(unit.unknowns);
  const malformed=good.replace(array+'}',array.slice(0,-1)+'}'),repairs=[];
@@ -131,7 +131,7 @@ test('complete ledger responses may close only a missing unknowns delimiter, pre
  assert.throws(()=>parse(badPaths,source),/源码依据/);
 });
 test('return-origin syntax facts preserve quotes and omit shadowed or unsupported source without inventing runtime types',()=>{
- const {parameterReturns}=require('../ai-source-returns');
+ const {parameterReturns}=require('../ai/ai-source-returns');
  const code='export function update(current, locked) {\r\n  if (locked) return current;\r\n  return 0;\r\n}\r\n';
  assert.deepEqual(parameterReturns(code,'counter.js'),[{function:'update',parameter:'current',declaredType:null,async:false,generator:false,returnQuote:'return current;'}]);
  assert.equal(parameterReturns('function outer(value) { function inner() { return value; } return value; }','test.js').length,1);
@@ -142,14 +142,14 @@ test('return-origin syntax facts preserve quotes and omit shadowed or unsupporte
  assert.deepEqual(parameterReturns('function broken(value) { return value;','test.js'),[]);
  const typed=parameterReturns('async function typed(value: number) { return value; }','test.ts')[0];
  assert.equal(typed.async,true);assert.equal(typed.declaredType,'number');
- const {returnHints}=require('../ai-review-patches'),draft={title:'Update',sections:[{title:'Contract',text:'This function does not return a Promise.'}]};
+ const {returnHints}=require('../ai/ai-review-patches'),draft={title:'Update',sections:[{title:'Contract',text:'This function does not return a Promise.'}]};
  const hints=returnHints(draft,[{role:'user',content:JSON.stringify({filename:'counter.js',source:code})}],{locale:'en'});
  assert.match(hints,/f2/);assert.match(hints,/return current;/);assert.match(hints,/syntax only/);assert.match(hints,/whole field/);
  assert.match(returnHints({answer:'The code starts with the old value.'},[{role:'user',content:JSON.stringify({filename:'counter.js',source:code})}],{locale:'en'}),/"fields":\[\]/);
  assert.equal(returnHints(draft,[{role:'user',content:JSON.stringify({filename:'test.js',source:'function value() { return 1; }'})}],{locale:'en'}),'');
 });
 test('selected retry statements receive exact enclosing loop guards without confusing neighboring or nested-function execution',async()=>{
- const {enclosingLoops}=require('../ai-source-returns'),{selectedSource,modelCall}=require('../ai-client');
+ const {enclosingLoops}=require('../ai/ai-source-returns'),{selectedSource,modelCall}=require('../ai/ai-client');
  const sample=require('./ai-quality-cases.cjs').find(c=>c.id==='async-retry-boundary'),selected=selectedSource(sample.source,sample.selection);
  assert.deepEqual(enclosingLoops(sample.source,sample.name,selected),[{kind:'for',initialization:'let i = 0',condition:'i < attempts',update:'i++'}]);
  assert.deepEqual(enclosingLoops(sample.source,sample.name,{...selected,code:'stale selection'}),[]);

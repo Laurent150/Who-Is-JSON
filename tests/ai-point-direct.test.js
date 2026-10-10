@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {modelCall,requestOptions}=require('../ai-client'),point=require('../ai-point');
-const knowledge=require('../ai-knowledge'),contract=require('../ai-point-contract');
+const {modelCall,requestOptions}=require('../ai/ai-client'),point=require('../ai/ai-point');
+const knowledge=require('../ai/ai-knowledge'),contract=require('../ai/ai-point-contract');
 const config={base:'https://api.deepseek.com/v1',model:'deepseek-flash'};
 const source='async function load(value) {\r\n  const result = await transform(value);\r\n  return result;\r\n}';
 const selectedSource={start:2,end:2,code:source.split('\n')[1]};
@@ -31,14 +31,14 @@ test('official Flash local selections emit one isolated scope-controlled draft a
   assert.equal(bodies.length,1);const body=bodies[0];
   assert.equal(body.model,config.model);assert.deepEqual(body.thinking,{type:'enabled'});assert.equal(body.reasoning_effort,scope==='line'&&readingMode==='standard'?'high':'low');assert.equal(body.max_tokens,6000);
   const system=body.messages[0].content;
-  const expected=scope==='token'?(require('../ai-point-await-line').classify(JSON.parse(body.messages[1].content),readingMode)?require('../ai-point-await-line').prompt(locale,readingMode,'token'):require('../ai-token-prompts').semanticDraft(JSON.parse(body.messages[1].content),locale,readingMode,true)):contract.profile(locale,readingMode,scope,undefined,true)+(locale==='en'?'\nReturn only the explanation as plain text.':'\n只返回解释正文，不使用JSON包装。');
+  const expected=scope==='token'?(require('../ai/ai-point-await-line').classify(JSON.parse(body.messages[1].content),readingMode)?require('../ai/ai-point-await-line').prompt(locale,readingMode,'token'):require('../ai/ai-token-prompts').semanticDraft(JSON.parse(body.messages[1].content),locale,readingMode,true)):contract.profile(locale,readingMode,scope,undefined,true)+(locale==='en'?'\nReturn only the explanation as plain text.':'\n只返回解释正文，不使用JSON包装。');
   assert.equal(system,expected);assert.equal(body.messages.length,2);
   if(scope==='line'&&readingMode==='beginner'){
    assert.match(system,locale==='en'?/roster holds the complete list of names; batch is the small group produced this time/:/roster是完整的姓名名单，batch是这次得到的小组/);
    assert.match(system,locale==='en'?/other endpoints or negative steps retain their real semantics/:/其他终点或负步长保留真实语义/);
    assert.match(system,locale==='en'?/Actual roles must come from source/:/实际角色须由源码证明/);
   }else assert.doesNotMatch(system,/roster holds|roster是完整/);
-  if(scope==='token'&&readingMode==='beginner'&&!require('../ai-point-await-line').classify(JSON.parse(body.messages[1].content),readingMode))assert.match(system,locale==='en'?/surrounding signature is evidence, not a checklist/:/周围完整声明是证据，不是待逐项解释的清单/);
+  if(scope==='token'&&readingMode==='beginner'&&!require('../ai/ai-point-await-line').classify(JSON.parse(body.messages[1].content),readingMode))assert.match(system,locale==='en'?/surrounding signature is evidence, not a checklist/:/周围完整声明是证据，不是待逐项解释的清单/);
   else assert.doesNotMatch(system,/surrounding signature is evidence|周围完整声明是证据/);
   assert.doesNotMatch(system,/FUNCTION CONTRACTS|ERROR BOUNDARIES|ASYNC INPUT.?OUTPUT|FIMI_REVIEW_CONTEXT_V1|caller.*Promise|calling.*Promise/i);
   if(locale==='en')assert.doesNotMatch(system,/[\u3400-\u9fff]/);
@@ -73,7 +73,7 @@ test('generic semantic token transport preserves fields and old decoder isolatio
  assert.equal(point.draftAnswer(raw,'token',true),' old characters \n\n old paragraph ');
  assert.throws(()=>point.draftAnswer(raw,'token',true,true),/格式不完整/);
  assert.throws(()=>point.draftAnswer(raw,'token'),/格式不完整/);
- for(const locale of ['en','zh-CN'])for(const mode of ['beginner','standard']){const legacy=require('../ai-token-prompts').draft(locale,mode);assert.match(legacy,/kind="definition"/);assert.doesNotMatch(legacy,/"effect":|"paragraphs":/);}
+ for(const locale of ['en','zh-CN'])for(const mode of ['beginner','standard']){const legacy=require('../ai/ai-token-prompts').draft(locale,mode);assert.match(legacy,/kind="definition"/);assert.doesNotMatch(legacy,/"effect":|"paragraphs":/);}
 });
 
 test('free-form asks and nonboolean/body intent cannot select the low route',()=>{
@@ -157,7 +157,7 @@ test('semantic transport is routed only for beginner function and exception cand
   const raw=semantic?JSON.stringify({kind:'definition',effect,details,type:'json_object'}):JSON.stringify({kind:'definition',paragraphs:[effect]});
   const {bodies,result}=await capture(()=>knowledge.explain(source,selectedToken,config,{name,locale,readingMode}),raw);
   assert.equal(bodies.length,1);const body=bodies[0],input=JSON.parse(body.messages[1].content);assert.equal(input.source,source);assert.deepEqual(input.selectedToken,selectedToken);
-  const prompts=require('../ai-token-prompts');assert.equal(body.messages[0].content,prompts.semanticDraft(input,locale,readingMode,true));
+  const prompts=require('../ai/ai-token-prompts');assert.equal(body.messages[0].content,prompts.semanticDraft(input,locale,readingMode,true));
   assert.equal(result.answer,semantic?effect+'\n\n'+details:effect);
   if(semantic){assert.doesNotMatch(body.messages[0].content,/Transport contract:|传输协议：|paragraphs is a nonempty/);assert.match(body.messages[0].content,locale==='en'?/details may be omitted/:/details可省略/);}
  }

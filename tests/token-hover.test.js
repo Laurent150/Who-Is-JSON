@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const knowledge=require('../ai-knowledge'),hover=require('../ai-token-prompts'),paragraphs=require('../ai-point-paragraphs');
+const knowledge=require('../ai/ai-knowledge'),hover=require('../ai/ai-token-prompts'),paragraphs=require('../ai/ai-point-paragraphs');
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const source='function pick(value) {\n  return value;\n}',token={text:'return',line:2,startColumn:2,endColumn:8,sourceLine:'  return value;'};
 const response=x=>({choices:[{finish_reason:'stop',message:{content:JSON.stringify(x)}}]});

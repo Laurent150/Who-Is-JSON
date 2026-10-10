@@ -1,5 +1,5 @@
 const {modelCall}=require('./ai-client');
-const {scaffold}=require('./public/flow-model');
+const {scaffold}=require('../public/flow-model');
 function attach(graph,text,locale='zh-CN'){
  let data;try{data=JSON.parse(text.trim().replace(/^```(?:json)?\s*/, '').replace(/\s*```$/,''));}catch{throw Error('AI 流程说明格式不完整，请重试。');}
  if(!data || typeof data.summary!=='string' || !Array.isArray(data.nodes))throw Error('AI 没有返回可用的流程说明。');

@@ -33,7 +33,7 @@ async function main(){
   }
   throw Error('Test backend did not start');
  }
- const revision=()=>crypto.createHash('sha256').update(['ai-client.js','ai-talk.js','ai-talk-policy.js','ai-talk-audience.js','ai-english.js','ai-grounding-checks.js','ai-review-patches.js','ai-talk-contracts.js','ai-talk-async.js'].filter(f=>fs.existsSync(path.join(root,f))).map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n')).digest('hex').slice(0,16);
+ const revision=()=>crypto.createHash('sha256').update(['ai/ai-client.js','ai/ai-talk.js','ai/ai-talk-policy.js','ai/ai-talk-audience.js','ai/ai-english.js','ai/ai-grounding-checks.js','ai/ai-review-patches.js','ai/ai-talk-contracts.js','ai/ai-talk-async.js'].filter(f=>fs.existsSync(path.join(root,f))).map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n')).digest('hex').slice(0,16);
  async function run(jobs){
   running=true;stopped=false;lastError='';
   try{

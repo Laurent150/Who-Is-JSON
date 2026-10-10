@@ -4,7 +4,7 @@ test('desktop payload explicitly includes release modules and excludes local eva
  const files=JSON.parse(fs.readFileSync(path.join(root,'desktop/app-files.json'),'utf8'));
  assert.equal(new Set(files).size,files.length);
  for(const file of files){assert.ok(!file.split('/').some(part=>part.startsWith('.')));assert.ok(fs.statSync(path.join(root,file)).isFile());assert.ok(!/browser-artifacts|talk-eval|node_modules|^desktop\//.test(file));}
- for(const file of ['ai-talk-contracts.js','ai-talk-async.js','ai-talk-audience.js','ai-talk-policy.js','ai-review.js','ai-usage.js','public/i18n.js','public/flow-model.js','public/saved-explanations.js','parsers/javascript-links.js'])assert.ok(files.includes(file),file);
+ for(const file of ['ai/ai-talk-contracts.js','ai/ai-talk-async.js','ai/ai-talk-audience.js','ai/ai-talk-policy.js','ai/ai-review.js','ai/ai-usage.js','public/i18n.js','public/flow-model.js','public/saved-explanations.js','parsers/javascript-links.js'])assert.ok(files.includes(file),file);
  // All static relative production imports must be present (evaluation-only test hooks are excluded).
  for(const file of files.filter(f=>f.endsWith('.js'))){
   const source=fs.readFileSync(path.join(root,file),'utf8');

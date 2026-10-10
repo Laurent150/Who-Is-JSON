@@ -8,12 +8,12 @@ const sha=value=>crypto.createHash('sha256').update(value).digest('hex');
 const lines=file=>fs.existsSync(file)?fs.readFileSync(file,'utf8').split('\n').filter(Boolean).map(JSON.parse):[];
 function saveOnce(file,value){if(fs.existsSync(file)){if(JSON.stringify(JSON.parse(fs.readFileSync(file,'utf8')))!==JSON.stringify(value))throw Error('Frozen evaluation changed: '+path.basename(file));}else fs.writeFileSync(file,JSON.stringify(value,null,2),{flag:'wx'});return value;}
 function hashes(files){return [...new Set(files)].sort().map(file=>({file,sha256:sha(fs.readFileSync(path.join(root,file)))}));}
-function productionFiles(){return [...fs.readdirSync(root).filter(f=>/^ai-.*\.js$/.test(f)),'public/file-types.js','public/flow-model.js','public/knowledge-library.js','parsers/review-javascript.js','parsers/review-python.py','parsers/review-syntax.js'];}
+function productionFiles(){return [...fs.readdirSync(path.join(root,'ai')).filter(f=>/^ai-.*\.js$/.test(f)).map(f=>'ai/'+f),'public/file-types.js','public/flow-model.js','public/knowledge-library.js','parsers/review-javascript.js','parsers/review-python.py','parsers/review-syntax.js'];}
 function reserve(file,event){const events=lines(file);if(events.length>=LIMIT)throw Error('本轮104次请求上限已达到。');const saved={...event,ordinal:events.length+1};fs.appendFileSync(file,JSON.stringify(saved)+'\n');return saved;}
 async function main(){
  fs.mkdirSync(revision,{recursive:true});
  const probeJobs=design.probes(lines(path.join(out,'acceptance-results.jsonl'))),jobs=design.acceptance();
- const harnessFiles=['tests/review-recovery-server.cjs','tests/review-recovery-plan.cjs','tests/review-acceptance-cases.cjs','tests/review-recovery.html','tests/ai-quality-server.cjs','tests/live-bilingual-request.cjs','ai-talk-format.js'];
+ const harnessFiles=['tests/review-recovery-server.cjs','tests/review-recovery-plan.cjs','tests/review-acceptance-cases.cjs','tests/review-recovery.html','tests/ai-quality-server.cjs','tests/live-bilingual-request.cjs','ai/ai-talk-format.js'];
  const harness=saveOnce(path.join(revision,'probe-freeze.json'),{files:hashes(harnessFiles),probeJobs,limit:LIMIT,normalNewCalls:76,startingReservedCalls:25});
  const eventFile=path.join(out,'dispatches.jsonl'),resultFile=path.join(revision,'results.jsonl'),results=lines(resultFile),token=crypto.randomBytes(24).toString('hex');
  const frozenFile=path.join(revision,'acceptance-freeze.json');
@@ -26,7 +26,7 @@ async function main(){
   unchanged();
   // Only repository-owned application modules, never samples, can be loaded.
   for(const f of productionFiles())delete require.cache[require.resolve(path.join(root,f))];
-  current={talk:require('../ai-talk'),knowledge:require('../ai-knowledge'),client:require('../ai-client')};
+  current={talk:require('../ai/ai-talk'),knowledge:require('../ai/ai-knowledge'),client:require('../ai/ai-client')};
  }
  if(stage==='acceptance')loadCandidate();
  async function run(job){
@@ -50,9 +50,9 @@ async function main(){
     if(choice?.finish_reason==='length')throw Error('Probe response was truncated');
     const parsed=JSON.parse(raw.trim().replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,''));
     record.format={validJSON:true,questionsPresent:Object.hasOwn(parsed,'questions')};
-    record.response=require('../ai-talk-format').parse(raw,r=>record.protocolRepairs.push(r));record.format.normalizedValid=true;
+    record.response=require('../ai/ai-talk-format').parse(raw,r=>record.protocolRepairs.push(r));record.format.normalizedValid=true;
    }else if(job.task==='talk')record.response=await current.talk.generateTalk(sample.source,sample.name,{audience:job.audience,detail:job.detail,coverage:job.coverage},config,options);
-   else if(job.task==='token')record.response=await current.knowledge.explain(sample.source,require('../ai-flow').tokenSource(sample.source,sample.token),config,{...options,name:sample.name});
+   else if(job.task==='token')record.response=await current.knowledge.explain(sample.source,require('../ai/ai-flow').tokenSource(sample.source,sample.token),config,{...options,name:sample.name});
    else record.response={answer:await current.client.modelCall(config,[{role:'system',content:require('./ai-quality-server.cjs').selectionPrompt()},{role:'user',content:JSON.stringify({filename:sample.name,sourceLanguage:require('../public/file-types').language(sample.name),source:sample.source,selectedSource:current.client.selectedSource(sample.source,sample.selection),question:require('./live-bilingual-request.cjs').questions[job.readingMode][job.locale]})}],{...options,explanation:true})};
    record.ok=true;
   }catch(error){record.ok=false;record.error=error.message;record.errorCode=error.code||null;lastError=error.message;}

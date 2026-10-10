@@ -1,5 +1,5 @@
 // Shared prompt and deterministic decoder; no model, parser process or ledger access.
-const {decodeModuleResponse:decode}=require('./cloudbase/functions/ai-trial/module-output.cjs');
+const {decodeModuleResponse:decode}=require('../cloudbase/functions/ai-trial/module-output.cjs');
 function prompt(input,locale,mode){
  // The existing passage contract is reused verbatim. Module fields only isolate
  // the whole-module explanation from its input/output facts, in one request.

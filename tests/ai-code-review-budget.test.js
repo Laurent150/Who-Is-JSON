@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
-const {requestOptions,modelCall}=require('../ai-client');
+const {requestOptions,modelCall}=require('../ai/ai-client');
 const profile='code-review-64k-v1';
 const config={base:'https://api.deepseek.com',model:'deepseek-flash'};
 const response=value=>({choices:[{finish_reason:'stop',message:{content:JSON.stringify(value)}}]});
@@ -44,7 +44,7 @@ test('real walkthrough orchestration forwards the selected audience to source an
    if(phase==='final-audit')return mockFinalAudit(body);
    assert.fail(phase);
   }};
-  const result=await require('../ai-talk').generateTalk(source,'echo.js',{audience:'review',detail:'standard'},provider,{locale,readingMode:'standard',onModelRequest:(_body,phase)=>phases.push(phase)});
+  const result=await require('../ai/ai-talk').generateTalk(source,'echo.js',{audience:'review',detail:'standard'},provider,{locale,readingMode:'standard',onModelRequest:(_body,phase)=>phases.push(phase)});
   assert.deepEqual(phases,['contracts','composition','review']);
   assert.equal(JSON.parse(sent[0].messages[1].content).source,source);
   assert.equal(result.sections[0].text,draft.sections[0].text);
@@ -55,7 +55,7 @@ test('a larger budget still rejects truncation and never replays a possibly bill
  let calls=0;
  await assert.rejects(()=>modelCall({...config,sponsoredCall:async()=>{calls++;return {choices:[{finish_reason:'length',message:{content:'{"title":"unfinished'}}]};},reviewThinking:true},[],{task:'talk',audience:'review',usagePhase:'composition',reviewReasoning:true}),error=>error.code==='AI_REVIEW_LENGTH');
  assert.equal(calls,1);
- const diagnostics=require('../ai-diagnostics');
+ const diagnostics=require('../ai/ai-diagnostics');
  assert.deepEqual(diagnostics.safe({transportCode:'UND_ERR_BODY_TIMEOUT',message:'secret'}),{transportCode:'UND_ERR_BODY_TIMEOUT'});
  assert.deepEqual(diagnostics.safe({transportCode:'private-code-with-secrets'}),{});
  const context=vm.createContext({});

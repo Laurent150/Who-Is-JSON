@@ -1,7 +1,7 @@
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
-const context=require('../ai-review-context'),syntax=require('../parsers/review-syntax');
+const context=require('../ai/ai-review-context'),syntax=require('../parsers/review-syntax');
 const cases=require('./review-foundation-cases.cjs');
 const message=data=>[{role:'system',content:'Explain this source.'},{role:'user',content:JSON.stringify(data)}];
 const build=(source,filename='case.js',extra={},options={})=>context.create(message({filename,source,...extra}),{locale:'en',...options});
@@ -57,7 +57,7 @@ test('point scope does not inherit an outer loop or neighboring function, and ex
         ['case.js','function outer(n){\n while(n){\n  function inner(){\n   return 1;\n  }\n }\n}',4],
         ['case.py','def outer(n):\n    while n:\n        def inner():\n            return 1\n',4]
     ]) {
-        const selectedSource=require('../ai-client').selectedSource(source,{start:line,end:line});
+        const selectedSource=require('../ai/ai-client').selectedSource(source,{start:line,end:line});
         const c=await build(source,name,{selectedSource});
         assert.equal(c.scope.kind,'selection');assert.equal(c.enclosingFunctions[0].name,'inner');
         assert.equal(kind(c,'loop').length,0);assert.ok(!c.checks.some(r=>r.id==='LOOP-01'));
@@ -86,7 +86,7 @@ test('UTF-16 token offsets and Python UTF-8 AST columns preserve Unicode and CRL
         ['case.js','function f(值){\r\n const 文本="😀"; return 值;\r\n}']
     ]) {
         const line=source.split('\n')[1],column=line.indexOf('return');
-        const selectedToken=require('../ai-flow').tokenSource(source,{line:2,startColumn:column,endColumn:column+6});
+        const selectedToken=require('../ai/ai-flow').tokenSource(source,{line:2,startColumn:column,endColumn:column+6});
         const c=await build(source,name,{selectedToken});
         assert.equal(c.evidence.status,'parsed');assert.equal(c.scope.status,'verified');
         assert.equal(source.slice(c.scope.ranges[0].start,c.scope.ranges[0].end),'return');
@@ -137,8 +137,8 @@ test('bilingual word and line draft/review stages keep distinct styles while sha
         }};
         if(route==='word') {
             const line=source.split('\n')[1],column=line.indexOf('&&');
-            await require('../ai-knowledge').explain(source,require('../ai-flow').tokenSource(source,{line:2,startColumn:column,endColumn:column+2}),config,{locale,readingMode,name:'case.js'});
-        }else await require('../ai-client').modelCall(config,message({filename:'case.js',source,selectedSource:require('../ai-client').selectedSource(source,{start:2,end:2})}),{locale,readingMode,explanation:true});
+            await require('../ai/ai-knowledge').explain(source,require('../ai/ai-flow').tokenSource(source,{line:2,startColumn:column,endColumn:column+2}),config,{locale,readingMode,name:'case.js'});
+        }else await require('../ai/ai-client').modelCall(config,message({filename:'case.js',source,selectedSource:require('../ai/ai-client').selectedSource(source,{start:2,end:2})}),{locale,readingMode,explanation:true});
         assert.equal(requests.length,readingMode==='beginner'&&route==='word'?1:2);
         for(const request of requests) {
             const p=JSON.parse(request.messages.find(m=>m.role==='user').content),c=p.reviewContext;
@@ -154,7 +154,7 @@ test('bilingual word and line draft/review stages keep distinct styles while sha
 test('flow receives a language, verified function scope and source context without changing graph identities',async()=>{
     const source='function f(x){\n if(x) return x;\n return 0;\n}',requests=[];
     const result={language:'JavaScript',blocks:[{title:'f',start:1,end:4,controlFlow:[{kind:'step',start:2,end:3}]}]};
-    const graph=await require('../ai-flow').explainFlow(result,source,1,{base:'https://example.org',model:'mock',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
+    const graph=await require('../ai/ai-flow').explainFlow(result,source,1,{base:'https://example.org',model:'mock',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;
         requests.push(body);return {choices:[{message:{content:JSON.stringify(requests.length===1?{summary:'Select a value.',input:'x',output:'x or zero',nodes:[{id:'n1',title:'Return',explanation:'Select a value.',example:''}]}:{corrections:[]})}}]};
     }},{name:'case.js',locale:'en',readingMode:'beginner'});
     assert.equal(graph.nodes[0].id,'n1');assert.equal(requests.length,2);
@@ -164,8 +164,8 @@ test('flow receives a language, verified function scope and source context witho
 test('cancellation stops before a billable dispatch while unsupported syntax still receives source-based review',async()=>{
     const controller=new AbortController();controller.abort();let calls=0;
     const config={base:'https://example.org',model:'mock',sponsoredCall:async body=>{const audit=mockFinalAudit(body);if(audit)return audit;calls++;return {choices:[{message:{content:'An explanation.'}}]};}};
-    await assert.rejects(()=>require('../ai-client').modelCall(config,message({filename:'case.py',source:'x=1'}),{explanation:true,signal:controller.signal}));assert.equal(calls,0);
-    await require('../ai-client').modelCall(config,message({filename:'case.go',source:'package demo'}),{explanation:true});assert.equal(calls,2);
+    await assert.rejects(()=>require('../ai/ai-client').modelCall(config,message({filename:'case.py',source:'x=1'}),{explanation:true,signal:controller.signal}));assert.equal(calls,0);
+    await require('../ai/ai-client').modelCall(config,message({filename:'case.go',source:'package demo'}),{explanation:true});assert.equal(calls,2);
 });
 
 test('overview scopes refer to selected blocks and invalid block text cannot become evidence',async()=>{

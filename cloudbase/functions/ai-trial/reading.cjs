@@ -4,10 +4,10 @@ const fs = require('node:fs');
 // load the originals, not another implementation of the model prompts.
 const root = fs.existsSync(path.join(__dirname,'runtime/package.json'))
   ? path.join(__dirname,'runtime') : path.join(__dirname,'../../..');
-const point = require(path.join(root,'ai-direct-reading.js'));
-const moduleReading = require(path.join(root,'ai-module-reading-policy.js'));
-const language = require(path.join(root,'ai-language-policy.js'));
-const repair = require(path.join(root,'ai-repair-policy.js'));
+const point = require(path.join(root,'ai/ai-direct-reading.js'));
+const moduleReading = require(path.join(root,'ai/ai-module-reading-policy.js'));
+const language = require(path.join(root,'ai/ai-language-policy.js'));
+const repair = require(path.join(root,'ai/ai-repair-policy.js'));
 function prepare(context) {
   let prepared, validate;
   if(context?.kind==='point') {

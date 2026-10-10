@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {createHash}=require('node:crypto');
-const peer=require('../ai-talk-peer'),composition=require('../ai-talk-composition');
-const {generateTalk}=require('../ai-talk');
+const peer=require('../ai/ai-talk-peer'),composition=require('../ai/ai-talk-composition');
+const {generateTalk}=require('../ai/ai-talk');
 const source='function echo(value) {\r\n  return value; // 中文 😀\r\n}';
 const ledger={units:[{name:'echo',anchor:'function echo(value)',accepts:'A value.',returns:'The supplied value.',timing:'Returns directly.',paths:[{when:'Called',does:'Return value.',completion:'The same value.',failure:'No explicit handler.',anchor:'return value;'}],unknowns:[]}]};
 const draft={title:'Echo',sections:[{title:'Result',text:'echo returns the supplied value.\n\nThe caller receives that same value.'}],questions:[]};
@@ -29,7 +29,7 @@ async function run(locale='en',settings={},fault){
 test('peer method 2 keeps the exact selected Chinese system prompt',()=>{
  assert.equal(createHash('sha256').update(peer.instruction({locale:'zh-CN'})).digest('hex'),'0e657ba52fc927491a595d3a9c2a8e67c68ce15fafe01612973a677eab26cddd');
  assert.doesNotMatch(peer.instruction({locale:'en'}),/[\u3400-\u9fff]/);
- assert.ok(require('../desktop/app-files.json').includes('ai-talk-peer.js'));
+ assert.ok(require('../desktop/app-files.json').includes('ai/ai-talk-peer.js'));
 });
 
 test('peer method 2 preserves source and every setting through bilingual drafting, existing review and local delivery',async()=>{

@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {analyze}=require('../analyzer');
-const {identify,parseLanguage,needsLanguageHelp,analyzeAs}=require('../ai-language');
+const {identify,parseLanguage,needsLanguageHelp,analyzeAs}=require('../ai/ai-language');
 const code='class Box { read(value) { return value; } }';
 const guess=(language,confidence='high')=>async()=>JSON.stringify({language,confidence});
 test('AI language hint is verified locally without editing source and reused by flow parsing',async()=>{

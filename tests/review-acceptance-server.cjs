@@ -12,7 +12,7 @@ function validatePlan(jobs){
  return jobs;
 }
 function frozenFiles(){
- const production=fs.readdirSync(root).filter(f=>/^ai-.*\.js$/.test(f));
+ const production=fs.readdirSync(path.join(root,'ai')).filter(f=>/^ai-.*\.js$/.test(f)).map(f=>'ai/'+f);
  const files=[...production,'server.js','public/file-types.js','public/flow-model.js','public/knowledge-library.js','parsers/review-javascript.js','parsers/review-python.py','parsers/review-syntax.js','tests/review-acceptance-cases.cjs','tests/review-acceptance-server.cjs','tests/ai-quality-server.cjs','tests/live-bilingual-request.cjs'];
  const baseline=JSON.parse(fs.readFileSync(path.join(out,'baseline/manifest.json'),'utf8').replace(/^\uFEFF/,''));
  for(const f of baseline.files){
@@ -33,6 +33,7 @@ function freeze(){
 }
 function baseline(){
  const cache=new Map();
+ if(!fs.existsSync(path.join(out,'baseline','ai/ai-client.js')))throw Error('The baseline snapshot must match the current ai/ directory layout; do not substitute current modules for an older snapshot.');
  function load(file){
   const relative=path.relative(root,file),saved=path.join(out,'baseline',relative);
   if(!fs.existsSync(saved))return require(file);
@@ -41,7 +42,7 @@ function baseline(){
   m.require=specifier=>{const resolved=Module._resolveFilename(specifier,m);return path.isAbsolute(resolved)&&resolved.startsWith(root+path.sep)?load(resolved):require(specifier);};
   m._compile(fs.readFileSync(saved,'utf8'),file);return m.exports;
  }
- return {talk:load(path.join(root,'ai-talk.js')),knowledge:load(path.join(root,'ai-knowledge.js')),client:load(path.join(root,'ai-client.js'))};
+ return {talk:load(path.join(root,'ai/ai-talk.js')),knowledge:load(path.join(root,'ai/ai-knowledge.js')),client:load(path.join(root,'ai/ai-client.js'))};
 }
 function readLines(file){return fs.existsSync(file)?fs.readFileSync(file,'utf8').split('\n').filter(Boolean).map(JSON.parse):[];}
 function infrastructureRetry(results,jobId){
@@ -52,7 +53,7 @@ function infrastructureRetry(results,jobId){
 }
 async function main(){
  const frozen=freeze(),jobs=frozen.jobs,old=baseline();
- const current={talk:require('../ai-talk'),knowledge:require('../ai-knowledge'),client:require('../ai-client')};
+ const current={talk:require('../ai/ai-talk'),knowledge:require('../ai/ai-knowledge'),client:require('../ai/ai-client')};
  const askPrompt=require('./ai-quality-server.cjs').selectionPrompt();
  const eventsFile=path.join(out,'dispatches.jsonl'),resultsFile=path.join(out,'acceptance-results.jsonl');
  const events=readLines(eventsFile),results=readLines(resultsFile),token=crypto.randomBytes(24).toString('hex');
@@ -80,7 +81,7 @@ async function main(){
   }};
   try{
    if(j.task==='talk')record.response=await modules.talk.generateTalk(sample.source,sample.name,{audience:j.audience,detail:j.detail,coverage:j.coverage},config,options);
-   else if(j.task==='token')record.response=await modules.knowledge.explain(sample.source,require('../ai-flow').tokenSource(sample.source,sample.token),config,{...options,name:sample.name});
+   else if(j.task==='token')record.response=await modules.knowledge.explain(sample.source,require('../ai/ai-flow').tokenSource(sample.source,sample.token),config,{...options,name:sample.name});
    else record.response={answer:await modules.client.modelCall(config,[{role:'system',content:askPrompt},{role:'user',content:JSON.stringify({filename:sample.name,sourceLanguage:require('../public/file-types').language(sample.name),source:sample.source,selectedSource:modules.client.selectedSource(sample.source,sample.selection),question:require('./live-bilingual-request.cjs').questions[j.readingMode][j.locale]})}],{...options,explanation:true})};
    record.ok=true;
   }catch(e){record.ok=false;record.error=e.message;record.errorCode=e.code||null;lastError=e.message;}

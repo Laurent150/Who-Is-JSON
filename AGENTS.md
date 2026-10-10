@@ -1,7 +1,7 @@
 # Repository collaboration
 
 - Read README.md, CONTRIBUTING.md, ARCHITECTURE.md and VALIDATION.md before
-  changing behavior. The product is Who Is JSON; the package and some internal
+  changing behavior. The product is FIMI; the package and some internal
   identifiers still use CodeLingo.
 - Work on a task branch and target `main` in a PR. Follow the existing PR
   template. Keep each PR focused; do not combine feature work with broad
@@ -32,3 +32,5 @@
   `.runtime/dev-config.json`; generated reports belong in `.browser-artifacts`.
 - Desktop packaging is a separate workflow under desktop/. Do not infer that
   passing source tests validates the installer or Windows GUI integration.
+- Server-side AI modules live in ai/. Keep desktop/app-files.json and the
+  CloudBase runtime bundle paths in sync when adding or moving these modules.

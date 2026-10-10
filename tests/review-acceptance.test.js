@@ -17,7 +17,7 @@ test('fixed acceptance plan covers all language/mode/audience combinations and h
   const c=candidate.find(j=>j.jobId===b.jobId.replace('baseline','candidate'));assert.ok(c);
   const settings=({variant,jobId,...s})=>s;assert.deepEqual(settings(b),settings(c));
  }
- for(const c of cases){assert.ok(c.oracle.length);assert.equal(require('../ai-flow').tokenSource(c.source,c.token).text,c.word);assert.ok(require('../ai-client').selectedSource(c.source,c.selection).code);}
+ for(const c of cases){assert.ok(c.oracle.length);assert.equal(require('../ai/ai-flow').tokenSource(c.source,c.token).text,c.word);assert.ok(require('../ai/ai-client').selectedSource(c.source,c.selection).code);}
  assert.equal(maxCalls({task:'talk',variant:'candidate'}),6);assert.equal(maxCalls({task:'line',variant:'candidate'}),4);
  assert.throws(()=>validatePlan(jobs.slice(1)),/plan changed/);
 });

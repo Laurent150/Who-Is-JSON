@@ -18,7 +18,7 @@ function plan(input){
 function evaluationLimit(value){const limit=value===undefined?80:Number(value);if(!Number.isSafeInteger(limit)||limit<1||limit>90)throw Error('Evaluation limit must be an integer from 1 to 90');return limit;}
 function baseline(){
  const cache=new Map(),snapshot=path.join(out,'baseline');
- if(!fs.existsSync(path.join(snapshot,'ai-client.js')))throw Error('缺少修改前的本地快照，不能把当前版本标为旧版对照。');
+ if(!fs.existsSync(path.join(snapshot,'ai/ai-client.js')))throw Error('缺少修改前的本地快照，不能把当前版本标为旧版对照。');
  function load(file){
   const relative=path.relative(root,file),saved=path.join(snapshot,relative);
   if(!fs.existsSync(saved))return require(file);
@@ -27,7 +27,7 @@ function baseline(){
   m.require=specifier=>{const resolved=Module._resolveFilename(specifier,m);return path.isAbsolute(resolved)&&resolved.startsWith(root+path.sep)?load(resolved):require(specifier);};
   m._compile(fs.readFileSync(saved,'utf8'),file);return m.exports;
  }
- return {talk:load(path.join(root,'ai-talk.js')),client:load(path.join(root,'ai-client.js')),knowledge:load(path.join(root,'ai-knowledge.js'))};
+ return {talk:load(path.join(root,'ai/ai-talk.js')),client:load(path.join(root,'ai/ai-client.js')),knowledge:load(path.join(root,'ai/ai-knowledge.js'))};
 }
 function selectionPrompt(){
  // Read the application's own literal prompt via syntax; execute no source.
@@ -43,7 +43,7 @@ function selectionPrompt(){
 }
 async function main(){
  const old=baseline();
- const candidate=()=>({talk:require('../ai-talk'),client:require('../ai-client'),knowledge:require('../ai-knowledge')});
+ const candidate=()=>({talk:require('../ai/ai-talk'),client:require('../ai/ai-client'),knowledge:require('../ai/ai-knowledge')});
  let current=candidate();
  const askPrompt=selectionPrompt();
  const legacyPolicy=await import(require('node:url').pathToFileURL(path.join(out,'baseline/cloudbase/functions/ai-trial/policy.mjs')));
@@ -56,7 +56,7 @@ async function main(){
  const status=()=>({connected:!!key,running,dispatched,limit,lastError,cases:cases.map(({id,name,oracle})=>({id,name,oracle})),results});
  async function job(j){
   const sample=cases.find(c=>c.id===j.id),baselineVariant=j.variant.startsWith('baseline'),thinking=j.variant.endsWith('thinking');
-  const policyFiles=['ai-client.js','ai-talk.js','ai-talk-contracts.js','ai-review-patches.js','ai-logic-policy.js','ai-source-returns.js'];
+  const policyFiles=['ai/ai-client.js','ai/ai-talk.js','ai/ai-talk-contracts.js','ai/ai-review-patches.js','ai/ai-logic-policy.js','ai/ai-source-returns.js'];
   const policyRevision=crypto.createHash('sha256').update(policyFiles.map(f=>{const file=baselineVariant?path.join(out,'baseline',f):path.join(root,f);return fs.existsSync(file)?fs.readFileSync(file):'';}).join('\n')).digest('hex').slice(0,16);
   const modules=baselineVariant?old:current,traces=[],record={...j,policyRevision,sourceHash:crypto.createHash('sha256').update(sample.source).digest('hex'),oracle:sample.oracle,startedAt:new Date().toISOString(),transport:'official DeepSeek with local trial-policy emulation; NOT deployed CloudBase acceptance'};
   const options={locale:j.locale,readingMode:j.readingMode,signal:controller.signal,onUsage:u=>{if(traces.length)traces.at(-1).phase=u.phase;},onModelText:(text,phase)=>{if(traces.length)Object.assign(traces.at(-1),{phase,text});}};
@@ -78,7 +78,7 @@ async function main(){
   try{
    if(j.task==='talk')record.response=await modules.talk.generateTalk(sample.source,sample.name,{audience:j.audience,detail:j.detail,coverage:j.coverage},config,options);
    else if(j.task==='token'){
-    const selectedToken=require('../ai-flow').tokenSource(sample.source,sample.token);
+    const selectedToken=require('../ai/ai-flow').tokenSource(sample.source,sample.token);
     record.response=await modules.knowledge.explain(sample.source,selectedToken,config,{...options,name:sample.name});
    }else{
     const selectedSource=modules.client.selectedSource(sample.source,sample.selection);

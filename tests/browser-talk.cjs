@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
 const {chromium}=require(process.env.WHO_PLAYWRIGHT_MODULE||'playwright');
-const {parseTalk,settings}=require('../ai-talk');
+const {parseTalk,settings}=require('../ai/ai-talk');
 (async()=>{
  const browser=await chromium.launch({channel:'msedge',headless:true}),page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));

@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const audit=require('../ai-final-audit'),recovery=require('../ai-talk-recovery');
-const {modelCall}=require('../ai-client'),{mockFinalAudit}=require('./final-audit-mock.cjs');
+const audit=require('../ai/ai-final-audit'),recovery=require('../ai/ai-talk-recovery');
+const {modelCall}=require('../ai/ai-client'),{mockFinalAudit}=require('./final-audit-mock.cjs');
 const source='def read_count(record, fallback=0):\n    text = record["count"]\n    try:\n        return int(text)\n    except ValueError:\n        return fallback\n';
 const messages=[{role:'user',content:JSON.stringify({source,filename:'records.py'})}];
 const options={task:'talk',json:true,locale:'zh-CN',readingMode:'beginner',audience:'beginner'};

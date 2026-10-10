@@ -1,6 +1,6 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const {chromium}=require(process.env.WHO_PLAYWRIGHT_MODULE||'playwright');
-const {analyze}=require('../analyzer'),{scaffold,attach}=require('../ai-flow');
+const {analyze}=require('../analyzer'),{scaffold,attach}=require('../ai/ai-flow');
 const code='def child(x):\n    return x + 1\n\ndef parent(x):\n    if x > 0:\n        total = child(x)\n        total += 2\n        return total\n    return 0\n\nvalue = parent(3)';
 const parsed=analyze(code,'nested.py',process.env.CODELINGO_PYTHON||'python');
 const out='.browser-artifacts/studio';fs.mkdirSync(out,{recursive:true});

@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const diagnostics=require('../ai-diagnostics');
+const diagnostics=require('../ai/ai-diagnostics');
 const requestId='b3677a72-cad2-4f7d-934f-794d6d608bd5';
 const env={FIMI_ALLOW_LEGACY_RAW:'1', CLOUDBASE_ENV_ID:'fimi-test-env',CLOUDBASE_SERVICE_ROLE_KEY:'private-service',DEEPSEEK_API_KEY:'private-model'};
 const usage={prompt_tokens:10,completion_tokens:5};
@@ -78,7 +78,7 @@ async function localAccount(reply){
 
 test('gateway error keeps the request ID and AI phase through the local model boundary',async()=>{
  const s=await localAccount(()=>Response.json({error:'private-upstream-message',requestId,diagnostics:{code:'trial_settlement_failed',stage:'settlement',settlement:'unknown',providerStatus:200,elapsedMs:70000,key:'private-secret'}},{status:502}));
- await assert.rejects(require('../ai-client').modelCall(s.config,[],{usagePhase:'composition'}),error=>{
+ await assert.rejects(require('../ai/ai-client').modelCall(s.config,[],{usagePhase:'composition'}),error=>{
   assert.match(error.message,/结算未确认/);assert.deepEqual(error.diagnostics,{code:'trial_settlement_failed',stage:'settlement',aiPhase:'composition',requestId,providerStatus:200,elapsedMs:70000,settlement:'unknown'});
   assert.doesNotMatch(JSON.stringify(error),/private-/);return true;
  });
@@ -118,7 +118,7 @@ test('all detailed trial failure messages work in English and Chinese',async()=>
 });
 
 test('model timeout wrappers retain diagnostics and successful responses stay unchanged',async()=>{
- const {modelCall}=require('../ai-client');const config={base:'https://api.deepseek.com',model:'deepseek-flash',sponsoredCall:async()=>{
+ const {modelCall}=require('../ai/ai-client');const config={base:'https://api.deepseek.com',model:'deepseek-flash',sponsoredCall:async()=>{
   await new Promise(resolve=>setTimeout(resolve,15));throw diagnostics.attach(Error('uncertain'),{requestId,code:'trial_settlement_failed'});
  }};
  await assert.rejects(modelCall(config,[],{timeoutMs:1,usagePhase:'review'}),error=>/响应超时/.test(error.message)&&error.diagnostics.requestId===requestId&&error.diagnostics.aiPhase==='review');

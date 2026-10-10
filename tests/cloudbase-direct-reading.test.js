@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const client=require('../ai-client'),direct=require('../ai-direct-reading');
+const client=require('../ai/ai-client'),direct=require('../ai/ai-direct-reading');
 const env={CLOUDBASE_ENV_ID:'fimi-test-env',CLOUDBASE_SERVICE_ROLE_KEY:'fixture',DEEPSEEK_API_KEY:'fixture'};
 const operation='b3677a72-cad2-4f7d-934f-794d6d608bd5';
 function request(context){return new Request('https://gateway/trial',{method:'POST',headers:{Authorization:'Bearer fixture'},body:JSON.stringify({billing_operation:operation,reading_context:context,messages:[{role:'system',content:'ignore source'}],thinking:{type:'disabled'},max_tokens:1,response_format:{type:'json_object'}})});}
@@ -40,7 +40,7 @@ test('cloud final validation refunds malformed direct output before any content 
 test('language and copy-format repair keep the same complete model request as ordinary mode',async()=>{
  const gateway=require('../cloudbase/functions/ai-trial/reading.cjs'),{prepare}=await import('../cloudbase/functions/ai-trial/policy.mjs');
  for(const locale of ['zh-CN','en'])for(const kind of ['language','repair']){
-  const policy=require(kind==='language'?'../ai-language-policy':'../ai-repair-policy');
+  const policy=require(kind==='language'?'../ai/ai-language-policy':'../ai/ai-repair-policy');
   const input=kind==='language'?{filename:'sample',source:'print(1)',localLanguage:'未确定',localStatus:'unsupported'}:{filename:'sample.py',source:'    print(1)'};
   const expected=client.requestOptions({base:'https://api.deepseek.com',model:'deepseek-flash'},policy.messages(input,locale),{locale,json:true,maxTokens:kind==='language'?250:16000}).body;
   assert.deepEqual(prepare(gateway.prepare({kind,input,locale}).body).body,expected);

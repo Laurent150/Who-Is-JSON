@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {generateTalk}=require('../ai-talk'),composition=require('../ai-talk-composition');
-const format=require('../ai-talk-format'),{mockFinalAudit}=require('./final-audit-mock.cjs');
+const {generateTalk}=require('../ai/ai-talk'),composition=require('../ai/ai-talk-composition');
+const format=require('../ai/ai-talk-format'),{mockFinalAudit}=require('./final-audit-mock.cjs');
 // Opt in only within the tests that exercise the retained offline gate.
 process.env.WHO_TALK_EVAL_TRACE='1';process.env.WHO_CLOUD_DISABLED='1';
 const offlineAudit={evaluationReview:{editor:'legacy',audit:'on'}};
@@ -29,7 +29,7 @@ test('default introductory walkthrough uses method 4 and the existing review, th
   assert.deepEqual(phases,['contracts','composition','review']);
   const settings={task:'talk',locale:'en',readingMode:'beginner',audience:'beginner',detail:'standard',coverage:'full'};
   assert.equal(bodies[1].messages.length,2);
-  const method4=require('../ai-talk-method4');
+  const method4=require('../ai/ai-talk-method4');
   assert.equal(bodies[1].messages[0].content,method4.instruction(settings)+'\n\n'+method4.example('en'));
   const input=JSON.parse(bodies[1].messages[1].content);
   assert.equal(input.source,source);assert.deepEqual(input.sourceContracts,ledger);assert.deepEqual(input.settings,settings);
@@ -79,7 +79,7 @@ test('personal and current CloudBase policy forward identical method 4 and revie
  const oldFetch=global.fetch,captured=[];
  try{
   global.fetch=async(url,input)=>{captured.push(JSON.parse(input.body));return Response.json(reply(doc));};
-  await require('../ai-client').modelCall({base:'https://api.deepseek.com',model:'deepseek-flash'},bodies[1].messages,{task:'talk',json:true,reviewReasoning:true,usagePhase:'composition',compositionPrompt:'M4'});
+  await require('../ai/ai-client').modelCall({base:'https://api.deepseek.com',model:'deepseek-flash'},bodies[1].messages,{task:'talk',json:true,reviewReasoning:true,usagePhase:'composition',compositionPrompt:'M4'});
   assert.deepEqual(captured[0],bodies[1]);
  }finally{global.fetch=oldFetch;}
 });

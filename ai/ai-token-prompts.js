@@ -78,7 +78,7 @@ function semanticDraft(input,locale,mode,general=false) {
 
 function pythonName(input) {
  const t=input.selectedToken,offset=input.source.split('\n').slice(0,t.line-1).reduce((n,line)=>n+line.length+1,0)+t.startColumn;
- return require('./public/reading-model').scan(input.source,'Python').some(token=>token.kind==='name'&&token.start===offset&&token.end===offset+t.text.length&&token.text===t.text);
+ return require('../public/reading-model').scan(input.source,'Python').some(token=>token.kind==='name'&&token.start===offset&&token.end===offset+t.text.length&&token.text===t.text);
 }
 
 // Conservative style routing, not runtime type or binding authority.
@@ -94,7 +94,7 @@ function localTokenRole(input,mode){
   const params=m[1].split(',').map(x=>x.trim());if(params.at(-1)==='')params.pop();
   if(!params.length||params.some(x=>!/^[_\p{L}][_\p{L}\p{N}]*$/u.test(x))||new Set(params).size!==params.length||t.startColumn<=open||t.endColumn>close||!params.includes(t.text))return null;
  }
- const offset=input.source.split('\n').slice(0,t.line-1).reduce((n,l)=>n+l.length+1,0)+t.startColumn,tokens=require('./public/reading-model').scan(input.source,'Python');
+ const offset=input.source.split('\n').slice(0,t.line-1).reduce((n,l)=>n+l.length+1,0)+t.startColumn,tokens=require('../public/reading-model').scan(input.source,'Python');
  const selected=tokens.find(x=>x.start===offset&&x.end===offset+t.text.length&&x.text===t.text);
  if(!selected||selected.kind!==(compound?'symbol':'name'))return null;
  if(compound)return 'compound';

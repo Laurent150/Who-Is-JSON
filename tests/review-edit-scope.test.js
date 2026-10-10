@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {modelCall,requestOptions}=require('../ai-client'),expression=require('../ai-expression-review'),audit=require('../ai-final-audit');
+const {modelCall,requestOptions}=require('../ai/ai-client'),expression=require('../ai/ai-expression-review'),audit=require('../ai/ai-final-audit');
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 
 test('editing boundaries are confined to the reviewer, not initial composition or final audit',()=>{

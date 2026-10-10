@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {requestOptions}=require('../ai-client'),knowledge=require('../ai-knowledge');
-const expression=require('../ai-expression-review'),audit=require('../ai-final-audit');
-const {fieldCatalog}=require('../ai-review-patches');
+const {requestOptions}=require('../ai/ai-client'),knowledge=require('../ai/ai-knowledge');
+const expression=require('../ai/ai-expression-review'),audit=require('../ai/ai-final-audit');
+const {fieldCatalog}=require('../ai/ai-review-patches');
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const marker='FIMI_BEGINNER_TOKEN_V1';
 const config={base:'https://example.org/v1',model:'test'};

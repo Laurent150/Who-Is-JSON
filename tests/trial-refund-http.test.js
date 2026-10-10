@@ -15,7 +15,7 @@ test('HTTP boundary reports only cloud-confirmed refunds and leaves local-only f
     process.send({mode,spent});return success?'succeeded':'refunded';
    }};
   }});
-  require(${JSON.stringify(require.resolve('../ai-module-reading'))}).explainModule=async(r,source,start,config)=>{
+  require(${JSON.stringify(require.resolve('../ai/ai-module-reading'))}).explainModule=async(r,source,start,config)=>{
    await config.sponsoredCall();await config.sponsoredCall();
    if(['invalid','refund-outage','cloud-failure'].includes(config.mode))throw Error('模型返回的内容无法对应当前源码，请重试。');
    return {answer:'valid code explanation'};

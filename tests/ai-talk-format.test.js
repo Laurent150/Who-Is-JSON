@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {parse,normalize}=require('../ai-talk-format');
+const {parse,normalize}=require('../ai/ai-talk-format');
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const base={title:'Unicode 名称 😀',sections:[{title:'Original heading',text:'Keep "quotes", \\ paths and 中文.\r\nNext line.'}]};
 test('empty extra metadata is removed at each manuscript level without changing any content',()=>{
@@ -39,7 +39,7 @@ test('all walkthrough settings can omit optional Q&A without a paid repair and r
     if(phase==='review'){assert.deepEqual(JSON.parse(body.messages.find(m=>m.role==='assistant').content).questions,[]);return {choices:[{message:{content:'{"corrections":[]}'}}]};}
     return {choices:[{message:{content:JSON.stringify(phase==='contracts'?ledger:base)}}]};
    }};
-   const result=await require('../ai-talk').generateTalk(source,'identity.js',{audience},config,{locale,readingMode,onModelRequest:(_,p)=>phases.push(p),onProtocolRepair:e=>events.push(e)});
+   const result=await require('../ai/ai-talk').generateTalk(source,'identity.js',{audience},config,{locale,readingMode,onModelRequest:(_,p)=>phases.push(p),onProtocolRepair:e=>events.push(e)});
    assert.deepEqual(phases,['contracts','composition','review']);assert.deepEqual(result.questions,[]);
    assert.equal(result.sections[0].text,base.sections[0].text);assert.equal(events.length,1);
   }
@@ -52,7 +52,7 @@ test('legacy direct drafting normalizes optional Q&A before review, while broken
    const phase=phases.at(-1);if(phase==='final-audit')return mockFinalAudit(body);
    return {choices:[{message:{content:phase==='draft'?(valid?JSON.stringify(base):'{"title":"unfinished"'): '{"corrections":[]}'}}]};
   }};
-  const call=()=>require('../ai-client').modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:JSON.stringify({filename:'case.js',source:'const value=1;'})}],{task:'talk',json:true,explanation:true,onModelRequest:(_,p)=>phases.push(p)});
+  const call=()=>require('../ai/ai-client').modelCall(config,[{role:'system',content:'Explain'},{role:'user',content:JSON.stringify({filename:'case.js',source:'const value=1;'})}],{task:'talk',json:true,explanation:true,onModelRequest:(_,p)=>phases.push(p)});
   if(valid){assert.deepEqual(JSON.parse(await call()).questions,[]);assert.deepEqual(phases,['draft','review']);}
   else {await assert.rejects(call,/格式不完整/);assert.deepEqual(phases,['draft']);}
  }

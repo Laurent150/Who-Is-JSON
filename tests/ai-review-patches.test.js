@@ -1,7 +1,7 @@
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {apply,parseDraft}=require('../ai-review-patches');
-const {modelCall}=require('../ai-client');
+const {apply,parseDraft}=require('../ai/ai-review-patches');
+const {modelCall}=require('../ai/ai-client');
 test('review edits only existing prose strings and preserves identities transactionally',()=>{
  const draft={summary:'Draft',nodes:[{id:'n2',start:3,explanation:'Wrong',example:''}]};
  const result=JSON.parse(apply(draft,JSON.stringify({corrections:[{path:['nodes',0,'explanation'],value:'Correct'},{path:['summary'],value:'Reviewed'}]})));
@@ -33,7 +33,7 @@ test('cancelling between draft and review never starts another sponsored request
  assert.equal(calls,1);
 });
 test('beginner readability flags dense paragraphs without rewriting text or flagging short separated paragraphs',()=>{
- const {readabilityHints}=require('../ai-review-patches');
+ const {readabilityHints}=require('../ai/ai-review-patches');
  const dense='word '.repeat(160),short='word '.repeat(80);
  const draft={sections:[{text:dense},{text:short+'\n\n'+short},{text:'Short.'}]};
  const hint=readabilityHints(draft,{locale:'en',readingMode:'beginner'});
@@ -63,7 +63,7 @@ test('beginner review removes hidden questions before listing allowed prose edit
 test('nested flow prose can be reviewed without loosening identity or path checks',()=>{
  const path=['nodes',0,'branches',0,'nodes',0,'branches',0,'nodes',0,'explanation'];
  const draft={nodes:[{id:'a',branches:[{nodes:[{id:'b',branches:[{nodes:[{id:'c',explanation:'Draft'}]}]}]}]}]};
- const {allowedPaths}=require('../ai-review-patches');
+ const {allowedPaths}=require('../ai/ai-review-patches');
  assert.ok(allowedPaths(draft).includes(JSON.stringify(path)));
  const corrected=JSON.parse(apply(draft,JSON.stringify({corrections:[{path,value:'Correct'}]})));
  assert.equal(corrected.nodes[0].branches[0].nodes[0].branches[0].nodes[0].explanation,'Correct');
@@ -80,7 +80,7 @@ test('review accepts canonical string indices only on existing array elements',(
 
 test('catalog IDs address nested prose and reject unknown, ambiguous and duplicate edits',()=>{
  const draft={summary:'Draft',nodes:[{id:'n17',start:18,branches:[{nodes:[{id:'n20',explanation:'Wrong'}]}]}]};
- const {allowedPaths}=require('../ai-review-patches');
+ const {allowedPaths}=require('../ai/ai-review-patches');
  assert.match(allowedPaths(draft),/"field":"f1","path":\["nodes",0,"branches",0,"nodes",0,"explanation"\]/);
  const corrected=JSON.parse(apply(draft,JSON.stringify({corrections:[{field:'f1',anchor:'Wrong',value:'Correct'}]})));
  assert.equal(corrected.nodes[0].branches[0].nodes[0].explanation,'Correct');
@@ -92,7 +92,7 @@ test('catalog IDs address nested prose and reject unknown, ambiguous and duplica
 });
 
 test('field anchors accept exact prefixes or full originals in English and Chinese without changing the catalog',()=>{
- const {fieldCatalog}=require('../ai-review-patches');
+ const {fieldCatalog}=require('../ai/ai-review-patches');
  for(const text of ['Original paragraph with spaces. '.repeat(8),'说明原文：保留条件、空格与换行。\n'.repeat(10),'x'.repeat(95)+'😀 café e\u0301\r\n'+'原文'.repeat(60)]){
   const draft={sections:[{title:'Heading',text}]},before=JSON.stringify(draft),catalog=fieldCatalog(draft);
   const entry=catalog.find(f=>f.path.at(-1)==='text');
@@ -126,7 +126,7 @@ test('anchors reject other fields with the same prefix, stale text and approxima
 });
 
 test('a quote completed beyond the catalog boundary uses the same field without fuzzy matching',()=>{
- const {fieldCatalog}=require('../ai-review-patches');
+ const {fieldCatalog}=require('../ai/ai-review-patches');
  for(const lead of ['原文','Original']){
   const text=(lead+' ').repeat(40).slice(0,87)+'["checked"] = True;';
   const draft={summary:text,output:text.slice(0,96)+' different field'};

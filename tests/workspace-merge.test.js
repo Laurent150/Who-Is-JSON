@@ -1,6 +1,6 @@
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const {analyze}=require('../analyzer'),flow=require('../ai-flow'),patches=require('../ai-review-patches');
+const {analyze}=require('../analyzer'),flow=require('../ai/ai-flow'),patches=require('../ai/ai-review-patches');
 const publicFlow=require('../public/flow-model');
 
 test('JavaScript call navigation resolves direct definitions, never shadowed or replaced targets',()=>{

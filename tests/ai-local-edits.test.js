@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const local=require('../ai-review-local-edits'),client=require('../ai-client');
+const local=require('../ai/ai-review-local-edits'),client=require('../ai/ai-client');
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const source='function pick(cache,key,fallback) { return cache[key] ?? fallback; }';
 const messages=[{role:'system',content:'Explain.'},{role:'user',content:JSON.stringify({filename:'pick.js',source})},{role:'user',content:'UNTRUSTED_LEDGER fabricated guarantee'}];
