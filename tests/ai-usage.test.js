@@ -1,8 +1,8 @@
 // Legacy direct pipeline regression; the release default is tested separately.
 process.env.WHO_TALK_PIPELINE='direct';
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {record,summary}=require('../ai-usage');
-const {generateTalk,settings}=require('../ai-talk');
+const {record,summary}=require('../ai/ai-usage');
+const {generateTalk,settings}=require('../ai/ai-talk');
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 test('usage counts reasoning as part of output and preserves unavailable counters',()=>{
  const a=record({prompt_tokens:100,completion_tokens:60,total_tokens:160,completion_tokens_details:{reasoning_tokens:40},prompt_cache_hit_tokens:50,secret:'not retained'},'draft');
@@ -24,7 +24,7 @@ test('unsupported audience names remain invalid after merging legacy preferences
  for(const audience of ['unknown','__proto__','constructor'])assert.throws(()=>settings({audience}),/设置无效/);
 });
 test('optional evaluation observers capture only provider identity and final text, not reasoning or connection data',async()=>{
- const {modelCall}=require('../ai-client'),models=[],texts=[];
+ const {modelCall}=require('../ai/ai-client'),models=[],texts=[];
  const answer=await modelCall({base:'https://example.org',model:'requested',key:'test-only-secret',sponsoredCall:async()=>({model:'reported',choices:[{message:{content:'Final content',reasoning_content:'Private reasoning'}}]})},[],{onProviderModel:m=>models.push(m),onModelText:(text,phase)=>texts.push({text,phase}),usagePhase:'composition'});
  assert.equal(answer,'Final content');assert.deepEqual(models,['reported']);assert.deepEqual(texts,[{text:'Final content',phase:'composition'}]);
  assert.doesNotMatch(JSON.stringify({models,texts}),/Private reasoning|test-only-secret/);

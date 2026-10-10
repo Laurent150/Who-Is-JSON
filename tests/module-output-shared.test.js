@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {decodeModuleResponse}=require('../cloudbase/functions/ai-trial/module-output.cjs');
-const local=require('../ai-module-reading').decode;
+const local=require('../ai/ai-module-reading').decode;
 const scaffold=[{id:'n1',start:2,end:4,kind:'condition',branches:[{label:'yes',nodes:[{id:'n2',start:3,end:3,kind:'return',branches:[],calls:[]}]}],calls:[]}];
 const body={summary:'  Read a value.\n\nKeep every paragraph. ',input:'value',output:'return value',nodes:[{id:'n1',title:'Check the value'},{id:'n2',title:'Return it'}]};
 test('shared module decoder preserves the current exact strings, nested topology and optional-title behavior',()=>{

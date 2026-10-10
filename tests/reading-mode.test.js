@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
-const {requestOptions}=require('../ai-client');
-const style=require('../ai-reading-style');
+const {requestOptions}=require('../ai/ai-client');
+const style=require('../ai/ai-reading-style');
 
 test('local selection writing preserves follow-ups and cannot replace review or structured protocols',()=>{
  const config={base:'https://example.org/v1',model:'test'};
@@ -16,7 +16,7 @@ test('local selection writing preserves follow-ups and cannot replace review or 
  }
  const free=requestOptions(config,[messages[0],{role:'user',content:JSON.stringify({source:data.source,question:data.question})}],{explanation:true}).body;
  assert.doesNotMatch(free.messages[0].content,/FIMI_POINT_READING_V2/);
- for(const module of ['../ai-point-prompts','../ai-point-prompts-en']){
+ for(const module of ['../ai/ai-point-prompts','../ai/ai-point-prompts-en']){
   const prompt=require(module);
   assert.doesNotMatch(prompt.review(prompt.passage),/without a JSON wrapper|不使用JSON包装/);
   assert.match(prompt.review(prompt.passage),/corrections/);

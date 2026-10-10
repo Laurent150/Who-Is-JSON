@@ -168,7 +168,7 @@ function createCloudBaseAccount({ env = process.env, fetcher = fetch, now = Date
       result = await res.json();
     } catch (error) {
       const timeout = error.name === 'TimeoutError' || error.name === 'AbortError';
-      throw require('./ai-diagnostics').attach(failure(503, data.action === 'quota' ? '额度服务暂时不可用。' : 'AI 调用未完成，预留额度待核对，请勿反复重试。'), {
+      throw require('./ai/ai-diagnostics').attach(failure(503, data.action === 'quota' ? '额度服务暂时不可用。' : 'AI 调用未完成，预留额度待核对，请勿反复重试。'), {
         code: timeout ? 'trial_gateway_timeout' : stage === 'gateway-response' ? 'trial_gateway_response' : 'trial_gateway_connection',
         stage, elapsedMs: now() - started, gatewayStatus:res?.status,
         ...(res ? {responseType:res.headers?.get('content-type')?.includes('json')?'json':res.headers?.get('content-type')?.includes('html')?'html':'other'} : {}),
@@ -178,7 +178,7 @@ function createCloudBaseAccount({ env = process.env, fetcher = fetch, now = Date
     }
     if (!res.ok) {
       const known = ['请先登录。','登录已过期，请重新登录。','未能确认邮箱身份。','暂时无法验证登录。','平台试用尚未启用。','额度服务暂时不可用。','平台试用已暂停。','上一笔调用仍在处理或待核对。','请稍后再试。','个人或平台试用额度不足，可改用自己的 AI。','AI 调用未完成，预留额度待核对，请勿反复重试。','内容过长，请缩小代码范围。','输出长度超过试用限制。','请求格式不正确。','请求过大。','试用额度目前仅支持文字，请使用本地图片识别。'];
-      const diagnostics = require('./ai-diagnostics').safe({...result?.diagnostics, requestId:result?.requestId});
+      const diagnostics = require('./ai/ai-diagnostics').safe({...result?.diagnostics, requestId:result?.requestId});
       const messages = {
         trial_provider_timeout: 'AI 服务响应超时，本次调用及预留额度待核对，请勿连续重试。',
         trial_provider_connection: '与 AI 服务的连接中断，本次调用及预留额度待核对，请勿连续重试。',
@@ -194,7 +194,7 @@ function createCloudBaseAccount({ env = process.env, fetcher = fetch, now = Date
       known.push('试用模式仅支持当前代码阅读请求，请更新应用。');
       const refundMessage = diagnostics.settlement === 'refunded' ? 'AI 生成失败，本次使用的试用额度已返还。'
         : diagnostics.settlement === 'refund_pending' ? 'AI 生成失败，额度返还尚未确认，请稍后重新查询额度。' : null;
-      const error = require('./ai-diagnostics').attach(failure(res.status,
+      const error = require('./ai/ai-diagnostics').attach(failure(res.status,
         (diagnostics.code==='trial_followup_scope' ? messages.trial_followup_scope : refundMessage) || messages[diagnostics.code] || (known.includes(result?.error) ? result.error : '额度服务暂时不可用。')), diagnostics);
       error.trialRateLimited = res.status === 429 && result?.code === 'rate';
       throw error;

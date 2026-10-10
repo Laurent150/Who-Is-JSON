@@ -5,7 +5,7 @@ const output=path.resolve(root,process.argv[2]||`.browser-artifacts/trial-${Date
 const allowed=path.join(root,'.browser-artifacts')+path.sep;
 if(!output.startsWith(allowed)||fs.existsSync(output))throw Error('Use a new directory under .browser-artifacts');
 const serviceFiles=['Dockerfile','package.json','server.mjs','handler.mjs','policy.mjs','followup.cjs','reading.cjs','module-output.cjs'];
-const runtimeFiles=['ai-direct-reading.js','ai-module-reading-policy.js','ai-language-policy.js','ai-repair-policy.js','ai-point-contract.js','ai-token-prompts.js','ai-point-await-line.js','public/reading-model.js','public/gitignore-syntax.js','cloudbase/functions/ai-trial/module-output.cjs'];
+const runtimeFiles=['ai/ai-direct-reading.js','ai/ai-module-reading-policy.js','ai/ai-language-policy.js','ai/ai-repair-policy.js','ai/ai-point-contract.js','ai/ai-token-prompts.js','ai/ai-point-await-line.js','public/reading-model.js','public/gitignore-syntax.js','cloudbase/functions/ai-trial/module-output.cjs'];
 const manifest={deployed:false,billingVersion:'failure-refund-v1',directReadingProfile:'direct-reading-v1',files:{}};
 function copy(source,destination){
   const to=path.join(output,destination);fs.mkdirSync(path.dirname(to),{recursive:true});fs.copyFileSync(source,to);

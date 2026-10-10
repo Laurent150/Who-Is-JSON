@@ -2,7 +2,7 @@
 // No paid provider call. The explicit preload redirects only official requests.
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const {spawn}=require('node:child_process'),{chromium}=require(process.env.WHO_PLAYWRIGHT_MODULE||'playwright');
-const {mockFinalAudit}=require('./final-audit-mock.cjs'),contract=require('../ai-point-contract'),awaitStyle=require('../ai-point-await-line');
+const {mockFinalAudit}=require('./final-audit-mock.cjs'),contract=require('../ai/ai-point-contract'),awaitStyle=require('../ai/ai-point-await-line');
 const root=path.resolve(__dirname,'..'),out=process.env.WHO_BROWSER_ARTIFACT_DIR||path.join(root,'.browser-artifacts/point-direct');
 const source='async function load(value) {\n  const result = await transform(value);\n  return result;\n}';
 const listen=server=>new Promise(r=>server.listen(0,'127.0.0.1',()=>r(server.address().port)));

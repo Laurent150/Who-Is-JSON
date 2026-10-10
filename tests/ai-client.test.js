@@ -1,7 +1,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const http=require('node:http');
-const {requestOptions,mergeOverview,modelCall,networkMessage}=require('../ai-client');
+const {requestOptions,mergeOverview,modelCall,networkMessage}=require('../ai/ai-client');
 test('teaching rules preserve source and response format and stay out of non-explanation requests',()=>{
  const messages=[{role:'system',content:'Only return JSON.'},{role:'user',content:'async function f(){ return 1; }'}];
  const config={base:'https://api.deepseek.com',model:'deepseek-flash'};
@@ -64,7 +64,7 @@ test('transport handles valid replies, rejected credentials, truncation, cancell
 });
 
 test('selected source is extracted from actual input rather than model line counting',()=>{
- const {selectedSource}=require('../ai-client');
+ const {selectedSource}=require('../ai/ai-client');
  assert.deepEqual(selectedSource('while lo < hi:\n    mid = lo + (hi-lo) // 2\n    x = 1',{start:2,end:2}),{start:2,end:2,code:'    mid = lo + (hi-lo) // 2'});
  assert.throws(()=>selectedSource('x',{start:0,end:3}),/范围无效/);
 });

@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const point=require('../ai-point'),prompts=require('../ai-point-prompts'),paragraphs=require('../ai-point-paragraphs');
-const {modelCall}=require('../ai-client'),knowledge=require('../ai-knowledge');
-const hover=require('../ai-token-prompts');
+const point=require('../ai/ai-point'),prompts=require('../ai/ai-point-prompts'),paragraphs=require('../ai/ai-point-paragraphs');
+const {modelCall}=require('../ai/ai-client'),knowledge=require('../ai/ai-knowledge');
+const hover=require('../ai/ai-token-prompts');
 const source='function pick(value) {\n  return value;\n}';
 const token={text:'return',line:2,startColumn:2,endColumn:8,sourceLine:'  return value;'};
 const selectedSource={start:2,end:2,code:'  return value;'};
@@ -77,11 +77,11 @@ test('single-line review can merge repeated paragraphs while passages preserve s
 
 test('token routing removes redundant neighboring context but preserves exact UTF-16 source positions',async()=>{
  const code='const 名称 = "😀";\r\nconsole.log(名称);';
- const selected=require('../ai-flow').tokenSource(code,{line:2,startColumn:12,endColumn:14});
+ const selected=require('../ai/ai-flow').tokenSource(code,{line:2,startColumn:12,endColumn:14});
  const routed=point.route(messages({filename:'unicode.js',source:code,selectedToken:selected}),{...options,task:'knowledge',json:true});
  assert.equal(routed.input.source,code);assert.equal(routed.input.selectedToken.text,'名称');
  assert.equal(Object.hasOwn(routed.input.selectedToken,'context'),false);
- assert.equal(require('../ai-review-context').scopeFor(routed.input,'knowledge').status,'verified');
+ assert.equal(require('../ai/ai-review-context').scopeFor(routed.input,'knowledge').status,'verified');
  assert.deepEqual(Object.keys(routed.input.selectedToken),['text','line','startColumn','endColumn','sourceLine']);
 });
 
@@ -127,7 +127,7 @@ test('compatible providers do not receive DeepSeek-specific parameters',async()=
 });
 
 for(const scope of ['token','passage'])test('English '+scope+' sends the native-language profile through both stages without legacy additions',async()=>{
- const english=require('../ai-point-prompts-en');
+ const english=require('../ai/ai-point-prompts-en');
  const draft='This gives the supplied value back.\n\nThis part then finishes.';
  const revised='This gives the information it received back to the code that asked for it.';
  const mode=scope==='token'?'standard':'beginner';

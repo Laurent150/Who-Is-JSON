@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {scaffold,attach,tokenSource}=require('../ai-flow');
+const {scaffold,attach,tokenSource}=require('../ai/ai-flow');
 const {analyze}=require('../analyzer');
 test('AI flow preserves branches, positions and confirmed nested calls',()=>{
  const code='def child(x):\n    return x + 1\ndef parent(x):\n    if x > 0:\n        return child(x)\n    return 0\ny = parent(1)';

@@ -9,7 +9,8 @@ function check(key,where,missing){
 test('every literal UI translation key and server Error message has an English translation',()=>{
  const missing=[];
  const publicFiles=fs.readdirSync(path.join(root,'public')).filter(f=>f.endsWith('.js')&&f!=='locale-en.js').map(f=>'public/'+f);
- const serverFiles=fs.readdirSync(root).filter(f=>/^(ai-|cloud|server)/.test(f)&&f.endsWith('.js'));
+ const serverFiles=[...fs.readdirSync(root).filter(f=>/^(cloud|server)/.test(f)&&f.endsWith('.js')),
+  ...fs.readdirSync(path.join(root,'ai')).filter(f=>f.endsWith('.js')).map(f=>'ai/'+f)];
  for(const file of [...publicFiles,...serverFiles]){
   const ast=ts.createSourceFile(file,fs.readFileSync(path.join(root,file),'utf8'),ts.ScriptTarget.Latest,true);
   function walk(n){

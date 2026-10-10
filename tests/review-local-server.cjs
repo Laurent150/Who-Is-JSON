@@ -1,7 +1,7 @@
 // Explicitly authorized, local-only pilot. No automatic dispatch; keys remain
 // in process memory. Importing this file cannot start a server or model call.
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),crypto=require('node:crypto');
-const design=require('./review-local-pilot.cjs'),audit=require('../ai-final-audit');
+const design=require('./review-local-pilot.cjs'),audit=require('../ai/ai-final-audit');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'.browser-artifacts/review-local-edit-20261002'),PORT=43178;
 const lines=file=>fs.existsSync(file)?fs.readFileSync(file,'utf8').split('\n').filter(Boolean).map(JSON.parse):[];
 function reserve(file,event){

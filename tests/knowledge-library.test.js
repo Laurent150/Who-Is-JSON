@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {parse}=require('../ai-knowledge'),K=require('../public/knowledge'),L=require('../public/knowledge-library');
+const {parse}=require('../ai/ai-knowledge'),K=require('../public/knowledge'),L=require('../public/knowledge-library');
 const lesson={kind:'lesson',answer:'await 等待一个异步结果。',title:'等待异步结果',language:'JavaScript',category:'异步与错误处理',tags:['Promise'],plain:'用 await 取得 Promise 完成后的值。',naming:'await 是关键词。',example:'const value = await Promise.resolve(3);',result:'假设推演：value 为 3。',pitfall:'拒绝时需要处理异常。'};
 test('only complete replies become reusable AI lessons; definitions remain direct answers',()=>{
  assert.ok(parse(JSON.stringify(lesson)).knowledge);

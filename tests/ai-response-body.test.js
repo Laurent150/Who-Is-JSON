@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),http=require('node:http');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const {modelCall}=require('../ai-client');
+const {modelCall}=require('../ai/ai-client');
 
 test('a real response stream interruption is not mislabeled as invalid JSON and is never replayed',async()=>{
  let calls=0;
@@ -44,7 +44,7 @@ test('source-analysis truncation stops before composition or paid repair and nam
  const config={base:'https://api.deepseek.com',model:'deepseek-flash',reviewThinking:true,sponsoredCall:async()=>{
   calls++;return {usage:{prompt_tokens:10,completion_tokens:16384,total_tokens:16394,completion_tokens_details:{reasoning_tokens:15261}},choices:[{finish_reason:'length',message:{content:'{"units":['}}]};
  }};
- await assert.rejects(()=>require('../ai-talk-contracts').derive('function echo(value) { return value; }','echo.js',config,{locale:'zh-CN'}),error=>{
+ await assert.rejects(()=>require('../ai/ai-talk-contracts').derive('function echo(value) { return value; }','echo.js',config,{locale:'zh-CN'}),error=>{
   assert.equal(error.code,'AI_CONTRACT_LENGTH');assert.equal(error.diagnostics.aiPhase,'contracts');
   assert.match(error.message,/源码分析.*输出上限/);assert.doesNotMatch(error.message,/较小范围/);return true;
  });assert.equal(calls,1);

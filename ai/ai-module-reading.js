@@ -1,5 +1,5 @@
 const {modelCall}=require('./ai-client');
-const {scaffold}=require('./public/flow-model');
+const {scaffold}=require('../public/flow-model');
 function moduleInput(result,source,start,end,name,locale='zh-CN',role,blockId){
  if(typeof source!=='string'||!Number.isInteger(start))throw Error('请选择有效的模块范围。');
  const graph=scaffold(result,start,locale,(end!==undefined||role!==undefined||blockId!==undefined)?{end,role,blockId}:undefined),lines=source.split('\n');

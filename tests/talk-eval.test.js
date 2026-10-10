@@ -41,7 +41,7 @@ test('model comparison is isolated, preserves the opaque connection, and reserve
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 test('Pro comparison matches Flash reasoning settings without changing ordinary requests',()=>{
- const {requestOptions}=require('../ai-client'),before={trace:process.env.WHO_TALK_EVAL_TRACE,cloud:process.env.WHO_CLOUD_DISABLED};
+ const {requestOptions}=require('../ai/ai-client'),before={trace:process.env.WHO_TALK_EVAL_TRACE,cloud:process.env.WHO_CLOUD_DISABLED};
  const config={base:'https://api.deepseek.com',model:'deepseek-v4-pro'};
  try{
   process.env.WHO_TALK_EVAL_TRACE='1';process.env.WHO_CLOUD_DISABLED='1';

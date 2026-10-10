@@ -1,7 +1,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {createCloudAccount}=require('../cloud-account');
-const {modelCall}=require('../ai-client');
+const {modelCall}=require('../ai/ai-client');
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 async function setup(respond){
  let time=10000,last=-Infinity,active=0,maxActive=0;

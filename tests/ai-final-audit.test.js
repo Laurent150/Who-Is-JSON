@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {modelCall}=require('../ai-client'),audit=require('../ai-final-audit'),expression=require('../ai-expression-review');
+const {modelCall}=require('../ai/ai-client'),audit=require('../ai/ai-final-audit'),expression=require('../ai/ai-expression-review');
 const {mockFinalAudit}=require('./final-audit-mock.cjs');
 const source='function choose(value, active) {\r\n if (active && value !== null) return value;\r\n return 0;\r\n}';
 const messages=[{role:'system',content:'Explain the selection.'},{role:'user',content:JSON.stringify({filename:'choose.js',source,selectedSource:{start:2,end:2,code:source.split('\n')[1]}})}];
@@ -46,7 +46,7 @@ test('legacy post-edit gates see exact final prose; beginner selections use para
         const result=await modelCall(config,input,{...options,locale,readingMode,json,onUsage:v=>usage.push(v),onModelRequest:(_,p)=>phases.push(p)});
         assert.equal(json?JSON.parse(result).answer:result,candidate);assert.equal(calls.length,point?2:3);
         assert.deepEqual(phases,point?['draft','review']:['draft','review','final-audit']);assert.equal(usage.length,point?2:3);
-        assert.equal(require('../ai-usage').summary(usage).totalTokens,point?30:45);
+        assert.equal(require('../ai/ai-usage').summary(usage).totalTokens,point?30:45);
     }
 });
 test('a mistake introduced by the editor is blocked even when the original draft was correct',async()=>{

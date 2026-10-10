@@ -79,4 +79,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           version=$(node -p 'require("./package.json").version')
+          if gh release view "v$version" --json tagName >/dev/null 2>&1; then
+            echo "Release v$version already exists; keeping its published assets."
+            exit 0
+          fi
           gh release create "v$version" release-assets/*Setup.exe release-assets/SHA256SUMS.txt --target "$GITHUB_SHA" --title "FIMI v$version · Windows Desktop" --notes-file "docs/releases/v$version.md" --draft

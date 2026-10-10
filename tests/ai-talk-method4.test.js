@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {createHash}=require('node:crypto');
-const composition=require('../ai-talk-composition'),method4=require('../ai-talk-method4');
-const {generateTalk}=require('../ai-talk');
+const composition=require('../ai/ai-talk-composition'),method4=require('../ai/ai-talk-method4');
+const {generateTalk}=require('../ai/ai-talk');
 const source='function echo(名称) {\r\n  return 名称; // original 中文 😀\r\n}';
 const ledger={units:[{name:'echo',anchor:'function echo(名称)',accepts:'A value.',returns:'The supplied value.',timing:'Returns directly.',paths:[{when:'Called',does:'Return the value.',completion:'The same value.',failure:'No explicit handler.',anchor:'return 名称;'}],unknowns:[]}]};
 const options={locale:'zh-CN',readingMode:'beginner',audience:'beginner',detail:'standard',coverage:'full'};
@@ -95,5 +95,5 @@ test('method 4 is restricted to introductory talks with explicit E and B rollbac
   }
   process.env.WHO_TALK_COMPOSITION='M4';assert.equal(composition.version({audience:'peer'}),'E');
  }finally{if(before===undefined)delete process.env.WHO_TALK_COMPOSITION;else process.env.WHO_TALK_COMPOSITION=before;}
- const files=require('../desktop/app-files.json');assert.ok(files.includes('ai-talk-method4.js'));
+ const files=require('../desktop/app-files.json');assert.ok(files.includes('ai/ai-talk-method4.js'));
 });

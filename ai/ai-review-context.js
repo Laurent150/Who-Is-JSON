@@ -1,6 +1,6 @@
 const {createHash}=require('node:crypto');
-const {language}=require('./public/file-types');
-const syntax=require('./parsers/review-syntax');
+const {language}=require('../public/file-types');
+const syntax=require('../parsers/review-syntax');
 const {select}=require('./ai-review-rules');
 const VERSION='review-foundation-v1';
 function payload(messages) {

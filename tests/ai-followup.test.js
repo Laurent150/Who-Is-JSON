@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const followup=require('../ai-followup'),{explainFollowup}=require('../ai-client');
+const followup=require('../ai/ai-followup'),{explainFollowup}=require('../ai/ai-client');
 const source='function total(values) {\n  let sum = 0;\n  for (const value of values) sum += value;\n  return sum;\n}\nconst answer = total([2, 3]);';
 const selectedSource={start:3,end:3,code:source.split('\n')[2]};
 const input={source,selectedSource,filename:'total.js',sourceLanguage:'JavaScript',question:'Why does total return zero for an empty array?'};

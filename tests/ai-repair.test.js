@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {parseRepair,repair}=require('../ai-repair');
+const {parseRepair,repair}=require('../ai/ai-repair');
 test('repair preserves suggested source and explicit uncertainty without executing it',()=>{
  const code='throw new Error("this is data");';
  const result=parseRepair(JSON.stringify({code,changes:['调整缩进'],uncertainty:'分支归属需要核对'}));

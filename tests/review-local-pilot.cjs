@@ -1,6 +1,6 @@
 // Paired editor experiment over saved prose. Never execute sample source or
 // pass evaluator ratings/counterexamples to a model. No network on import.
-const crypto=require('node:crypto'),local=require('../ai-review-local-edits'),patches=require('../ai-review-patches'),audit=require('../ai-final-audit');
+const crypto=require('node:crypto'),local=require('../ai/ai-review-local-edits'),patches=require('../ai/ai-review-patches'),audit=require('../ai/ai-final-audit');
 const hash=value=>crypto.createHash('sha256').update(value).digest('hex');
 const LIMIT=36,REPAIRS=4;
 async function capture(client,config,prepared,draft,options){
@@ -22,8 +22,8 @@ async function plan(records){
   const prepared=options.json?review.request.messages.slice(0,review.request.messages.findIndex(m=>m.role==='assistant')):record.traces.find(t=>t.phase==='draft').request.messages;
   const document=options.json?patches.parseDraft(draft):{answer:draft};if(!document)throw Error('Invalid saved candidate');
   const config={base:'https://api.deepseek.com',model:review.request.model,reviewThinking:true};
-  const oldBody=await capture(require('../ai-client'),config,prepared,draft,{...options,evaluationReview:{editor:'legacy',audit:'off'}});
-  const newBody=await capture(require('../ai-client'),config,prepared,draft,{...options,evaluationReview:{editor:'local-edits-v1',audit:'off'}});
+  const oldBody=await capture(require('../ai/ai-client'),config,prepared,draft,{...options,evaluationReview:{editor:'legacy',audit:'off'}});
+  const newBody=await capture(require('../ai/ai-client'),config,prepared,draft,{...options,evaluationReview:{editor:'local-edits-v1',audit:'off'}});
   for(const variant of (repeat+pair)%2?['local','legacy']:['legacy','local'])jobs.push({jobId:`local-r${repeat}-j${index}-${variant}`,sourceJob:record.jobId,id:record.id,repeat,variant,sourceHash:hash(input.source),draftHash:hash(draft),draft,prepared,options,body:variant==='legacy'?oldBody:newBody});
  }
  return jobs;
@@ -46,7 +46,7 @@ function repairBody(job){
 }
 function auditRequest(job,candidate){
  const input=audit.build(job.prepared,candidate,job.draft,job.options);
- const body=require('../ai-client').requestOptions({base:'https://api.deepseek.com',model:job.body.model,reviewThinking:true},[{role:'system',content:audit.instruction(job.options)},{role:'user',content:JSON.stringify(input)}],{...job.options,explanation:false,json:true,usagePhase:'final-audit',reviewReasoning:true,maxTokens:5000}).body;
+ const body=require('../ai/ai-client').requestOptions({base:'https://api.deepseek.com',model:job.body.model,reviewThinking:true},[{role:'system',content:audit.instruction(job.options)},{role:'user',content:JSON.stringify(input)}],{...job.options,explanation:false,json:true,usagePhase:'final-audit',reviewReasoning:true,maxTokens:5000}).body;
  return {body,input};
 }
 function canReserve(events,phase){return events.length<LIMIT&&(phase!=='repair'||events.filter(e=>e.phase==='repair').length<REPAIRS);}

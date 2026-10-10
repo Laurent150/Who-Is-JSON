@@ -8,7 +8,7 @@ const PORT = Number(process.env.CODELINGO_PORT || 43127), HOST = '127.0.0.1', to
 const python = process.env.CODELINGO_PYTHON || 'python';
 let inbox = null, widget = null, capturing = false;
 const root = path.join(__dirname, 'public');
-const {modelCall, explainOverview} = require('./ai-client');
+const {modelCall, explainOverview} = require('./ai/ai-client');
 function json(res, status, value) { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(value)); }
 function body(req) { return new Promise((resolve, reject) => { let chunks = [], size = 0; req.on('data', c => { size += c.length; if (size > 12e6) {
     reject(new Error('文件过大，第一版最多接收 8 MB 图片或 100 KB 源码。'));
@@ -58,7 +58,7 @@ const server = http.createServer(async (req, res) => {
             if (url.pathname.startsWith('/api/account/')) {
                 if (req.method !== 'POST') return await reply(405, { error: 'POST required' });
                 try { return await reply(200, await cloudAccount.handle(req, url.pathname.slice('/api/account/'.length), await body(req))); }
-                catch (e) { return await reply(e.status || 400, { error: e.message, ...require('./ai-diagnostics').report(e) }); }
+                catch (e) { return await reply(e.status || 400, { error: e.message, ...require('./ai/ai-diagnostics').report(e) }); }
             }
             if (req.method === 'GET' && url.pathname === '/api/examples') {
                 const dir = path.join(__dirname, 'tests', 'corpus');
@@ -82,7 +82,7 @@ const server = http.createServer(async (req, res) => {
                 return await reply(200, require('./prepare').prepare(String(b.code || '')));
             }
             if (url.pathname === '/api/repair') {
-                return await reply(200,await require('./ai-repair').repair(b.code,b.name,b.config,{signal:requestAbort.signal,locale:b.locale==='en'?'en':'zh-CN'}));
+                return await reply(200,await require('./ai/ai-repair').repair(b.code,b.name,b.config,{signal:requestAbort.signal,locale:b.locale==='en'?'en':'zh-CN'}));
             }
             if (url.pathname === '/api/analyze') {
                 if (typeof b.code !== 'string' || !b.code.trim())
@@ -90,7 +90,7 @@ const server = http.createServer(async (req, res) => {
                 if (Buffer.byteLength(b.code) > 100000)
                     throw new Error('第一版最多分析 100 KB 源码，请选择更小的文件或片段。');
                 let result = analyze(b.code, b.name, python);
-                const languageTools=require('./ai-language');
+                const languageTools=require('./ai/ai-language');
                 if(b.identifyLanguage===true){
                     result=await languageTools.identify(b.code,b.name,python,result,b.config,{signal:requestAbort.signal,locale:b.locale==='en'?'en':'zh-CN'});
                 }
@@ -104,32 +104,32 @@ const server = http.createServer(async (req, res) => {
             if (url.pathname === '/api/talk') {
                 if(typeof b.code!=='string'||!b.code.trim()||Buffer.byteLength(b.code)>100000)throw Error('请选择不超过 100 KB 的源码。');
                 const evaluation=process.env.WHO_TALK_EVAL_TRACE==='1'&&process.env.WHO_CLOUD_DISABLED==='1'?require('./tests/talk-eval-runtime.cjs').prepare(b.config):null;
-                const result=await require('./ai-talk').generateTalk(b.code,b.name,b.options,evaluation?.config||b.config,{signal:requestAbort.signal,readingMode:b.readingMode,locale:b.locale==='en'?'en':'zh-CN',...evaluation?.options});
+                const result=await require('./ai/ai-talk').generateTalk(b.code,b.name,b.options,evaluation?.config||b.config,{signal:requestAbort.signal,readingMode:b.readingMode,locale:b.locale==='en'?'en':'zh-CN',...evaluation?.options});
                 if(evaluation)result.evaluationProvider=evaluation.metadata;
                 return await reply(200,result);
             }
             if (url.pathname === '/api/module-reading') {
                 if(typeof b.code!=='string'||!b.code.trim()||Buffer.byteLength(b.code)>100000)throw Error('请选择不超过 100 KB 的源码。');
-                const result=b.languageHint?require('./ai-language').analyzeAs(b.code,b.name,python,b.languageHint):analyze(b.code,b.name,python);
-                return await reply(200,await require('./ai-module-reading').explainModule(result,b.code,b.start,b.config,{end:b.end,role:b.role,blockId:b.blockId,name:b.name,signal:requestAbort.signal,readingMode:b.readingMode,locale:b.locale==='en'?'en':'zh-CN'}));
+                const result=b.languageHint?require('./ai/ai-language').analyzeAs(b.code,b.name,python,b.languageHint):analyze(b.code,b.name,python);
+                return await reply(200,await require('./ai/ai-module-reading').explainModule(result,b.code,b.start,b.config,{end:b.end,role:b.role,blockId:b.blockId,name:b.name,signal:requestAbort.signal,readingMode:b.readingMode,locale:b.locale==='en'?'en':'zh-CN'}));
             }
             if (url.pathname === '/api/flow') {
                 if(typeof b.code!=='string'||!b.code.trim()||Buffer.byteLength(b.code)>100000)throw Error('请选择不超过 100 KB 的源码。');
-                const result=b.languageHint?require('./ai-language').analyzeAs(b.code,b.name,python,b.languageHint):analyze(b.code,b.name,python);
-                return await reply(200,await require('./ai-flow').explainFlow(result,b.code,b.start,b.config,{end:b.end,role:b.role,blockId:b.blockId,name:b.name,signal:requestAbort.signal,readingMode:b.readingMode,locale:b.locale==='en'?'en':'zh-CN'}));
+                const result=b.languageHint?require('./ai/ai-language').analyzeAs(b.code,b.name,python,b.languageHint):analyze(b.code,b.name,python);
+                return await reply(200,await require('./ai/ai-flow').explainFlow(result,b.code,b.start,b.config,{end:b.end,role:b.role,blockId:b.blockId,name:b.name,signal:requestAbort.signal,readingMode:b.readingMode,locale:b.locale==='en'?'en':'zh-CN'}));
             }
             if (url.pathname === '/api/ask') {
                 if (!b.code || typeof b.question !== 'string')
                     throw new Error('请先分析代码，再填写问题。');
-                const selectedToken = require('./ai-flow').tokenSource(String(b.code),b.token);
+                const selectedToken = require('./ai/ai-flow').tokenSource(String(b.code),b.token);
                 if(b.knowledge===true&&selectedToken){
                     if(typeof b.code!=='string'||Buffer.byteLength(b.code)>100000)throw Error('请选择不超过 100 KB 的源码。');
-                    return await reply(200,await require('./ai-knowledge').explain(b.code,selectedToken,b.config,{name:b.name,signal:requestAbort.signal,readingMode:b.readingMode,locale:b.locale==='en'?'en':'zh-CN'}));
+                    return await reply(200,await require('./ai/ai-knowledge').explain(b.code,selectedToken,b.config,{name:b.name,signal:requestAbort.signal,readingMode:b.readingMode,locale:b.locale==='en'?'en':'zh-CN'}));
                 }
-                const selectedSource = require('./ai-client').selectedSource(String(b.code),b.selection);
-                const fixedPointReading = b.pointReading === true && require('./ai-followup').readingQuestion(b.question) && selectedSource;
+                const selectedSource = require('./ai/ai-client').selectedSource(String(b.code),b.selection);
+                const fixedPointReading = b.pointReading === true && require('./ai/ai-followup').readingQuestion(b.question) && selectedSource;
                 if (b.followupKind === 'example' || !fixedPointReading) {
-                    const result = await require('./ai-client').explainFollowup(b.config, {
+                    const result = await require('./ai/ai-client').explainFollowup(b.config, {
                         source:b.code, filename:b.name, sourceLanguage:require('./public/file-types').language(b.name||''), selectedSource, question:b.question
                     }, {kind:b.followupKind==='example'?'example':'question',signal:requestAbort.signal,readingMode:b.readingMode,locale:b.locale==='en'?'en':'zh-CN'});
                     return await reply(200,result);
@@ -141,7 +141,7 @@ const server = http.createServer(async (req, res) => {
                 if (!/^data:image\/(png|jpeg|webp);base64,/.test(b.image || ''))
                     throw new Error('请选择 PNG、JPG 或 WebP 图片。');
                 if (b.ai) {
-                    const prompt = require('./ai-input-prompts').transcription(b.locale);
+                    const prompt = require('./ai/ai-input-prompts').transcription(b.locale);
                     const code = await modelCall(b.config, [{ role: 'system', content: prompt.system }, { role: 'user', content: [{ type: 'text', text: prompt.user }, { type: 'image_url', image_url: { url: b.image } }] }], {signal:requestAbort.signal,locale:b.locale==='en'?'en':'zh-CN',maxTokens:5000});
                     return await reply(200, { code, method: '视觉模型识别，请核对缩进与符号' });
                 }
@@ -245,7 +245,7 @@ const server = http.createServer(async (req, res) => {
             catch { trialRefund = 'refund_pending'; }
         }
         if (!res.destroyed) json(res, e.status || 400, { error: e.name === 'TimeoutError' ? '模型响应超时，请重试。' : e.message,
-            ...(trialRefund ? {trialRefund} : {}), ...require('./ai-diagnostics').report(e), ...(process.env.WHO_TALK_EVAL_TRACE==='1'&&process.env.WHO_CLOUD_DISABLED==='1'&&e.usage?{usage:e.usage}:{}) });
+            ...(trialRefund ? {trialRefund} : {}), ...require('./ai/ai-diagnostics').report(e), ...(process.env.WHO_TALK_EVAL_TRACE==='1'&&process.env.WHO_CLOUD_DISABLED==='1'&&e.usage?{usage:e.usage}:{}) });
     }
 });
 server.listen(PORT, HOST, () => console.log(`CodeLingo: http://${HOST}:${PORT}`));

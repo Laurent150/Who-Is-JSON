@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const direct=require('../ai-direct-reading'),point=require('../ai-point'),client=require('../ai-client');
-const moduleReading=require('../ai-module-reading'),modulePolicy=require('../ai-module-reading-policy');
+const direct=require('../ai/ai-direct-reading'),point=require('../ai/ai-point'),client=require('../ai/ai-client');
+const moduleReading=require('../ai/ai-module-reading'),modulePolicy=require('../ai/ai-module-reading-policy');
 const official={base:'https://api.deepseek.com/v1',model:'deepseek-flash'};
 const response=content=>({choices:[{finish_reason:'stop',message:{content}}]});
 const question=locale=>locale==='en'?'Explain only the selected code, using a small example when it helps.':'只解释选中代码，需要时用一个小例子帮助理解。';

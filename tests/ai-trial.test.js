@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {modelCall}=require('../ai-client');
+const {modelCall}=require('../ai/ai-client');
 const {createCloudAccount}=require('../cloud-account');
 test('cloud handler verifies identity, refuses exhausted credit, and retains uncertain reservations',async()=>{
  let handler, rejectAuth=false, exhausted=false, providerFails=false;

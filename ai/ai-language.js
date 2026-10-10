@@ -1,5 +1,5 @@
 const {modelCall}=require('./ai-client');
-const {analyze}=require('./analyzer');
+const {analyze}=require('../analyzer');
 const names={Python:'source.py',JavaScript:'source.js',TypeScript:'source.ts',Java:'source.java',Shell:'source.sh',Dockerfile:'Dockerfile',Gitignore:'.gitignore',JSON:'source.json',YAML:'source.yaml',HTML:'source.html',CSS:'source.css',SQL:'source.sql'};
 const unsupported=['C','C++','Go','Rust','C#','PHP','Ruby','MATLAB','unknown'];
 function needsLanguageHelp(result){
@@ -9,7 +9,7 @@ const {parseLanguage}=require('./ai-language-policy');
 function analyzeAs(code,name,python,language){
  if(!Object.hasOwn(names,language))throw Error('不支持该语言的结构解析。');
  // Preserve subtype/config filenames when they already match the identified language.
- const matching=require('./public/file-types').language(name)===language;
+ const matching=require('../public/file-types').language(name)===language;
  return analyze(code,matching?name:names[language],python);
 }
 async function identify(code,name,python,result,config,request={},call=modelCall){

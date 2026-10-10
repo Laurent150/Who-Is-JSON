@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const moduleReading=require('../ai-module-reading'),contract=require('../ai-point-contract'),{analyze}=require('../analyzer');
+const moduleReading=require('../ai/ai-module-reading'),contract=require('../ai/ai-point-contract'),{analyze}=require('../analyzer');
 const source='function summarize(values) {\n  const kept = values.filter(value => value > 0);\n  const total = kept.reduce((sum, value) => sum + value, 0);\n  return { count: kept.length, total };\n}\nconst example = summarize([2, 0, 5]);';
 const result=analyze(source,'scores.js'),start=result.blocks.find(b=>b.title==='summarize').start;
 const config={base:'https://api.deepseek.com/v1',model:'deepseek-flash'},answer={summary:'Keep positive values.\n\nCollect their count and total.',input:'values holds the numbers.',output:'An object with count and total.'};

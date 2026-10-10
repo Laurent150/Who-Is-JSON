@@ -2,7 +2,7 @@ const {mockFinalAudit}=require('./final-audit-mock.cjs');
 // Legacy direct pipeline regression; the release default is tested separately.
 process.env.WHO_TALK_PIPELINE='direct';
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {settings,parseTalk}=require('../ai-talk');
+const {settings,parseTalk}=require('../ai/ai-talk');
 test('AI talk preserves authored prose and exports without invented source links',()=>{
  const authored={title:'购物车怎样计算金额',sections:[{title:'从一笔购物说起',text:'假设买了两件商品，我们先把价格相加，再计算折扣。'}],questions:[{question:'为什么没有显示金额？',answer:'返回结果与显示结果不同。'}]};
  const result=parseTalk(JSON.stringify(authored),'cart.py',settings());
@@ -15,7 +15,7 @@ test('AI talk rejects invalid preferences and incomplete model output',()=>{
 });
 
 test('localized nontechnical guidance reaches draft and review without changing other audiences or source',async()=>{
- const {generateTalk}=require('../ai-talk');
+ const {generateTalk}=require('../ai/ai-talk');
  const source='function total(价格) {\r\n  return 价格.reduce((sum, value) => sum + value, 0);\r\n}';
  const audienceLabels={en:{beginner:'Audience — introductory understanding',peer:'Audience — programming colleague',review:'Audience — code reviewer'},'zh-CN':{beginner:'受众—入门理解',peer:'受众—有基础的同事',review:'受众—代码评审参与者'}};
  const detailLabels={en:{brief:'Brief',standard:'Standard',detailed:'Detailed'},'zh-CN':{brief:'简要',standard:'标准',detailed:'详细'}};

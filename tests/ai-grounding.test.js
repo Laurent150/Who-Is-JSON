@@ -2,8 +2,8 @@ const {mockFinalAudit}=require('./final-audit-mock.cjs');
 // Legacy direct pipeline regression; the release default is tested separately.
 process.env.WHO_TALK_PIPELINE='direct';
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {modelCall,overviewBlocks,requestOptions,explainOverview}=require('../ai-client');
-const {explainFlow,attach}=require('../ai-flow');
+const {modelCall,overviewBlocks,requestOptions,explainOverview}=require('../ai/ai-client');
+const {explainFlow,attach}=require('../ai/ai-flow');
 const {java}=require('../parsers/java');
 
 test('review compares the original source and draft, and only returns the reviewed result',async()=>{
@@ -49,7 +49,7 @@ test('overview carries source slices and token context includes the guarded assi
  }},{locale:'en'});
  assert.equal(JSON.parse(seen[0].messages[1].content).blocks[0].source,'function f() {\n return 1;\n}');
  const code='def update():\n    new = hook()\n    if new is not None:\n        current = new\n    return current';
- const token=require('../ai-flow').tokenSource(code,{line:3,startColumn:18,endColumn:22});
+ const token=require('../ai/ai-flow').tokenSource(code,{line:3,startColumn:18,endColumn:22});
  assert.equal(token.text,'None');assert.match(token.context.source,/current = new/);
  assert.equal(token.context.start,1);assert.equal(token.context.end,5);
 });
@@ -106,7 +106,7 @@ test('official DeepSeek uses direct walkthrough drafts and reasoning reviews wit
  try{
   const source='function check(value) { return value > 0; }';
   const config={base:'https://api.deepseek.com',model:'deepseek-flash'},request={locale:'en',readingMode:'beginner'};
-  const {generateTalk}=require('../ai-talk');
+  const {generateTalk}=require('../ai/ai-talk');
   await generateTalk(source,'short.js',{detail:'brief'},config,request);
   const longSource=source+'\n// Context line'.repeat(201);
   await generateTalk(longSource,'long.js',{detail:'brief'},config,request);
