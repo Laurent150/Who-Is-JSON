@@ -1,186 +1,86 @@
-# FIMI
+<p align="center">
+  <strong>English</strong> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a>
+</p>
 
-[简体中文](README.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
+<h1 align="center">FIMI</h1>
 
-当前正在准备 FIMI 1.2.1 Windows 发布候选，GitHub 已发布安装包仍是 Who Is JSON 1.1.0。开发版支持中英文，并将结构资料归并到代码工作台；新增 AI 输入／输出、随解释模式变化的步骤总结及选区追问。新版安装器已进入本地安装验收，尚未发布；未签名状态和安装排查见 [Windows 安装说明](docs/WINDOWS_INSTALL.md)。详见 [最新分级与复测结论](docs/BILINGUAL_FOCUSED_FOLLOWUP.md) 和 [验证记录](VALIDATION.md)。
+<h3 align="center">Understand your code, one click at a time</h3>
 
-**看懂自己找到的代码，并从中学习。**
+<p align="center">A code-reading workspace for people building with AI and learning along the way</p>
 
-FIMI（原名 Who Is JSON）是面向 **vibe coders（使用 AI 写代码的人）** 的 **AI 代码阅读工具**：导入源码，用中文或英文理解用途、步骤和变量变化，点读不懂的词语，再生成便于复习或面试解释代码的讲解稿。对于能够本地解析的语言，还可以沿函数、分支和循环对照源码阅读。
+<p align="center">
+  <a href="https://github.com/Laurent150/FIMI/releases/latest"><img src="https://img.shields.io/github/v/release/Laurent150/FIMI?style=flat-square&amp;color=496B4A" alt="Latest release"></a>
+  <a href="https://github.com/Laurent150/FIMI/releases/latest"><img src="https://img.shields.io/badge/desktop-Windows%20x64-496B4A?style=flat-square" alt="Windows x64"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-DCE7A4?style=flat-square" alt="MIT license"></a>
+</p>
 
-当前已公开发布的是 **Who Is JSON 1.1.0 Windows 桌面版**，包含 AI 代码工作台、源码点读、独立讲解稿、GitHub 登录、收藏云同步与有限 AI 试用。版本说明见 [v1.1.0 发布说明](docs/releases/v1.1.0.md)。它是阅读和解释工具，不会执行导入的代码，也不能以“解析成功”证明程序运行正确。
+<p align="center">
+  <a href="#get-started">Get started</a> · <a href="#what-you-can-do">Features</a> · <a href="#run-from-source">Run from source</a> · <a href="https://github.com/Laurent150/FIMI/issues">Feedback</a>
+</p>
 
-本仓库是 v0.8.0 的干净公开发行：应用代码保持一致，原始反馈测试片段已换成自编样本。开发历史保留在原私有仓库，迁移范围见 [公开迁移说明](docs/PUBLIC_MIGRATION.md)，开发者署名见 [贡献者](CONTRIBUTORS.md)。
+## See FIMI in action
 
-## 主要功能
+https://github.com/user-attachments/assets/6b5deab6-18f2-4a1f-a3b5-622c61fa94fb
 
-| 功能 | 可以做什么 | 是否需要 AI |
-| --- | --- | --- |
-| 导入与本地解析 | 粘贴、拖入源码或选择文件；识别支持的语言、函数和源码范围 | 不需要 |
-| 代码工作台 | 左边按函数展开流程，中间查看完整源码，右边理解当前步骤；点击节点定位源码，展开判断、循环和异常路径 | 流程讲解需要；未配置时仍可查看源码和函数目录 |
-| 本文件调用展开 | 在已确认的调用处展开另一个函数；递归有提示，避免无限展开 | 需要；调用位置由解析器确定，支持 Python 和可确认的 JS/TS 直接函数调用 |
-| 点读代码 | 选择语句或点击变量、函数名、关键词、运算符，获得结合当前源码的解释与小例子 | 需要 |
-| 本地结构与知识卡 | 工作台保留本地流程位置，解释下方按需展开匹配的基础知识；知识卡及收藏继续可用 | 结构位置和基础卡不需要；功能语义、输入输出和步骤总结由 AI 生成 |
-| 收藏库 | 词语、符号与语句解释均可收藏；按编程语言筛选、搜索，并返回收藏时的源码定位 | 生成 AI 解释需要；浏览收藏不需要 |
-| AI 讲解稿 | 按阅读基础、讲解范围和详略生成独立讲解稿，可停止、重试、导出或进入专注讲稿 | 需要 |
-| 图片识别 | 导入 PNG、JPG、WebP，先转成文字，核对后分析；内置英文与简体中文 OCR 数据 | 本地识别不需要；AI 识图需要支持图片的模型 |
-| Windows 辅助入口 | 框选截图；原桌面悬浮入口默认隐藏，兼容代码保留 | 不需要 |
+Follow a checkout function from an unfamiliar symbol to a practical question: why did a discount remove free shipping? Read the code, trace the decision, ask how to change it, and save the answer with its source.
 
-![三列工作台与词语解释示例](docs/screenshots/ai-workspace.png)
+## Why FIMI
 
-*界面示例来自模拟 AI 的交互验收，展示布局与操作方式；实际生成文字取决于所配置的模型。*
+Getting code from an AI is often easier than understanding what it does. FIMI helps you work through that gap without moving between a code editor, a chat window, and scattered notes.
 
-## 语言支持：AI 解释与流程定位分别看
+Start with the part you do not understand. A word or symbol opens an explanation in context; a flow step takes you to its source; a follow-up question helps you connect the syntax to the behavior. Whether you call it vibe coding or are learning your first language, the goal is the same: understand the code you build with.
 
-**C 和 C++ 可以导入并请求 AI 解释，并非完全不支持。** 当前版本中，AI 点读、追问和独立讲解稿直接使用源码，不要求先识别出函数；具体解释质量取决于模型及提供的上下文。
+## What you can do
 
-但当前也不是全部结构都由 AI 生成：**文字解释由 AI 提供，函数目录、流程骨架和已确认的调用位置仍由本地解析器提供。** AI 流程是在已有节点上补充语义，不会为尚未解析的语言自动补出完整函数图。
+| Feature | In practice |
+| --- | --- |
+| **Read a word, symbol, or line** | Click a name, `=>`, or a whole line for an explanation tied to the current code. Drag the explanation card out of the way and close it when you are done. |
+| **Follow the flow** | Open a function or module, then select a step to see the corresponding source and explanation side by side. Move from the overview to the detail without losing your place. |
+| **Understand a passage** | Select a flow module or step to read the connected code as a unit, rather than piecing together isolated definitions. |
+| **Ask for an example** | Turn an abstract condition or calculation into a concrete case you can follow. |
+| **Ask a follow-up** | Ask why something happens or how a change would affect the current code. The source stays alongside the answer. |
+| **Save what you learn** | Keep useful explanations in **Saved**, search them later, and reopen the source as it was when you saved it, with the relevant location highlighted. |
 
-| 代码类型 | AI 点读、追问与代码讲解稿 | 本地结构与流程定位 |
-| --- | --- | --- |
-| Python | 可请求 AI 解释 | 函数、分支、循环等；可展开部分当前文件内调用 |
-| JavaScript / TypeScript、Java、Bash | 可请求 AI 解释 | 支持相应结构，复杂语法和调用关联仍有边界 |
-| Dockerfile、JSON、YAML、HTML、CSS、SQL、`.gitignore` | 可请求 AI 解释 | 按文件类型展示指令、层级、规则或语句；不都适合程序流程图 |
-| **C / C++**（`.c`、`.cpp`、`.h`） | **可导入源码并请求 AI 解释** | 当前只识别文件类型，不提供函数目录、函数级流程图或调用展开 |
-| Go、Rust、C#、PHP、Ruby | 可导入已识别扩展名的文件并请求 AI 解释 | 当前只识别文件类型 |
-| MATLAB 等其他文本源码 | 可粘贴源码或通过 `.txt` 导入后请求 AI 解释；必要时在追问中说明语言 | 没有对应的可靠本地解析；并非所有原始扩展名都能直接导入 |
+Completed click explanations are reused when you revisit the same selection in the current page. The interface and AI explanations support English and Simplified Chinese; English is the default and your language choice is remembered.
 
-这里的“可请求 AI 解释”表示应用提供请求入口，不表示各语言、所有语法或所有模型都已经通过准确性验收。当前不会编译或运行 C/C++，也不会自动读取头文件实现、外部库或整个项目。
+## Get started
 
-## 安装方法
+1. **Install FIMI.** Download [FIMI for Windows 10/11 x64](https://github.com/Laurent150/FIMI/releases/download/v1.2.2/FIMI-1.2.2-Windows-x64-Setup.exe). Node.js and Python are bundled; no developer setup is required.
+2. **Choose your AI connection.** Sign in with email to use the limited AI trial when available, or open **AI settings** and enter your own OpenAI-compatible API base URL, model name, and API key.
+3. **Bring your code.** Paste it, import a file, or try the built-in example. Open a module in the flow map, click the source, and ask about anything that needs a closer look.
 
-### Windows 10 / 11 64 位（推荐）
+The Windows installer is currently unsigned. Checksums are included in the [release](https://github.com/Laurent150/FIMI/releases/latest); see the [installation guide](docs/WINDOWS_INSTALL.md) for details.
 
-在 [Releases](https://github.com/Laurent150/Who-Is-JSON/releases/latest) 下载 `Who-Is-JSON-1.1.0-Windows-x64-Setup.exe`，双击安装后通过桌面快捷方式打开，无需安装 Node.js、Python 或 pnpm。使用 Edge 独立窗口，没有 Edge 时使用默认浏览器。关闭窗口后可从系统托盘完全退出。安装包未作商业代码签名；SHA-256 校验文件随 Release 提供。
+### Code and language support
 
-GitHub 登录、云同步和 AI 需要网络可达，不承诺各地区直连稳定。未登录时仍可使用本地解析与本地收藏。下方为源码运行方式。
+Python, JavaScript/TypeScript, Java, and Bash have local structural navigation. Configuration and data formats such as JSON, YAML, HTML, CSS, SQL, and Dockerfile use structures appropriate to their format. C/C++, Go, Rust, C#, PHP, and Ruby can be imported for AI reading, but do not currently have full local function maps.
 
-### 准备环境
+You can also import an image of code, recognize the text, and check it before reading. Local OCR includes English and Simplified Chinese; AI image recognition requires a vision-capable model. README translations do not imply additional interface languages.
 
-- Node.js：最低 20；建议使用 CI 验证采用的 **24**，并确保 `node` 和随安装附带的 `npm` 可用。
-- Python：建议 **3.12**，与开发验证环境一致；Windows 开发脚本要求 3.12 或更新版本。
-- pnpm：固定 **10.15.1**，以 `package.json` 中的 `packageManager` 为准。
-- 这是公开仓库，可以克隆或在 GitHub 下载 ZIP 后解压。
+### AI, accounts, and your code
 
-```sh
-git clone https://github.com/Laurent150/Who-Is-JSON-Public.git
-cd Who-Is-JSON-Public
-```
+- Local parsing and local OCR run without an AI connection. AI explanations require the trial or a configured provider; trial availability and usage limits apply.
+- AI features send the relevant source and context to the selected service. AI image recognition also sends the image. Provider pricing and data policies apply when using your own service.
+- Guest saves stay in the current browser. Account saves sync explanations **and their linked source** to the cloud.
+- FIMI reads code; it does not run it. Explanations and examples should be checked against the source, especially when dependencies or surrounding code are missing.
 
-### Windows（PowerShell 7）
+## Run from source
 
-在项目根目录运行：
-
-```powershell
-./dev.ps1 -Task Install
-./dev.ps1 -Task Start -Python (Get-Command python.exe).Source
-```
-
-`Install` 会安装项目指定的 pnpm，并按锁文件安装依赖。如果 `python.exe` 不是 Python 3.12，可将 `-Python` 后面的内容改为自己的 Python 3.12 可执行文件路径。详细配置见 [协作开发说明](CONTRIBUTING.md)。
-
-### 已有 pnpm 的环境（Windows / macOS / Linux）
-
-确认 `pnpm --version` 为 `10.15.1` 后运行：
+Use Node.js 20 or later, Python (3.12 recommended), and pnpm 10.15.1.
 
 ```sh
+git clone https://github.com/Laurent150/FIMI.git
+cd FIMI
 pnpm install --frozen-lockfile --ignore-scripts
 pnpm start
 ```
 
-Python 不在默认位置时，启动前设置 `CODELINGO_PYTHON`。macOS / Linux 可运行 `export CODELINGO_PYTHON="$(command -v python3)"`；PowerShell 可运行 `$env:CODELINGO_PYTHON = (Get-Command python.exe).Source`。
+Open <http://127.0.0.1:43127>. If Python is not on your PATH, set `CODELINGO_PYTHON` to its executable before starting. Windows setup scripts and development checks are covered in [Contributing](CONTRIBUTING.md).
 
-浏览器打开 **http://127.0.0.1:43127**。终端按 `Ctrl+C` 停止服务；可通过 `CODELINGO_PORT` 更换端口。应用只监听本机地址，Windows 截图与悬浮窗不适用于其他系统。源码 ZIP 需要按上述步骤安装依赖；Windows 普通用户请下载 EXE 安装包。
+## Contributing
 
-## 1.2.0 工作台归并（开发预览）
+Bug reports, reproducible code examples, and improvements to explanations are welcome. Open an [issue](https://github.com/Laurent150/FIMI/issues) or read the [contribution guide](CONTRIBUTING.md) before submitting a pull request. Please remove credentials and private code from anything you share.
 
-顶端只保留「代码工作台 / Code workspace」和「讲解稿 / Walkthrough」。原三列布局、源码、词语弹窗、收藏回看与讲解稿继续使用；结构资料不再单独展示，解析问题按需出现在工作台。
+## License
 
-选择函数后可生成 AI 流程：AI 根据原文生成函数用途、输入、输出与步骤标题，遵循中英文和零基础／标准模式。本地解析仅确定源码范围、分支和可确认的调用关系，不用本地用途模板冒充 AI 内容。模式或语言切换后清除旧生成内容；再次主动生成才调用服务。未连接或生成失败时仍可查看本地结构位置及完整源码。
-
-点击左侧函数选中函数范围，点击步骤选中对应源码；查看调用定义是独立操作。行号和行内空白选择整行，Shift 连选多行，点击词语或符号只打开该词的解释。右侧显示选择类型及行号；过期回复不会覆盖新的选择。解释下方可「再简单一点」「举个例子」或继续提问，答案仍可收藏并回看当时的源码。
-
-JS/TS 调用定位只处理当前文件内能确定绑定的直接函数声明；名称被参数遮蔽、重新赋值、导入、动态调用和未确认的方法均不冒充已定位关系。当前不提供项目文件树，也不自动读取外部源码。
-
-## 使用方法
-
-顶部「解释风格」可切换 **零基础友好 / 标准**，默认零基础友好，并记住当前浏览器的选择。零基础解释先用一两句说眼前这一步做什么，必要时给一个小例子；标准模式保留较紧凑的技术表达。此选择作用于 AI 总览、流程、点读、追问和讲解稿；本地资料优先显示已有通俗说明，写法、例子和处理细节可展开，重要限制仍保留。切换会清除当前 AI 解释与讲解稿，下一次主动生成才调用服务；不修改源码、AI 配置或既有收藏内容。它是表达风格选择，不是准确性保证。
-
-1. **放入代码。** 粘贴或拖入源码，也可点击“用购物车示例开始”体验。源码最多 100 KB，保留原文件名有助于识别语言。图片先点“识别代码”，对照原图核对缩进、下划线和标点。
-2. **进入工作台。** 点击“查看整段结构”，默认进入“AI 代码工作台”。有本地解析能力的语言会显示函数或结构目录；C/C++ 等没有本地解析器的语言仍可查看源码。页面的“暂不支持”指本地结构解析，不代表不能请求 AI 解释。
-3. **连接 AI（按需）。** 在“设置”填写兼容 Chat Completions 的服务基础地址、模型和密钥。基础地址通常以 `/v1` 结尾，不是完整的 `/chat/completions` 地址。保存配置不代表连接已验证。
-4. **点读源码或沿流程学习。** 点击代码行请求解释，`Shift` 连选；点击词语打开说明，`Escape` 关闭。方向键也可选行，右方向键进入词语。有函数目录时，可展开函数，点击“生成这个函数的 AI 流程”，再点步骤定位源码；没有目录时直接使用源码点读或讲解稿。
-5. **需要整体理解、复习或准备面试时，生成代码讲解稿。** 切换到“讲解稿 · 可选”，选择阅读基础、范围和详略，点击“生成 AI 讲解稿”。它直接解释用途、输入输出、整体思路、关键步骤、例子与边界，并补充针对源码的问答；生成要求排除“大家好”等正式开场白，没有演讲时长设置。它会单独生成，不要求先生成整体 AI 分析或本地函数目录。
-
-“AI 总览（可选）”开关控制分析时的 AI 总览补充，也决定图片使用本地 OCR 还是 AI 识图。**工作台中的生成流程、点读解释和生成讲解稿，是各自的 AI 操作，不受该开关统一关闭。** 每次操作都需要有效的服务配置；错误会提供提示或重试入口。
-
-配置 AI 后，点击分析时若本地无法确定语言、解析失败或未找到可用的程序结构，会发送本次源码请 AI 辅助判断语言，再用对应的本地解析器验证。此步骤不要求勾选 AI 总览，可随时停止；AI 判断不确定、请求失败或本地验证失败时保留原结果。AI 不会在此步骤改写源码或编造结构；尚无本地解析器的语言仍使用源码点读和讲解稿。
-
-复制源码出现格式问题时，输入区按需显示修复入口：先预览本地清理或 AI 修复建议，核对变化后应用；应用后可在继续编辑前撤销。AI 修复会请求你配置的服务，不会自动替换源码。
-
-### 收藏与复习
-
-点读得到有效解释后，名称、词语、符号和语句均可通过“收藏／已收藏”保存或取消收藏。加载、连接提示和失败状态不提供收藏入口。内置基础知识只在解析器证据与受支持的关键字匹配时提供折叠入口；符号、自定义名称不硬匹配基础知识卡。内置覆盖有限，没有入口不代表该写法没有知识可学。
-
-“我的收藏”只按编程语言筛选，并可搜索解释或源码。列表显示标题、摘要和来源位置，展开后查看解释、打开源码或取消收藏。同一位置与同一份解释不重复保存；同名内容出现在其他位置或文件时分别保存。每条新收藏保留当时的完整源码快照及选中位置，在独立只读窗口中高亮，不覆盖当前编辑内容。切换界面语言不会改写已经保存的解释。旧收藏继续保留；没有完整快照的旧记录只展示已有源码片段。
-
-账户收藏同步包含这些源码快照，沿用原有账户隔离和同步流程。为兼容云端容量限制，新收藏在达到条数或容量上限时提示整理，不自动删除旧记录。
-
-未登录时收藏保存在当前浏览器；使用 GitHub 登录后，账户收藏同步到云端，包括关联源码。登录不会自动上传既有本地收藏。平台试用可用时，登录后可自动接入 DeepSeek Flash；试用有个人和全平台限额，也可自行配置并支付 AI 服务。详见 [AI 试用说明](docs/AI_TRIAL.md)。
-
-### 阅读 C/C++ 的最短路径
-
-导入 `.c` 或 `.cpp` → 点击“查看整段结构” → 在设置中配置 AI → 点击中间源码的一行或词语请求解释，或打开“讲解稿 · 可选”生成整体解释。无需等待左侧出现函数流程；当前版本不会为 C/C++ 生成该目录。头文件依赖、宏定义或外部函数缺失时，需要补充相关源码才能解释具体行为。
-
-## 输入与输出示例
-
-保存为 `total.py` 并导入：
-
-```python
-def total_price(prices):
-    total = 0
-    for price in prices:
-        total += price
-    return total
-
-amount = total_price([10, 20])
-```
-
-可以对照的分析结果与学习内容：
-
-- **结构定位：** `total_price` 在第 1—5 行；循环在第 3—4 行；第 7 行调用本文件的这个函数。
-- **用途解释示意：** 接收一组价格，把每项价格加起来，再交回总价。
-- **步骤示意：** 总数先设为 0 → 依次取出一个价格并加到总数 → 全部取完后交回总数。
-- **点读示意：** `[10, 20]` 是含有两个数字的列表；这里的 `+=` 把当前价格加到总数，再存回 `total`；`for` 行末的 `:` 表示下面缩进的代码属于这个循环。
-- **结果推演：** 先算 `0 + 10`，再算 `10 + 20`，所以 `amount` 得到 30。这段代码没有 `print`，不会主动把 30 打印出来。
-
-以上文字是帮助核对含义的示意，不是模型固定输出。软件展示结构和解释，不运行这段输入来计算结果；AI 解释仍需对照源码判断。
-
-## 数据与当前限制
-
-- 本地解析和本地 OCR 不向模型服务上传内容。使用 AI 总览、流程、点读或讲解稿时，会把本次分析的源码及相关选择发送到你配置的服务；AI 识图发送图片。调用费用及服务端数据处理由该服务决定。
-- 服务地址、模型名和收藏保存在当前浏览器本地；密钥不写入应用的持久配置，刷新后需重新填写。收藏可能包含源码，导出或分享前应自行检查。
-- 图片 OCR 会出错，缩进是根据图片位置估算的；即使识别结果可以解析，也不能保证与原图完全相同。
-- 流程依赖本地识别到的结构。外部函数内部行为无法仅靠当前文件确认；过大的函数会提示缩小范围，未完成的 AI 节点说明会标明待补充。
-- 自动测试覆盖解析与交互，不等于任意代码都能讲对，更不等于已经验证零基础用户都能理解。最新工作台已完成少量双语双模式真实模型检查，复杂场景与用户理解效果仍需持续验收，见 [工作台说明](docs/STUDIO.md) 和 [验证记录](VALIDATION.md)。
-
-## 开发、检查与资料
-
-```sh
-pnpm test
-pnpm run test:release
-```
-
-测试环境需提供 Python 3.12，设置 `CODELINGO_PYTHON` 并把其所在目录加入 `PATH`。Windows 可使用 `./dev.ps1 -Task Verify -Python (Get-Command python.exe).Source` 一并执行。浏览器检查与真实 AI 检查的依赖和开启方式见 [验证记录](VALIDATION.md)；默认测试不会调用付费模型。
-
-- [协作开发与提交 PR](CONTRIBUTING.md)
-- [项目结构](ARCHITECTURE.md)
-- [工作台操作](docs/STUDIO.md)
-- [第三方代码与资料来源](OPEN_SOURCE_REFERENCES.md)
-- [本地 OCR 数据与限制](ocr-data/README.md)
-- [桌面打包说明](desktop/README.md)
-
-项目代码采用 [MIT 许可证](LICENSE)。第三方测试样本、OCR 数据等保留各自的来源和许可，不能将它们的许可证一并替换为 MIT。
-
-## 可选云端账户
-
-发布配置已包含公共云项目连接参数，默认端口 `43127` 下可从“账户”使用 GitHub 登录，无需创建云项目或填写 `.env`。云同步需要网络可达；当前测试网络的 Supabase 直连问题尚未解决，不能保证关闭 VPN 后可用。本地分析和本地收藏不依赖登录。自建配置、同步边界和验收进展见 [云端账户说明](docs/CLOUD_ACCOUNTS.md)。
+FIMI is released under the [MIT License](LICENSE). Third-party components and datasets retain their own licenses; see [attributions](OPEN_SOURCE_REFERENCES.md).
